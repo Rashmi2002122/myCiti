@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2f7bff"/>
+      <stop offset="100%" stop-color="#0e4abb"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Background rounded app icon -->
+  <rect width="512" height="512" rx="128" fill="url(#skyGrad)"/>
+
+  <!-- Inner Soft Container -->
+  <circle cx="256" cy="256" r="190" fill="#ffffff" opacity="0.12"/>
+
+  <!-- Main Map Marker Shape -->
+  <path d="M256 96 C185 96 128 153 128 224 C128 320 256 416 256 416 C256 416 384 320 384 224 C384 153 327 96 256 96 Z"
+        fill="#ffffff"
+        filter="url(#shadow)"/>
+
+  <!-- Inner Pandal Flame / Diya Icon -->
+  <!-- Diya base -->
+  <path d="M196 244 C196 268 223 288 256 288 C289 288 316 268 316 244 Z" fill="#f0592a"/>
+  <!-- Diya flame -->
+  <path d="M256 160 C240 196 232 216 232 232 C232 245 243 256 256 256 C269 256 280 245 280 232 C280 216 272 196 256 160 Z" fill="#ffb703"/>
+  <circle cx="256" cy="226" r="10" fill="#ffffff" opacity="0.8"/>
+</svg>
