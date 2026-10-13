@@ -1,3 +1,10 @@
+const rawApiUrl = import.meta.env.VITE_API_URL || '';
+export const API_BASE = rawApiUrl.endsWith('/') ? rawApiUrl.slice(0, -1) : rawApiUrl;
+
+function api(endpoint) {
+  return `${API_BASE}${endpoint}`;
+}
+
 // Category configuration for colors, icons, and styling
 export const CATEGORIES = {
   PANDAL: {
@@ -47,7 +54,7 @@ export async function fetchListings({ category = null, city = null, lat = null, 
   if (radiusKm) params.append('radiusKm', radiusKm);
   if (q && q.trim()) params.append('q', q.trim());
 
-  const res = await fetch(`/api/listings?${params.toString()}`);
+  const res = await fetch(api(`/api/listings?${params.toString()}`));
   if (!res.ok) {
     throw new Error(`Failed to fetch listings (${res.status})`);
   }
@@ -55,7 +62,7 @@ export async function fetchListings({ category = null, city = null, lat = null, 
 }
 
 export async function fetchListingById(id) {
-  const res = await fetch(`/api/listings/${id}`);
+  const res = await fetch(api(`/api/listings/${id}`));
   if (!res.ok) {
     throw new Error(`Failed to fetch listing #${id}`);
   }
@@ -64,7 +71,7 @@ export async function fetchListingById(id) {
 
 // Admin APIs
 export async function fetchAdminListings(token) {
-  const res = await fetch('/api/admin/listings', {
+  const res = await fetch(api('/api/admin/listings'), {
     headers: { 'Authorization': `Bearer ${token}` }
   });
   if (!res.ok) throw new Error('Failed to load admin listings');
@@ -72,7 +79,7 @@ export async function fetchAdminListings(token) {
 }
 
 export async function createAdminListing(token, listingData) {
-  const res = await fetch('/api/admin/listings', {
+  const res = await fetch(api('/api/admin/listings'), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -88,7 +95,7 @@ export async function createAdminListing(token, listingData) {
 }
 
 export async function updateAdminListing(token, id, listingData) {
-  const res = await fetch(`/api/admin/listings/${id}`, {
+  const res = await fetch(api(`/api/admin/listings/${id}`), {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -104,7 +111,7 @@ export async function updateAdminListing(token, id, listingData) {
 }
 
 export async function deleteAdminListing(token, id) {
-  const res = await fetch(`/api/admin/listings/${id}`, {
+  const res = await fetch(api(`/api/admin/listings/${id}`), {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${token}` }
   });
@@ -117,7 +124,7 @@ export async function uploadListingImage(token, listingId, file, sortOrder = 1) 
   formData.append('file', file);
   if (sortOrder) formData.append('sortOrder', sortOrder);
 
-  const res = await fetch(`/api/admin/listings/${listingId}/images`, {
+  const res = await fetch(api(`/api/admin/listings/${listingId}/images`), {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${token}` },
     body: formData
@@ -128,7 +135,7 @@ export async function uploadListingImage(token, listingId, file, sortOrder = 1) 
 
 // Google Authentication & Session APIs
 export async function loginWithGoogle(idToken) {
-  const res = await fetch('/api/auth/google', {
+  const res = await fetch(api('/api/auth/google'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ idToken })
@@ -143,7 +150,7 @@ export async function loginWithGoogle(idToken) {
 }
 
 export async function refreshSession() {
-  const res = await fetch('/api/auth/refresh', {
+  const res = await fetch(api('/api/auth/refresh'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' }
   });
@@ -157,7 +164,7 @@ export async function refreshSession() {
 }
 
 export async function logoutSession() {
-  const res = await fetch('/api/auth/logout', {
+  const res = await fetch(api('/api/auth/logout'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' }
   });
@@ -166,7 +173,7 @@ export async function logoutSession() {
 
 // Signed-in User Profile APIs
 export async function getMyProfile(token) {
-  const res = await fetch('/api/me', {
+  const res = await fetch(api('/api/me'), {
     headers: { 'Authorization': `Bearer ${token}` }
   });
   if (!res.ok) {
@@ -179,7 +186,7 @@ export async function getMyProfile(token) {
 }
 
 export async function updateMyProfile(token, profileData) {
-  const res = await fetch('/api/me', {
+  const res = await fetch(api('/api/me'), {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -198,7 +205,7 @@ export async function updateMyProfile(token, profileData) {
 
 // Admin User Management APIs
 export async function fetchAdminUsers(token, query = '') {
-  const url = query ? `/api/admin/users?q=${encodeURIComponent(query)}` : '/api/admin/users';
+  const url = query ? api(`/api/admin/users?q=${encodeURIComponent(query)}`) : api('/api/admin/users');
   const res = await fetch(url, {
     headers: { 'Authorization': `Bearer ${token}` }
   });
@@ -207,7 +214,7 @@ export async function fetchAdminUsers(token, query = '') {
 }
 
 export async function suspendAdminUser(token, userId) {
-  const res = await fetch(`/api/admin/users/${userId}/suspend`, {
+  const res = await fetch(api(`/api/admin/users/${userId}/suspend`), {
     method: 'PUT',
     headers: { 'Authorization': `Bearer ${token}` }
   });
@@ -216,7 +223,7 @@ export async function suspendAdminUser(token, userId) {
 }
 
 export async function unsuspendAdminUser(token, userId) {
-  const res = await fetch(`/api/admin/users/${userId}/unsuspend`, {
+  const res = await fetch(api(`/api/admin/users/${userId}/unsuspend`), {
     method: 'PUT',
     headers: { 'Authorization': `Bearer ${token}` }
   });
@@ -225,7 +232,7 @@ export async function unsuspendAdminUser(token, userId) {
 }
 
 export async function fetchAdminAuditLogs(token) {
-  const res = await fetch('/api/admin/audit-logs', {
+  const res = await fetch(api('/api/admin/audit-logs'), {
     headers: { 'Authorization': `Bearer ${token}` }
   });
   if (!res.ok) throw new Error('Failed to load audit logs');
@@ -234,7 +241,7 @@ export async function fetchAdminAuditLogs(token) {
 
 // Submitter Advertisement APIs
 export async function fetchMySubmissions(token, status = null) {
-  const url = status ? `/api/submissions?status=${status}` : '/api/submissions';
+  const url = status ? api(`/api/submissions?status=${status}`) : api('/api/submissions');
   const res = await fetch(url, {
     headers: { 'Authorization': `Bearer ${token}` }
   });
@@ -243,7 +250,7 @@ export async function fetchMySubmissions(token, status = null) {
 }
 
 export async function fetchSubmissionById(token, id) {
-  const res = await fetch(`/api/submissions/${id}`, {
+  const res = await fetch(api(`/api/submissions/${id}`), {
     headers: { 'Authorization': `Bearer ${token}` }
   });
   if (!res.ok) throw new Error(`Failed to load submission #${id}`);
@@ -251,7 +258,7 @@ export async function fetchSubmissionById(token, id) {
 }
 
 export async function createSubmission(token, payload) {
-  const res = await fetch('/api/submissions', {
+  const res = await fetch(api('/api/submissions'), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -267,7 +274,7 @@ export async function createSubmission(token, payload) {
 }
 
 export async function updateSubmission(token, id, payload) {
-  const res = await fetch(`/api/submissions/${id}`, {
+  const res = await fetch(api(`/api/submissions/${id}`), {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -283,7 +290,7 @@ export async function updateSubmission(token, id, payload) {
 }
 
 export async function deleteSubmission(token, id) {
-  const res = await fetch(`/api/submissions/${id}`, {
+  const res = await fetch(api(`/api/submissions/${id}`), {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${token}` }
   });
@@ -295,7 +302,7 @@ export async function deleteSubmission(token, id) {
 }
 
 export async function unpublishSubmission(token, id) {
-  const res = await fetch(`/api/submissions/${id}/unpublish`, {
+  const res = await fetch(api(`/api/submissions/${id}/unpublish`), {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${token}` }
   });
@@ -314,7 +321,7 @@ export async function uploadSubmissionImages(token, id, files) {
     formData.append('file', files);
   }
 
-  const res = await fetch(`/api/submissions/${id}/images`, {
+  const res = await fetch(api(`/api/submissions/${id}/images`), {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${token}` },
     body: formData
@@ -327,7 +334,7 @@ export async function uploadSubmissionImages(token, id, files) {
 }
 
 export async function deleteSubmissionImage(token, id, imageId) {
-  const res = await fetch(`/api/submissions/${id}/images/${imageId}`, {
+  const res = await fetch(api(`/api/submissions/${id}/images/${imageId}`), {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${token}` }
   });
@@ -337,7 +344,7 @@ export async function deleteSubmissionImage(token, id, imageId) {
 
 // Admin Submissions Management APIs
 export async function fetchAdminSubmissions(token, status = 'PENDING') {
-  const url = status ? `/api/admin/submissions?status=${status}` : '/api/admin/submissions';
+  const url = status ? api(`/api/admin/submissions?status=${status}`) : api('/api/admin/submissions');
   const res = await fetch(url, {
     headers: { 'Authorization': `Bearer ${token}` }
   });
@@ -346,7 +353,7 @@ export async function fetchAdminSubmissions(token, status = 'PENDING') {
 }
 
 export async function approveAdminSubmission(token, id) {
-  const res = await fetch(`/api/admin/submissions/${id}/approve`, {
+  const res = await fetch(api(`/api/admin/submissions/${id}/approve`), {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${token}` }
   });
@@ -358,7 +365,7 @@ export async function approveAdminSubmission(token, id) {
 }
 
 export async function declineAdminSubmission(token, id, reason) {
-  const res = await fetch(`/api/admin/submissions/${id}/decline`, {
+  const res = await fetch(api(`/api/admin/submissions/${id}/decline`), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
