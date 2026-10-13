@@ -9,10 +9,20 @@ export default function LoginModal({ isOpen, onClose }) {
   const [popupBlocked, setPopupBlocked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const isInitializedRef = useRef(false);
+
   useEffect(() => {
     if (!isOpen) {
       setAuthError(null);
       setPopupBlocked(false);
+      isInitializedRef.current = false;
+      return;
+    }
+
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!clientId || clientId.includes('placeholder')) {
+      console.error('[Google Auth] VITE_GOOGLE_CLIENT_ID is missing or not set in environment variables!');
+      setAuthError('Google Client ID is not configured. Please check Vercel environment variables.');
       return;
     }
 
@@ -20,24 +30,27 @@ export default function LoginModal({ isOpen, onClose }) {
       if (window.google?.accounts?.id) {
         setIsGsiLoaded(true);
         try {
-          window.google.accounts.id.initialize({
-            client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || 'placeholder-google-client-id.apps.googleusercontent.com',
-            callback: async (response) => {
-              if (response?.credential) {
-                try {
-                  setIsLoading(true);
-                  await handleGoogleLogin(response.credential);
-                  onClose();
-                } catch (e) {
-                  console.error('Login callback error:', e);
-                } finally {
-                  setIsLoading(false);
+          if (!isInitializedRef.current) {
+            window.google.accounts.id.initialize({
+              client_id: clientId,
+              callback: async (response) => {
+                if (response?.credential) {
+                  try {
+                    setIsLoading(true);
+                    await handleGoogleLogin(response.credential);
+                    onClose();
+                  } catch (e) {
+                    console.error('Login callback error:', e);
+                  } finally {
+                    setIsLoading(false);
+                  }
                 }
-              }
-            },
-            auto_select: false,
-            cancel_on_tap_outside: true,
-          });
+              },
+              auto_select: false,
+              cancel_on_tap_outside: true,
+            });
+            isInitializedRef.current = true;
+          }
 
           if (googleBtnRef.current) {
             googleBtnRef.current.innerHTML = '';
@@ -60,7 +73,7 @@ export default function LoginModal({ isOpen, onClose }) {
     };
 
     checkGsi();
-  }, [isOpen, handleGoogleLogin, onClose, setAuthError]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
