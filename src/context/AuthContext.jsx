@@ -2,37 +2,96 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { refreshSession, logoutSession, loginWithGoogle } from '../services/api';
 
 const AuthContext = createContext(null);
+
+const USER_STORAGE_KEY = 'myciti_user';
+const ACCESS_TOKEN_STORAGE_KEY = 'myciti_access_token';
 const REFRESH_TOKEN_STORAGE_KEY = 'myciti_refresh_token';
 
+// Singleton in-flight promise to avoid multiple simultaneous refresh requests
+let inFlightRefresh = null;
+
+async function executeRefresh(token) {
+  if (inFlightRefresh) {
+    return inFlightRefresh;
+  }
+  inFlightRefresh = refreshSession(token).finally(() => {
+    inFlightRefresh = null;
+  });
+  return inFlightRefresh;
+}
+
+function persistSession(data) {
+  if (data?.accessToken) {
+    localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, data.accessToken);
+  }
+  if (data?.user) {
+    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
+  }
+  if (data?.refreshToken) {
+    localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
+  }
+}
+
+function clearSessionStorage() {
+  localStorage.removeItem(USER_STORAGE_KEY);
+  localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
+}
+
 export function AuthProvider({ children }) {
-  // In-memory access token
-  const [accessToken, setAccessToken] = useState(null);
-  const [user, setUser] = useState(null);
+  // Synchronously restore user and accessToken from localStorage so refresh never flickers logged-out
+  const [accessToken, setAccessToken] = useState(() => {
+    try {
+      return localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY) || null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [user, setUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem(USER_STORAGE_KEY);
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
+
   const [isInitializing, setIsInitializing] = useState(true);
   const [authError, setAuthError] = useState(null);
 
-  // Restore session on mount via /api/auth/refresh (supports Cookie and LocalStorage fallback)
+  // Restore and validate session in background on mount
   useEffect(() => {
     let isMounted = true;
 
     async function initSession() {
+      const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
+      const storedUser = localStorage.getItem(USER_STORAGE_KEY);
+
+      // If user is not logged in at all, skip network call
+      if (!storedRefreshToken && !storedUser) {
+        if (isMounted) setIsInitializing(false);
+        return;
+      }
+
       try {
-        const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
-        const data = await refreshSession(storedRefreshToken);
+        const data = await executeRefresh(storedRefreshToken);
         if (isMounted) {
           setAccessToken(data.accessToken);
           setUser(data.user);
-          if (data.refreshToken) {
-            localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
-          }
+          persistSession(data);
           setAuthError(null);
         }
       } catch (err) {
-        // No active or valid token; clear storage
-        localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
-        if (isMounted) {
-          setAccessToken(null);
-          setUser(null);
+        console.warn('[Auth] Session validation/refresh warning:', err);
+        // Only clear storage if backend explicitly rejected credentials (401 or 403)
+        // If it's a network glitch or Render free-tier cold-start (502/503/504), KEEP cached user
+        if (err.status === 401 || err.status === 403) {
+          clearSessionStorage();
+          if (isMounted) {
+            setAccessToken(null);
+            setUser(null);
+          }
         }
       } finally {
         if (isMounted) {
@@ -48,21 +107,21 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  // Proactive session refresh (e.g., on 401 or timer)
+  // Proactive session refresh (e.g. on 401 or timer)
   const refreshCurrentToken = useCallback(async () => {
     try {
       const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
-      const data = await refreshSession(storedRefreshToken);
+      const data = await executeRefresh(storedRefreshToken);
       setAccessToken(data.accessToken);
       setUser(data.user);
-      if (data.refreshToken) {
-        localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
-      }
+      persistSession(data);
       return data.accessToken;
     } catch (err) {
-      localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
-      setAccessToken(null);
-      setUser(null);
+      if (err.status === 401 || err.status === 403) {
+        clearSessionStorage();
+        setAccessToken(null);
+        setUser(null);
+      }
       throw err;
     }
   }, []);
@@ -83,12 +142,10 @@ export function AuthProvider({ children }) {
       const data = await loginWithGoogle(idToken);
       setAccessToken(data.accessToken);
       setUser(data.user);
-      if (data.refreshToken) {
-        localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
-      }
+      persistSession(data);
       return data;
     } catch (err) {
-      localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
+      clearSessionStorage();
       if (err.status === 403) {
         setAuthError('Your account is suspended. Contact admin@myciti.com');
       } else {
@@ -98,9 +155,12 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  // Update in-memory user profile
+  // Update in-memory and stored user profile
   const updateUserProfile = useCallback((updatedUser) => {
     setUser(updatedUser);
+    if (updatedUser) {
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(updatedUser));
+    }
   }, []);
 
   // Logout
@@ -111,7 +171,7 @@ export function AuthProvider({ children }) {
     } catch (e) {
       console.warn('Logout request warning:', e);
     } finally {
-      localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
+      clearSessionStorage();
       setAccessToken(null);
       setUser(null);
     }
