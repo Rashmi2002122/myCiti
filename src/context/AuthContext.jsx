@@ -2,28 +2,34 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { refreshSession, logoutSession, loginWithGoogle } from '../services/api';
 
 const AuthContext = createContext(null);
+const REFRESH_TOKEN_STORAGE_KEY = 'myciti_refresh_token';
 
 export function AuthProvider({ children }) {
-  // In-memory access token (never persisted in localStorage)
+  // In-memory access token
   const [accessToken, setAccessToken] = useState(null);
   const [user, setUser] = useState(null);
   const [isInitializing, setIsInitializing] = useState(true);
   const [authError, setAuthError] = useState(null);
 
-  // Restore session on mount via /api/auth/refresh cookie
+  // Restore session on mount via /api/auth/refresh (supports Cookie and LocalStorage fallback)
   useEffect(() => {
     let isMounted = true;
 
     async function initSession() {
       try {
-        const data = await refreshSession();
+        const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
+        const data = await refreshSession(storedRefreshToken);
         if (isMounted) {
           setAccessToken(data.accessToken);
           setUser(data.user);
+          if (data.refreshToken) {
+            localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
+          }
           setAuthError(null);
         }
       } catch (err) {
-        // No active or valid cookie; normal unauthenticated state
+        // No active or valid token; clear storage
+        localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
         if (isMounted) {
           setAccessToken(null);
           setUser(null);
@@ -45,11 +51,16 @@ export function AuthProvider({ children }) {
   // Proactive session refresh (e.g., on 401 or timer)
   const refreshCurrentToken = useCallback(async () => {
     try {
-      const data = await refreshSession();
+      const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
+      const data = await refreshSession(storedRefreshToken);
       setAccessToken(data.accessToken);
       setUser(data.user);
+      if (data.refreshToken) {
+        localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
+      }
       return data.accessToken;
     } catch (err) {
+      localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
       setAccessToken(null);
       setUser(null);
       throw err;
@@ -72,8 +83,12 @@ export function AuthProvider({ children }) {
       const data = await loginWithGoogle(idToken);
       setAccessToken(data.accessToken);
       setUser(data.user);
+      if (data.refreshToken) {
+        localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
+      }
       return data;
     } catch (err) {
+      localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
       if (err.status === 403) {
         setAuthError('Your account is suspended. Contact admin@myciti.com');
       } else {
@@ -91,10 +106,12 @@ export function AuthProvider({ children }) {
   // Logout
   const handleLogout = useCallback(async () => {
     try {
-      await logoutSession();
+      const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
+      await logoutSession(storedRefreshToken);
     } catch (e) {
       console.warn('Logout request warning:', e);
     } finally {
+      localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
       setAccessToken(null);
       setUser(null);
     }

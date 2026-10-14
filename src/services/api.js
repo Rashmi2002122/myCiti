@@ -150,10 +150,15 @@ export async function loginWithGoogle(idToken) {
   return res.json();
 }
 
-export async function refreshSession() {
+export async function refreshSession(fallbackToken = null) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (fallbackToken) {
+    headers['X-Refresh-Token'] = fallbackToken;
+  }
   const res = await fetch(api('/api/auth/refresh'), {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
+    body: fallbackToken ? JSON.stringify({ refreshToken: fallbackToken }) : undefined,
     credentials: 'include'
   });
   if (!res.ok) {
@@ -165,10 +170,15 @@ export async function refreshSession() {
   return res.json();
 }
 
-export async function logoutSession() {
+export async function logoutSession(fallbackToken = null) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (fallbackToken) {
+    headers['X-Refresh-Token'] = fallbackToken;
+  }
   const res = await fetch(api('/api/auth/logout'), {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
+    body: fallbackToken ? JSON.stringify({ refreshToken: fallbackToken }) : undefined,
     credentials: 'include'
   });
   return res.ok;
