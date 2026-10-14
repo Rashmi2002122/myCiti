@@ -138,7 +138,8 @@ export async function loginWithGoogle(idToken) {
   const res = await fetch(api('/api/auth/google'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ idToken })
+    body: JSON.stringify({ idToken }),
+    credentials: 'include'
   });
   if (!res.ok) {
     const err = await res.json().catch(() => null);
@@ -152,7 +153,8 @@ export async function loginWithGoogle(idToken) {
 export async function refreshSession() {
   const res = await fetch(api('/api/auth/refresh'), {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' }
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include'
   });
   if (!res.ok) {
     const err = await res.json().catch(() => null);
@@ -166,7 +168,8 @@ export async function refreshSession() {
 export async function logoutSession() {
   const res = await fetch(api('/api/auth/logout'), {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' }
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include'
   });
   return res.ok;
 }
