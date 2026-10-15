@@ -18,8 +18,13 @@ export default function LocationPickerMap({ lat, lng, onSelectLocation }) {
       zoomControl: false,
     });
 
+    const isRetina = typeof window !== 'undefined' && (window.devicePixelRatio > 1 || (L.Browser && L.Browser.retina));
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
+      subdomains: ['a', 'b', 'c'],
+      tileSize: isRetina ? 512 : 256,
+      zoomOffset: isRetina ? -1 : 0,
       attribution: '&copy; OpenStreetMap contributors',
     }).addTo(map);
 

@@ -57,10 +57,14 @@ export default function MapView({ listings, onSelectListing, userLocation, targe
       zoomControl: false,
     });
 
-    // Official OpenStreetMap tiles (100% free, reliable, no API key required)
+    // High-DPI Retina mode: loads 2x resolution tiles for sharp rendering on mobile without API keys
+    const isRetina = typeof window !== 'undefined' && (window.devicePixelRatio > 1 || (L.Browser && L.Browser.retina));
+
     const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       subdomains: ['a', 'b', 'c'],
+      tileSize: isRetina ? 512 : 256,
+      zoomOffset: isRetina ? -1 : 0,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
 
