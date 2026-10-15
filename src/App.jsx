@@ -189,8 +189,16 @@ export default function App() {
     );
   };
 
+  // Sync mobile browser status bar color with active theme (light/dark)
+  useEffect(() => {
+    const metas = document.querySelectorAll('meta[name="theme-color"]');
+    metas.forEach((meta) => {
+      meta.setAttribute('content', darkMode ? '#0f172a' : '#ffffff');
+    });
+  }, [darkMode]);
+
   return (
-    <div className="fixed inset-0 w-full h-full h-[100dvh] overflow-hidden bg-gradient-to-b from-[#cfe7ff] to-[#eaf4ff] dark:from-slate-950 dark:to-slate-900">
+    <div className="fixed inset-0 w-full h-full h-[100dvh] overflow-hidden bg-slate-100 dark:bg-slate-950">
       {/* Top Floating Controls */}
       <TopBar
         selectedCategory={selectedCategory}

@@ -18,7 +18,7 @@
   }
 
   body {
-    @apply font-sans antialiased text-slate-900 bg-gradient-to-b from-[#cfe7ff] to-[#eaf4ff] selection:bg-blue-200;
+    @apply font-sans antialiased text-slate-900 bg-slate-100 dark:bg-slate-950 selection:bg-blue-200;
   }
 }
 
