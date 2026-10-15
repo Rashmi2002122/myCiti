@@ -39,9 +39,10 @@ function createCustomPin(category) {
   });
 }
 
-export default function MapView({ listings, onSelectListing, userLocation, targetCity = null }) {
+export default function MapView({ listings, onSelectListing, userLocation, targetCity = null, darkMode = false }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
+  const tileLayerRef = useRef(null);
   const clusterGroupRef = useRef(null);
   const userMarkerRef = useRef(null);
 
@@ -56,11 +57,29 @@ export default function MapView({ listings, onSelectListing, userLocation, targe
       zoomControl: false,
     });
 
-    // Standard OpenStreetMap tiles (no API key required)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    // High-resolution Retina tiles (CartoDB Voyager) with automatic 2x/3x scaling on mobile screens
+    const tileUrl = darkMode
+      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+
+    const tileLayer = L.tileLayer(tileUrl, {
+      maxZoom: 20,
+      subdomains: 'abcd',
+      detectRetina: true,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
     }).addTo(map);
+
+    tileLayerRef.current = tileLayer;
+
+    // Invalidate size on initial mount and on window resize/orientationchange to guarantee no blank space on mobile
+    const invalidate = () => {
+      map.invalidateSize();
+    };
+    const t1 = setTimeout(invalidate, 100);
+    const t2 = setTimeout(invalidate, 400);
+
+    window.addEventListener('resize', invalidate);
+    window.addEventListener('orientationchange', invalidate);
 
     // Marker cluster group
     const clusterGroup = L.markerClusterGroup({
@@ -76,12 +95,26 @@ export default function MapView({ listings, onSelectListing, userLocation, targe
     clusterGroupRef.current = clusterGroup;
 
     return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      window.removeEventListener('resize', invalidate);
+      window.removeEventListener('orientationchange', invalidate);
       map.remove();
       mapInstanceRef.current = null;
+      tileLayerRef.current = null;
       clusterGroupRef.current = null;
       userMarkerRef.current = null;
     };
   }, []);
+
+  // Sync theme changes with map tiles seamlessly
+  useEffect(() => {
+    if (!tileLayerRef.current) return;
+    const tileUrl = darkMode
+      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+    tileLayerRef.current.setUrl(tileUrl);
+  }, [darkMode]);
 
   // Update Markers when listings change
   useEffect(() => {
@@ -144,7 +177,7 @@ export default function MapView({ listings, onSelectListing, userLocation, targe
   }, [targetCity]);
 
   return (
-    <div className="relative w-full h-full">
+    <div className="absolute inset-0 w-full h-full overflow-hidden">
       <div ref={mapContainerRef} className="w-full h-full z-0" />
     </div>
   );

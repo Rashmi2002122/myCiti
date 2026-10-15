@@ -190,7 +190,7 @@ export default function App() {
   };
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-gradient-to-b from-[#cfe7ff] to-[#eaf4ff] dark:from-slate-950 dark:to-slate-900">
+    <div className="fixed inset-0 w-full h-full h-[100dvh] overflow-hidden bg-gradient-to-b from-[#cfe7ff] to-[#eaf4ff] dark:from-slate-950 dark:to-slate-900">
       {/* Top Floating Controls */}
       <TopBar
         selectedCategory={selectedCategory}
@@ -209,13 +209,14 @@ export default function App() {
       />
 
       {/* Main Views */}
-      <main className="w-full h-full">
+      <main className="w-full h-full relative">
         {activeTab === 'map' && (
           <MapView
             listings={listings}
             onSelectListing={(listing) => setSelectedListing(listing)}
             userLocation={userLocation}
             targetCity={mapCenter}
+            darkMode={darkMode}
           />
         )}
 

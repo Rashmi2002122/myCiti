@@ -7,8 +7,18 @@
 @tailwind utilities;
 
 @layer base {
+  html, body, #root {
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   body {
-    @apply m-0 p-0 font-sans antialiased text-slate-900 bg-gradient-to-b from-[#cfe7ff] to-[#eaf4ff] min-h-screen selection:bg-blue-200;
+    @apply font-sans antialiased text-slate-900 bg-gradient-to-b from-[#cfe7ff] to-[#eaf4ff] selection:bg-blue-200;
   }
 }
 

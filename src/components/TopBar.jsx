@@ -44,7 +44,7 @@ export default function TopBar({
   }, []);
 
   return (
-    <header className="absolute top-0 left-0 right-0 z-[1000] p-3 sm:p-4 pointer-events-none flex flex-col gap-2.5">
+    <header className="absolute top-0 left-0 right-0 z-[1000] p-3 sm:p-4 pt-[max(0.75rem,env(safe-area-inset-top))] pointer-events-none flex flex-col gap-2.5">
       {/* Floating Action Controls */}
       <div className="flex items-center justify-between gap-2 pointer-events-auto">
         {/* Title pill with Dynamic City Selector */}
