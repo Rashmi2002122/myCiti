@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import '@maplibre/maplibre-gl-leaflet';
 
 export default function LocationPickerMap({ lat, lng, onSelectLocation }) {
   const containerRef = useRef(null);
@@ -18,15 +20,18 @@ export default function LocationPickerMap({ lat, lng, onSelectLocation }) {
       zoomControl: false,
     });
 
-    const isRetina = typeof window !== 'undefined' && (window.devicePixelRatio > 1 || (L.Browser && L.Browser.retina));
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      subdomains: ['a', 'b', 'c'],
-      tileSize: isRetina ? 512 : 256,
-      zoomOffset: isRetina ? -1 : 0,
-      attribution: '&copy; OpenStreetMap contributors',
-    }).addTo(map);
+    try {
+      L.maplibreGL({
+        style: 'https://tiles.openfreemap.org/styles/bright',
+        attribution: '&copy; OpenFreeMap &copy; OpenStreetMap contributors',
+      }).addTo(map);
+    } catch {
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        subdomains: ['a', 'b', 'c'],
+        attribution: '&copy; OpenStreetMap contributors',
+      }).addTo(map);
+    }
 
     const pinIcon = L.divIcon({
       className: 'admin-picker-pin',

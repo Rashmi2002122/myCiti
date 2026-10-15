@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet.markercluster';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import '@maplibre/maplibre-gl-leaflet';
 import { CATEGORIES } from '../services/api';
 
 // Create custom colored pin with emoji icon
@@ -57,18 +59,27 @@ export default function MapView({ listings, onSelectListing, userLocation, targe
       zoomControl: false,
     });
 
-    // High-DPI Retina mode: loads 2x resolution tiles for sharp rendering on mobile without API keys
-    const isRetina = typeof window !== 'undefined' && (window.devicePixelRatio > 1 || (L.Browser && L.Browser.retina));
+    // Native GPU Vector Map via OpenFreeMap: 100% vector-sharp on mobile retina screens, zero blurriness, no API key required
+    let vectorLayer;
+    try {
+      const styleUrl = darkMode
+        ? 'https://tiles.openfreemap.org/styles/positron'
+        : 'https://tiles.openfreemap.org/styles/bright';
 
-    const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      subdomains: ['a', 'b', 'c'],
-      tileSize: isRetina ? 512 : 256,
-      zoomOffset: isRetina ? -1 : 0,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    }).addTo(map);
+      vectorLayer = L.maplibreGL({
+        style: styleUrl,
+        attribution: '&copy; <a href="https://openfreemap.org">OpenFreeMap</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }).addTo(map);
+    } catch (e) {
+      console.warn('MapLibre GL initialization error, falling back to raster OSM:', e);
+      vectorLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        subdomains: ['a', 'b', 'c'],
+        attribution: '&copy; OpenStreetMap contributors',
+      }).addTo(map);
+    }
 
-    tileLayerRef.current = tileLayer;
+    tileLayerRef.current = vectorLayer;
 
     // Invalidate size on initial mount and on window resize/orientationchange to guarantee no blank space on mobile
     const invalidate = () => {
