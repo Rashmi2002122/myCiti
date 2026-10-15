@@ -81,6 +81,29 @@ export default function MapView({ listings, onSelectListing, userLocation, targe
         style: styleUrl,
         attribution: '&copy; <a href="https://openfreemap.org">OpenFreeMap</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
+
+      // Async runtime safety: if WebGL or worker encounters an error, gracefully swap to raster tiles
+      if (vectorLayer && vectorLayer.getMaplibreMap) {
+        const glMap = vectorLayer.getMaplibreMap();
+        if (glMap && typeof glMap.once === 'function') {
+          glMap.once('error', (err) => {
+            console.warn('MapLibre runtime error, falling back to raster OSM:', err);
+            try {
+              if (map.hasLayer(vectorLayer)) {
+                map.removeLayer(vectorLayer);
+              }
+              const rasterFallback = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                subdomains: ['a', 'b', 'c'],
+                attribution: '&copy; OpenStreetMap contributors',
+              }).addTo(map);
+              tileLayerRef.current = rasterFallback;
+            } catch (fallbackErr) {
+              console.error('Failed to attach raster fallback:', fallbackErr);
+            }
+          });
+        }
+      }
     } catch (e) {
       console.warn('MapLibre GL initialization error, falling back to raster OSM:', e);
       vectorLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

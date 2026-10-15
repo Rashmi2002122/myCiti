@@ -31,10 +31,31 @@ export default function LocationPickerMap({ lat, lng, onSelectLocation }) {
     });
 
     try {
-      L.maplibreGL({
+      const vectorLayer = L.maplibreGL({
         style: 'https://tiles.openfreemap.org/styles/bright',
         attribution: '&copy; OpenFreeMap &copy; OpenStreetMap contributors',
       }).addTo(map);
+
+      if (vectorLayer && vectorLayer.getMaplibreMap) {
+        const glMap = vectorLayer.getMaplibreMap();
+        if (glMap && typeof glMap.once === 'function') {
+          glMap.once('error', (err) => {
+            console.warn('MapLibre runtime error in picker, falling back to raster OSM:', err);
+            try {
+              if (map.hasLayer(vectorLayer)) {
+                map.removeLayer(vectorLayer);
+              }
+              L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                subdomains: ['a', 'b', 'c'],
+                attribution: '&copy; OpenStreetMap contributors',
+              }).addTo(map);
+            } catch (fallbackErr) {
+              console.error('Failed to attach raster fallback in picker:', fallbackErr);
+            }
+          });
+        }
+      }
     } catch {
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
