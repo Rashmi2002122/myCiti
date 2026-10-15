@@ -57,16 +57,11 @@ export default function MapView({ listings, onSelectListing, userLocation, targe
       zoomControl: false,
     });
 
-    // High-resolution Retina tiles (CartoDB Voyager) with automatic 2x/3x scaling on mobile screens
-    const tileUrl = darkMode
-      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-      : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-
-    const tileLayer = L.tileLayer(tileUrl, {
-      maxZoom: 20,
-      subdomains: 'abcd',
-      detectRetina: true,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    // Official OpenStreetMap tiles (100% free, reliable, no API key required)
+    const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      subdomains: ['a', 'b', 'c'],
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
 
     tileLayerRef.current = tileLayer;
@@ -107,14 +102,7 @@ export default function MapView({ listings, onSelectListing, userLocation, targe
     };
   }, []);
 
-  // Sync theme changes with map tiles seamlessly
-  useEffect(() => {
-    if (!tileLayerRef.current) return;
-    const tileUrl = darkMode
-      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-      : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-    tileLayerRef.current.setUrl(tileUrl);
-  }, [darkMode]);
+
 
   // Update Markers when listings change
   useEffect(() => {
