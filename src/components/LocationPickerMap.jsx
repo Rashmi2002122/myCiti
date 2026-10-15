@@ -1,7 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { setWorkerUrl } from 'maplibre-gl';
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import '@maplibre/maplibre-gl-leaflet';
+
+try {
+  setWorkerUrl(workerUrl);
+} catch (e) {
+  console.warn('Failed to set MapLibre workerUrl:', e);
+}
 
 export default function LocationPickerMap({ lat, lng, onSelectLocation }) {
   const containerRef = useRef(null);
@@ -17,6 +25,8 @@ export default function LocationPickerMap({ lat, lng, onSelectLocation }) {
     const map = L.map(containerRef.current, {
       center: [initialLat, initialLng],
       zoom: 13,
+      minZoom: 3,
+      maxZoom: 19,
       zoomControl: false,
     });
 

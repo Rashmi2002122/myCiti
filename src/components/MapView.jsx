@@ -2,8 +2,17 @@ import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet.markercluster';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { setWorkerUrl } from 'maplibre-gl';
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import '@maplibre/maplibre-gl-leaflet';
 import { CATEGORIES } from '../services/api';
+
+// Configure Web Worker for MapLibre GL
+try {
+  setWorkerUrl(workerUrl);
+} catch (e) {
+  console.warn('Failed to set MapLibre workerUrl:', e);
+}
 
 // Create custom colored pin with emoji icon
 function createCustomPin(category) {
@@ -56,6 +65,8 @@ export default function MapView({ listings, onSelectListing, userLocation, targe
     const map = L.map(mapContainerRef.current, {
       center: [22.5726, 88.3639],
       zoom: 12.5,
+      minZoom: 3,
+      maxZoom: 19,
       zoomControl: false,
     });
 

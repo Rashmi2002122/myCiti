@@ -32,7 +32,7 @@ export default defineConfig({
       },
       workbox: {
         // Cache static app assets
-        globPatterns: ['**/*.{js,css,html,svg,png,jpg,jpeg,ico}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,jpg,jpeg,ico,mjs}'],
         runtimeCaching: [
           // 1. Cache OpenStreetMap Map Tiles
           {
@@ -40,6 +40,21 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'osm-tiles-cache',
+              expiration: {
+                maxEntries: 400,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          // 1b. Cache OpenFreeMap Vector Assets
+          {
+            urlPattern: /^https:\/\/tiles\.openfreemap\.org\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'openfreemap-cache',
               expiration: {
                 maxEntries: 400,
                 maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
