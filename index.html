@@ -17,6 +17,17 @@
 
     <!-- Google Identity Services (GIS) Client Library -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <!-- Immediate Service Worker update check -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for (var reg of registrations) {
+            reg.update();
+          }
+        });
+      }
+    </script>
   </head>
   <body class="overscroll-none">
     <div id="root"></div>
