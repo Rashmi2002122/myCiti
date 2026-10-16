@@ -22,9 +22,6 @@ const CompleteProfileModal = lazy(() => import('./components/CompleteProfileModa
 const AccountMenuModal = lazy(() => import('./components/AccountMenuModal'));
 const MyPostsDashboard = lazy(() => import('./components/MyPostsDashboard'));
 const PostAdvertisementModal = lazy(() => import('./components/PostAdvertisementModal'));
-const MyAreaSettingsModal = lazy(() => import('./components/MyAreaSettingsModal'));
-const PrivacyConsentModal = lazy(() => import('./components/PrivacyConsentModal'));
-const PrivacyPolicyModal = lazy(() => import('./components/PrivacyPolicyModal'));
 const NotificationCenterModal = lazy(() => import('./components/NotificationCenterModal'));
 const CreateCampaignModal = lazy(() => import('./components/CreateCampaignModal'));
 const CreateAnnouncementModal = lazy(() => import('./components/CreateAnnouncementModal'));
@@ -45,9 +42,6 @@ export default function App() {
   const [isCompleteProfileOpen, setIsCompleteProfileOpen] = useState(false);
   const [isMyPostsOpen, setIsMyPostsOpen] = useState(false);
   const [isPostAdOpen, setIsPostAdOpen] = useState(false);
-  const [isMyAreaOpen, setIsMyAreaOpen] = useState(false);
-  const [isPrivacyConsentOpen, setIsPrivacyConsentOpen] = useState(false);
-  const [isPrivacyNoticeOpen, setIsPrivacyNoticeOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
   const [isCreateCampaignOpen, setIsCreateCampaignOpen] = useState(false);
@@ -410,15 +404,6 @@ export default function App() {
               }
             }}
             onOpenCampaigns={() => setIsCampaignsDashboardOpen(true)}
-            onOpenMyArea={() => {
-              const dismissed = localStorage.getItem('myciti_consent_dismissed');
-              if (!dismissed) {
-                setIsPrivacyConsentOpen(true);
-              } else {
-                setIsMyAreaOpen(true);
-              }
-            }}
-            onOpenPrivacyNotice={() => setIsPrivacyNoticeOpen(true)}
             darkMode={darkMode}
             onToggleDarkMode={() => setDarkMode(!darkMode)}
           />
@@ -466,40 +451,6 @@ export default function App() {
             onSuccess={() => {
               setIsMyPostsOpen(true);
             }}
-          />
-        )}
-
-        {isPrivacyConsentOpen && (
-          <PrivacyConsentModal
-            isOpen={isPrivacyConsentOpen}
-            onClose={() => setIsPrivacyConsentOpen(false)}
-            onConsentApplied={(choices) => {
-              if (choices?.location) {
-                setIsMyAreaOpen(true);
-              }
-            }}
-            onOpenPrivacyNotice={() => setIsPrivacyNoticeOpen(true)}
-          />
-        )}
-
-        {isMyAreaOpen && (
-          <MyAreaSettingsModal
-            isOpen={isMyAreaOpen}
-            onClose={() => setIsMyAreaOpen(false)}
-            onAreaSaved={(area) => {
-              if (area?.coarseLat && area?.coarseLng) {
-                setUserLocation({ lat: area.coarseLat, lng: area.coarseLng });
-                setMapCenter({ lat: area.coarseLat, lng: area.coarseLng, zoom: 13 });
-              }
-            }}
-          />
-        )}
-
-        {isPrivacyNoticeOpen && (
-          <PrivacyPolicyModal
-            isOpen={isPrivacyNoticeOpen}
-            onClose={() => setIsPrivacyNoticeOpen(false)}
-            onOpenSettings={() => setIsMyAreaOpen(true)}
           />
         )}
 

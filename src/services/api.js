@@ -395,41 +395,6 @@ export async function declineAdminSubmission(token, id, reason) {
 
 
 
-// --- Coarse Location & Privacy APIs ---
-
-export async function fetchMyLocation(token) {
-  const res = await fetch(api('/api/me/location'), {
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
-  if (!res.ok) return null;
-  return res.json();
-}
-
-export async function updateMyLocation(token, { latitude, longitude, areaName }) {
-  const res = await fetch(api('/api/me/location'), {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({ latitude, longitude, areaName })
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => null);
-    throw new Error(err?.message || 'Failed to update location');
-  }
-  return res.json();
-}
-
-export async function deleteMyLocation(token) {
-  const res = await fetch(api('/api/me/location'), {
-    method: 'DELETE',
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
-  if (!res.ok) throw new Error('Failed to delete location data');
-  return true;
-}
-
 // --- Notification & Web Push APIs ---
 
 export async function fetchVapidKey() {
