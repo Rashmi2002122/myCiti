@@ -15,42 +15,75 @@ try {
 }
 
 // Create custom colored pin with emoji icon
-function createCustomPin(category) {
+function createCustomPin(category, isSponsored = false) {
   const cfg = CATEGORIES[category] || CATEGORIES.PANDAL;
+  const borderColor = isSponsored ? '#f59e0b' : '#ffffff';
+  const shadow = isSponsored
+    ? '0 0 14px rgba(245, 158, 11, 0.8), 0 4px 12px rgba(0,0,0,0.35)'
+    : '0 4px 12px rgba(0,0,0,0.25)';
+
   const html = `
     <div style="
+      position: relative;
       background-color: ${cfg.color};
-      width: 38px;
-      height: 38px;
+      width: ${isSponsored ? '42px' : '38px'};
+      height: ${isSponsored ? '42px' : '38px'};
       border-radius: 50% 50% 50% 0;
       transform: rotate(-45deg);
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-      border: 2px solid #ffffff;
+      box-shadow: ${shadow};
+      border: ${isSponsored ? '3px' : '2px'} solid ${borderColor};
       cursor: pointer;
       transition: transform 0.15s ease-in-out;
     ">
       <span style="
         transform: rotate(45deg);
-        font-size: 17px;
+        font-size: ${isSponsored ? '19px' : '17px'};
         display: block;
         user-select: none;
       ">${cfg.icon}</span>
+      ${
+        isSponsored
+          ? `<div style="
+              position: absolute;
+              top: -6px;
+              right: -6px;
+              transform: rotate(45deg);
+              background: #f59e0b;
+              color: #ffffff;
+              font-size: 8px;
+              font-weight: 900;
+              font-family: system-ui, sans-serif;
+              border-radius: 999px;
+              padding: 1px 4px;
+              border: 1.5px solid #ffffff;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+              letter-spacing: 0.5px;
+            ">AD</div>`
+          : ''
+      }
     </div>
   `;
 
   return L.divIcon({
     className: 'custom-leaflet-marker',
     html: html,
-    iconSize: [38, 38],
-    iconAnchor: [19, 38],
-    popupAnchor: [0, -38]
+    iconSize: isSponsored ? [42, 42] : [38, 38],
+    iconAnchor: isSponsored ? [21, 42] : [19, 38],
+    popupAnchor: [0, isSponsored ? -42 : -38]
   });
 }
 
-export default function MapView({ listings, onSelectListing, userLocation, targetCity = null, darkMode = false }) {
+export default function MapView({
+  listings,
+  onSelectListing,
+  userLocation,
+  targetCity = null,
+  darkMode = false,
+  sponsoredListingIds = []
+}) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const tileLayerRef = useRef(null);
@@ -162,7 +195,8 @@ export default function MapView({ listings, onSelectListing, userLocation, targe
 
     listings.forEach((listing) => {
       if (listing.latitude && listing.longitude) {
-        const icon = createCustomPin(listing.category);
+        const isSponsored = sponsoredListingIds.includes(listing.id);
+        const icon = createCustomPin(listing.category, isSponsored);
         const marker = L.marker([listing.latitude, listing.longitude], { icon });
 
         marker.on('click', () => {
@@ -172,7 +206,7 @@ export default function MapView({ listings, onSelectListing, userLocation, targe
         clusterGroup.addLayer(marker);
       }
     });
-  }, [listings, onSelectListing]);
+  }, [listings, onSelectListing, sponsoredListingIds]);
 
   // Update User Location pin & pan
   useEffect(() => {

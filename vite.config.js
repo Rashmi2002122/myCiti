@@ -34,6 +34,7 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
+        importScripts: ['/push-sw.js'],
         // Cache static app assets (exclude html so users always get fresh bundle links)
         globPatterns: ['**/*.{js,css,svg,png,jpg,jpeg,ico,mjs}'],
         runtimeCaching: [

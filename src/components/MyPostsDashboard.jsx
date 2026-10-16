@@ -16,7 +16,8 @@ export default function MyPostsDashboard({
   isOpen,
   onClose,
   onOpenPostForm,
-  onViewOnMap
+  onViewOnMap,
+  onOpenCreateCampaign
 }) {
   const { accessToken, isAuthenticated, canPost } = useAuth();
   const [activeTab, setActiveTab] = useState('ALL'); // ALL | PENDING | APPROVED | DECLINED
@@ -299,16 +300,30 @@ export default function MyPostsDashboard({
                       <div className="flex items-center gap-1.5">
                         {/* Live Listing View on Map */}
                         {sub.status === 'APPROVED' && sub.listingId && (
-                          <button
-                            onClick={() => {
-                              onClose();
-                              if (onViewOnMap) onViewOnMap(sub.listingId);
-                            }}
-                            className="min-h-[36px] px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 font-bold text-xs flex items-center gap-1 transition-colors"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                            <span>View on map</span>
-                          </button>
+                          <>
+                            <button
+                              onClick={() => {
+                                onClose();
+                                if (onViewOnMap) onViewOnMap(sub.listingId);
+                              }}
+                              className="min-h-[36px] px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 font-bold text-xs flex items-center gap-1 transition-colors"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              <span>View on map</span>
+                            </button>
+
+                            {/* Promote / Create Geo Ad */}
+                            <button
+                              onClick={() => {
+                                onClose();
+                                if (onOpenCreateCampaign) onOpenCreateCampaign(sub.listingId);
+                              }}
+                              className="min-h-[36px] px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 text-amber-700 dark:text-amber-300 font-bold text-xs flex items-center gap-1 transition-colors border border-amber-200/60 dark:border-amber-900"
+                            >
+                              <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                              <span>Promote</span>
+                            </button>
+                          </>
                         )}
 
                         {/* Edit Button */}

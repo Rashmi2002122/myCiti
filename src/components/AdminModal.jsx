@@ -13,9 +13,10 @@ import {
 } from '../services/api';
 import LocationPickerMap from './LocationPickerMap';
 import AdminReviewQueue from './AdminReviewQueue';
+import AdminAdsManager from './AdminAdsManager';
 import { useAuth } from '../context/AuthContext';
 
-export default function AdminModal({ isOpen, onClose, onListingChanged }) {
+export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCreateAnnouncement }) {
   const { accessToken, isAdmin, handleLogout: authLogout } = useAuth();
   const token = (isAdmin && accessToken) ? accessToken : null;
   const [adminSection, setAdminSection] = useState('QUEUE'); // 'QUEUE' | 'LISTINGS'
@@ -245,6 +246,20 @@ export default function AdminModal({ isOpen, onClose, onListingChanged }) {
               }`}
             >
               🗺️ All Listings Database ({listings.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setAdminSection('MARKETING');
+                setIsFormOpen(false);
+              }}
+              className={`min-h-[40px] px-4 py-1.5 rounded-full text-xs font-black transition-all ${
+                adminSection === 'MARKETING'
+                  ? 'bg-city-blue text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              📢 Ads & Announcements
             </button>
           </div>
         )}
@@ -608,6 +623,14 @@ export default function AdminModal({ isOpen, onClose, onListingChanged }) {
                 </table>
               </div>
             </div>
+          )}
+
+          {/* Section 3: Ads & Announcements Marketing Panel */}
+          {token && adminSection === 'MARKETING' && (
+            <AdminAdsManager
+              token={token}
+              onOpenCreateAnnouncement={onOpenCreateAnnouncement}
+            />
           )}
         </div>
       </div>

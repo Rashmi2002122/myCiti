@@ -6,7 +6,12 @@ import BottomNav from './components/BottomNav';
 import HomeView from './components/HomeView';
 import SavedView from './components/SavedView';
 import { useAuth } from './context/AuthContext';
-import { fetchListings, fetchListingById } from './services/api';
+import {
+  fetchListings,
+  fetchListingById,
+  fetchActiveAds,
+  fetchMyNotifications
+} from './services/api';
 import AddToHomeScreenBanner from './components/AddToHomeScreenBanner';
 import InstallGuideModal from './components/InstallGuideModal';
 import SplashScreen from './components/SplashScreen';
@@ -17,6 +22,13 @@ const CompleteProfileModal = lazy(() => import('./components/CompleteProfileModa
 const AccountMenuModal = lazy(() => import('./components/AccountMenuModal'));
 const MyPostsDashboard = lazy(() => import('./components/MyPostsDashboard'));
 const PostAdvertisementModal = lazy(() => import('./components/PostAdvertisementModal'));
+const MyAreaSettingsModal = lazy(() => import('./components/MyAreaSettingsModal'));
+const PrivacyConsentModal = lazy(() => import('./components/PrivacyConsentModal'));
+const PrivacyPolicyModal = lazy(() => import('./components/PrivacyPolicyModal'));
+const NotificationCenterModal = lazy(() => import('./components/NotificationCenterModal'));
+const CreateCampaignModal = lazy(() => import('./components/CreateCampaignModal'));
+const CreateAnnouncementModal = lazy(() => import('./components/CreateAnnouncementModal'));
+const CampaignsDashboardModal = lazy(() => import('./components/CampaignsDashboardModal'));
 
 const SAVED_STORAGE_KEY = 'myciti_saved_listings';
 
@@ -33,6 +45,16 @@ export default function App() {
   const [isCompleteProfileOpen, setIsCompleteProfileOpen] = useState(false);
   const [isMyPostsOpen, setIsMyPostsOpen] = useState(false);
   const [isPostAdOpen, setIsPostAdOpen] = useState(false);
+  const [isMyAreaOpen, setIsMyAreaOpen] = useState(false);
+  const [isPrivacyConsentOpen, setIsPrivacyConsentOpen] = useState(false);
+  const [isPrivacyNoticeOpen, setIsPrivacyNoticeOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+  const [isCreateCampaignOpen, setIsCreateCampaignOpen] = useState(false);
+  const [campaignListingId, setCampaignListingId] = useState(null);
+  const [isCreateAnnouncementOpen, setIsCreateAnnouncementOpen] = useState(false);
+  const [isCampaignsDashboardOpen, setIsCampaignsDashboardOpen] = useState(false);
+  const [activeAds, setActiveAds] = useState([]);
   const [editingSubmission, setEditingSubmission] = useState(null);
   const [selectedCity, setSelectedCity] = useState('Kolkata');
   const [mapCenter, setMapCenter] = useState({ lat: 22.5726, lng: 88.3639, zoom: 12 });
@@ -137,6 +159,44 @@ export default function App() {
     loadListings();
   }, [loadListings]);
 
+  // Load active geo-targeted ads
+  const loadActiveAds = useCallback(async () => {
+    try {
+      const ads = await fetchActiveAds({
+        lat: userLocation ? userLocation.lat : null,
+        lng: userLocation ? userLocation.lng : null,
+        city: selectedCity
+      });
+      setActiveAds(ads || []);
+    } catch (e) {
+      console.warn('Failed to load active ads:', e);
+    }
+  }, [userLocation, selectedCity]);
+
+  useEffect(() => {
+    loadActiveAds();
+  }, [loadActiveAds]);
+
+  // Load unread notifications count for logged in user
+  useEffect(() => {
+    if (!isAuthenticated || !user) {
+      setUnreadNotificationsCount(0);
+      return;
+    }
+    const token = localStorage.getItem('myciti_token');
+    if (!token) return;
+    fetchMyNotifications(token)
+      .then((data) => {
+        const unread = (data || []).filter((n) => !n.isRead).length;
+        setUnreadNotificationsCount(unread);
+      })
+      .catch((e) => console.warn('Failed to check notifications:', e));
+  }, [isAuthenticated, user]);
+
+  const sponsoredListingIds = activeAds
+    .map((a) => a.listingId)
+    .filter((id) => id != null);
+
   // Auto-open Complete Profile modal if Client/Admin is logged in with incomplete profile
   useEffect(() => {
     if (isAuthenticated && canPost && !isProfileComplete) {
@@ -220,6 +280,14 @@ export default function App() {
           setSelectedCity(cityObj.name);
           setMapCenter({ lat: cityObj.lat, lng: cityObj.lng, zoom: 12 });
         }}
+        unreadCount={unreadNotificationsCount}
+        onOpenNotifications={() => {
+          if (!isAuthenticated) {
+            setIsLoginOpen(true);
+          } else {
+            setIsNotificationsOpen(true);
+          }
+        }}
       />
 
       {/* Main Views */}
@@ -231,6 +299,7 @@ export default function App() {
             userLocation={userLocation}
             targetCity={mapCenter}
             darkMode={darkMode}
+            sponsoredListingIds={sponsoredListingIds}
           />
         )}
 
@@ -244,6 +313,7 @@ export default function App() {
             userLocation={userLocation}
             onNearMeClick={handleNearMe}
             isLocating={isLocating}
+            selectedCity={selectedCity}
           />
         )}
 
@@ -307,6 +377,7 @@ export default function App() {
             isOpen={isAdminOpen}
             onClose={() => setIsAdminOpen(false)}
             onListingChanged={loadListings}
+            onOpenCreateAnnouncement={() => setIsCreateAnnouncementOpen(true)}
           />
         )}
 
@@ -338,6 +409,16 @@ export default function App() {
                 setIsPostAdOpen(true);
               }
             }}
+            onOpenCampaigns={() => setIsCampaignsDashboardOpen(true)}
+            onOpenMyArea={() => {
+              const dismissed = localStorage.getItem('myciti_consent_dismissed');
+              if (!dismissed) {
+                setIsPrivacyConsentOpen(true);
+              } else {
+                setIsMyAreaOpen(true);
+              }
+            }}
+            onOpenPrivacyNotice={() => setIsPrivacyNoticeOpen(true)}
             darkMode={darkMode}
             onToggleDarkMode={() => setDarkMode(!darkMode)}
           />
@@ -357,6 +438,10 @@ export default function App() {
             onOpenPostForm={(submissionToEdit) => {
               setEditingSubmission(submissionToEdit || null);
               setIsPostAdOpen(true);
+            }}
+            onOpenCreateCampaign={(listingId) => {
+              setCampaignListingId(listingId);
+              setIsCreateCampaignOpen(true);
             }}
             onViewOnMap={async (listingId) => {
               try {
@@ -381,6 +466,92 @@ export default function App() {
             onSuccess={() => {
               setIsMyPostsOpen(true);
             }}
+          />
+        )}
+
+        {isPrivacyConsentOpen && (
+          <PrivacyConsentModal
+            isOpen={isPrivacyConsentOpen}
+            onClose={() => setIsPrivacyConsentOpen(false)}
+            onConsentApplied={(choices) => {
+              if (choices?.location) {
+                setIsMyAreaOpen(true);
+              }
+            }}
+            onOpenPrivacyNotice={() => setIsPrivacyNoticeOpen(true)}
+          />
+        )}
+
+        {isMyAreaOpen && (
+          <MyAreaSettingsModal
+            isOpen={isMyAreaOpen}
+            onClose={() => setIsMyAreaOpen(false)}
+            onAreaSaved={(area) => {
+              if (area?.coarseLat && area?.coarseLng) {
+                setUserLocation({ lat: area.coarseLat, lng: area.coarseLng });
+                setMapCenter({ lat: area.coarseLat, lng: area.coarseLng, zoom: 13 });
+              }
+            }}
+          />
+        )}
+
+        {isPrivacyNoticeOpen && (
+          <PrivacyPolicyModal
+            isOpen={isPrivacyNoticeOpen}
+            onClose={() => setIsPrivacyNoticeOpen(false)}
+            onOpenSettings={() => setIsMyAreaOpen(true)}
+          />
+        )}
+
+        {isNotificationsOpen && (
+          <NotificationCenterModal
+            isOpen={isNotificationsOpen}
+            onClose={() => setIsNotificationsOpen(false)}
+            onSelectListingId={async (listingId) => {
+              try {
+                const listing = await fetchListingById(listingId);
+                setSelectedListing(listing);
+                setActiveTab('map');
+              } catch (e) {
+                console.error('Failed to view listing:', e);
+              }
+            }}
+            onUnreadCountChanged={setUnreadNotificationsCount}
+          />
+        )}
+
+        {isCreateCampaignOpen && (
+          <CreateCampaignModal
+            isOpen={isCreateCampaignOpen}
+            onClose={() => {
+              setIsCreateCampaignOpen(false);
+              setCampaignListingId(null);
+            }}
+            initialListingId={campaignListingId}
+            onCampaignCreated={() => {
+              loadActiveAds();
+              setIsCampaignsDashboardOpen(true);
+            }}
+          />
+        )}
+
+        {isCreateAnnouncementOpen && (
+          <CreateAnnouncementModal
+            isOpen={isCreateAnnouncementOpen}
+            onClose={() => setIsCreateAnnouncementOpen(false)}
+            initialListingId={campaignListingId}
+            onAnnouncementCreated={() => {
+              setIsCampaignsDashboardOpen(true);
+            }}
+          />
+        )}
+
+        {isCampaignsDashboardOpen && (
+          <CampaignsDashboardModal
+            isOpen={isCampaignsDashboardOpen}
+            onClose={() => setIsCampaignsDashboardOpen(false)}
+            onOpenCreateCampaign={() => setIsCreateCampaignOpen(true)}
+            onOpenCreateAnnouncement={() => setIsCreateAnnouncementOpen(true)}
           />
         )}
       </Suspense>

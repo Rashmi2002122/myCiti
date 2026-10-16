@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sparkles, Compass, MapPin } from 'lucide-react';
 import ListingCard from './ListingCard';
+import SponsoredAdCard from './SponsoredAdCard';
+import { fetchActiveAds } from '../services/api';
 
 export default function HomeView({
   listings,
@@ -10,8 +12,32 @@ export default function HomeView({
   onShare,
   userLocation,
   onNearMeClick,
-  isLocating
+  isLocating,
+  selectedCity = 'Kolkata'
 }) {
+  const [activeAds, setActiveAds] = useState([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadAds() {
+      try {
+        const ads = await fetchActiveAds({
+          lat: userLocation ? userLocation.lat : null,
+          lng: userLocation ? userLocation.lng : null,
+          city: selectedCity
+        });
+        if (isMounted) setActiveAds(ads);
+      } catch (e) {
+        console.warn('Failed to load active ads for HomeView:', e);
+      }
+    }
+    loadAds();
+    return () => { isMounted = false; };
+  }, [userLocation, selectedCity]);
+
+  const handleReportAd = (adId) => {
+    setActiveAds((prev) => prev.filter((a) => a.id !== adId));
+  };
   const pandals = listings.filter(l => l.category === 'PANDAL');
   const offersAndEvents = listings.filter(l => l.category !== 'PANDAL');
 
@@ -51,6 +77,17 @@ export default function HomeView({
         {/* Decorative circle glow */}
         <div className="absolute -right-10 -bottom-10 w-44 h-44 bg-white/10 rounded-full blur-xl pointer-events-none" />
       </div>
+
+      {/* Geo-Targeted Sponsored Ad Placement */}
+      {activeAds.length > 0 && (
+        <div className="space-y-1.5">
+          <SponsoredAdCard
+            ad={activeAds[0]}
+            onSelectListing={onSelectListing}
+            onReportAd={handleReportAd}
+          />
+        </div>
+      )}
 
       {/* Near You / Highlights List */}
       <div>

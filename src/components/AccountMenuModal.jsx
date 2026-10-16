@@ -4,7 +4,7 @@ import { usePWAInstall } from '../context/PWAInstallContext';
 import {
   X, User, Shield, LogOut, Phone, Store, Building2,
   CheckCircle, AlertTriangle, ExternalLink, Settings, Sun, Moon,
-  Smartphone
+  Smartphone, MapPin, ShieldCheck
 } from 'lucide-react';
 
 export default function AccountMenuModal({
@@ -14,6 +14,9 @@ export default function AccountMenuModal({
   onOpenAdminPanel,
   onOpenMyPosts,
   onOpenPostAd,
+  onOpenCampaigns,
+  onOpenMyArea,
+  onOpenPrivacyNotice,
   darkMode,
   onToggleDarkMode
 }) {
@@ -176,6 +179,21 @@ export default function AccountMenuModal({
                   </div>
                   <span className="text-[11px] text-slate-400">&rarr;</span>
                 </button>
+
+                {/* Marketing & Geo Campaigns */}
+                <button
+                  onClick={() => {
+                    onClose();
+                    if (onOpenCampaigns) onOpenCampaigns();
+                  }}
+                  className="w-full min-h-[44px] px-4 py-2.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-800 dark:text-amber-200 font-bold text-xs flex items-center justify-between transition-colors border border-amber-200/60 dark:border-amber-900"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm">🎯</span>
+                    <span>Marketing & Geo Ads</span>
+                  </div>
+                  <span className="text-[11px] text-slate-400">&rarr;</span>
+                </button>
               </>
             )}
 
@@ -210,6 +228,36 @@ export default function AccountMenuModal({
               <div className="flex items-center gap-2">
                 <Settings className="w-4 h-4 text-slate-500" />
                 <span>Edit Profile</span>
+              </div>
+              <span className="text-[11px] text-slate-400">&rarr;</span>
+            </button>
+
+            {/* My Area & Targeting Preferences */}
+            <button
+              onClick={() => {
+                onClose();
+                if (onOpenMyArea) onOpenMyArea();
+              }}
+              className="w-full min-h-[44px] px-4 py-2.5 rounded-2xl bg-sky-50 dark:bg-slate-800/80 hover:bg-sky-100 dark:hover:bg-slate-800 text-city-blue dark:text-blue-400 font-bold text-xs flex items-center justify-between transition-colors border border-sky-100 dark:border-slate-700/60"
+            >
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-city-blue dark:text-blue-400" />
+                <span>My Area & Targeting</span>
+              </div>
+              <span className="text-[11px] text-slate-400">&rarr;</span>
+            </button>
+
+            {/* Privacy Notice */}
+            <button
+              onClick={() => {
+                onClose();
+                if (onOpenPrivacyNotice) onOpenPrivacyNotice();
+              }}
+              className="w-full min-h-[44px] px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold text-xs flex items-center justify-between transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <span>Privacy & Data Protection</span>
               </div>
               <span className="text-[11px] text-slate-400">&rarr;</span>
             </button>

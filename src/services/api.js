@@ -393,3 +393,405 @@ export async function declineAdminSubmission(token, id, reason) {
   return res.json();
 }
 
+
+
+// --- Coarse Location & Privacy APIs ---
+
+export async function fetchMyLocation(token) {
+  const res = await fetch(api('/api/me/location'), {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export async function updateMyLocation(token, { latitude, longitude, areaName }) {
+  const res = await fetch(api('/api/me/location'), {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ latitude, longitude, areaName })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.message || 'Failed to update location');
+  }
+  return res.json();
+}
+
+export async function deleteMyLocation(token) {
+  const res = await fetch(api('/api/me/location'), {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to delete location data');
+  return true;
+}
+
+// --- Notification & Web Push APIs ---
+
+export async function fetchVapidKey() {
+  const res = await fetch(api('/api/notifications/vapid-public-key'));
+  if (!res.ok) return '';
+  const data = await res.json();
+  return data.publicKey || '';
+}
+
+export async function subscribePush(token, subscription) {
+  const key = subscription.getKey ? subscription.getKey('p256dh') : null;
+  const auth = subscription.getKey ? subscription.getKey('auth') : null;
+  const p256dh = key ? btoa(String.fromCharCode.apply(null, new Uint8Array(key))) : '';
+  const authSecret = auth ? btoa(String.fromCharCode.apply(null, new Uint8Array(auth))) : '';
+
+  const res = await fetch(api('/api/notifications/subscribe'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      endpoint: subscription.endpoint,
+      p256dh,
+      auth: authSecret
+    })
+  });
+  if (!res.ok) throw new Error('Failed to save push subscription');
+  return res.json();
+}
+
+export async function unsubscribePush(token, endpoint) {
+  const res = await fetch(api(`/api/notifications/unsubscribe?endpoint=${encodeURIComponent(endpoint)}`), {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to unsubscribe push');
+  return res.json();
+}
+
+export async function fetchNotifications(token) {
+  const res = await fetch(api('/api/notifications'), {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export async function fetchUnreadNotificationCount(token) {
+  const res = await fetch(api('/api/notifications/unread-count'), {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) return 0;
+  const data = await res.json();
+  return data.unreadCount || 0;
+}
+
+export async function markNotificationAsRead(token, id) {
+  await fetch(api(`/api/notifications/${id}/read`), {
+    method: 'PATCH',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  return true;
+}
+
+export async function markAllNotificationsAsRead(token) {
+  await fetch(api('/api/notifications/read-all'), {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  return true;
+}
+
+// --- Geo-Targeted Ads APIs ---
+
+export async function fetchActiveAds(latOrOptions = null, maybeLng = null, maybeCity = null) {
+  let lat = latOrOptions;
+  let lng = maybeLng;
+  let city = maybeCity;
+  if (latOrOptions && typeof latOrOptions === 'object') {
+    lat = latOrOptions.lat;
+    lng = latOrOptions.lng;
+    city = latOrOptions.city;
+  }
+  const params = new URLSearchParams();
+  if (lat !== null && lat !== undefined) params.append('lat', lat);
+  if (lng !== null && lng !== undefined) params.append('lng', lng);
+  if (city && city !== 'ALL') params.append('city', city);
+
+  const res = await fetch(api(`/api/ads/active?${params.toString()}`));
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export async function recordAdImpression(campaignId, count = 1) {
+  fetch(api(`/api/ads/campaigns/${campaignId}/impressions?count=${count}`), {
+    method: 'POST'
+  }).catch(() => {});
+}
+
+export async function recordAdClick(campaignId) {
+  fetch(api(`/api/ads/campaigns/${campaignId}/click`), {
+    method: 'POST'
+  }).catch(() => {});
+}
+
+export async function reportAd(campaignIdOrToken, campaignIdOrPayload, maybePayload) {
+  let token = null;
+  let campaignId = campaignIdOrToken;
+  let payload = campaignIdOrPayload;
+  if (typeof campaignIdOrToken === 'string' && typeof campaignIdOrPayload === 'number') {
+    token = campaignIdOrToken;
+    campaignId = campaignIdOrPayload;
+    payload = maybePayload;
+  }
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(api(`/api/ads/campaigns/${campaignId}/report`), {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.message || 'Failed to report advertisement');
+  }
+  return res.json();
+}
+
+export async function fetchAudienceEstimate(tokenOrParams, maybeParams) {
+  let token = null;
+  let paramsObj = tokenOrParams;
+  if (typeof tokenOrParams === 'string') {
+    token = tokenOrParams;
+    paramsObj = maybeParams || {};
+  }
+  const params = new URLSearchParams();
+  if (paramsObj.targetType) params.append('targetType', paramsObj.targetType);
+  if (paramsObj.lat !== null && paramsObj.lat !== undefined) params.append('lat', paramsObj.lat);
+  if (paramsObj.lng !== null && paramsObj.lng !== undefined) params.append('lng', paramsObj.lng);
+  if (paramsObj.radiusKm) params.append('radiusKm', paramsObj.radiusKm);
+  if (paramsObj.city || paramsObj.areaName) params.append('city', paramsObj.city || paramsObj.areaName);
+
+  const headers = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(api(`/api/ads/audience-estimate?${params.toString()}`), { headers });
+  if (!res.ok) throw new Error('Failed to calculate audience estimate');
+  return res.json();
+}
+
+export async function createAdCampaign(token, payload) {
+  const res = await fetch(api('/api/ads/campaigns'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.message || 'Failed to create campaign');
+  }
+  return res.json();
+}
+
+export async function fetchMyCampaigns(token) {
+  const res = await fetch(api('/api/ads/my-campaigns'), {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to load campaigns');
+  return res.json();
+}
+
+export async function pauseCampaign(token, id) {
+  const res = await fetch(api(`/api/ads/campaigns/${id}/pause`), {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to pause campaign');
+  return res.json();
+}
+
+export async function resumeCampaign(token, id) {
+  const res = await fetch(api(`/api/ads/campaigns/${id}/resume`), {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to resume campaign');
+  return res.json();
+}
+
+// --- Announcements APIs ---
+
+export async function createAnnouncement(token, payload) {
+  const res = await fetch(api('/api/announcements'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.message || 'Failed to create announcement');
+  }
+  return res.json();
+}
+
+export async function fetchMyAnnouncements(token) {
+  const res = await fetch(api('/api/announcements/my'), {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to load announcements');
+  return res.json();
+}
+
+// --- Admin Ads & Announcement Oversight APIs ---
+
+export async function fetchAdminCampaigns(token, status = null) {
+  const url = status ? api(`/api/admin/ads?status=${status}`) : api('/api/admin/ads');
+  const res = await fetch(url, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to load ad campaigns');
+  return res.json();
+}
+
+export async function approveAdminCampaign(token, id) {
+  const res = await fetch(api(`/api/admin/ads/${id}/approve`), {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to approve campaign');
+  return res.json();
+}
+
+export async function rejectAdminCampaign(token, id, reason) {
+  const res = await fetch(api(`/api/admin/ads/${id}/reject`), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ reason })
+  });
+  if (!res.ok) throw new Error('Failed to reject campaign');
+  return res.json();
+}
+
+export async function deleteAdminCampaign(token, id) {
+  const res = await fetch(api(`/api/admin/ads/${id}`), {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to delete campaign');
+  return true;
+}
+
+export async function fetchAdminReports(token) {
+  const res = await fetch(api('/api/admin/ads/reports'), {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to load reports');
+  return res.json();
+}
+
+export async function fetchAdminAnnouncements(token) {
+  const res = await fetch(api('/api/admin/announcements'), {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to load announcements');
+  return res.json();
+}
+
+export async function approveAdminAnnouncement(token, id) {
+  const res = await fetch(api(`/api/admin/announcements/${id}/approve`), {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to approve announcement');
+  return res.json();
+}
+
+export async function rejectAdminAnnouncement(token, id, reason) {
+  const res = await fetch(api(`/api/admin/announcements/${id}/reject`), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ reason })
+  });
+  if (!res.ok) throw new Error('Failed to reject announcement');
+  return res.json();
+}
+
+
+// --- Aliases and Missing Marketing Oversight Methods ---
+export const fetchMyNotifications = fetchNotifications;
+export const fetchMyAdCampaigns = fetchMyCampaigns;
+export const pauseAdCampaign = pauseCampaign;
+export const resumeAdCampaign = resumeCampaign;
+
+export async function deleteAdCampaign(token, id) {
+  const res = await fetch(api(`/api/ads/campaigns/${id}`), {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to delete campaign');
+  return true;
+}
+
+export const fetchAdminAdCampaigns = fetchAdminCampaigns;
+export const approveAdminAdCampaign = approveAdminCampaign;
+export const rejectAdminAdCampaign = rejectAdminCampaign;
+export const deleteAdminAdCampaign = deleteAdminCampaign;
+export const fetchAdminAdReports = fetchAdminReports;
+
+export async function createAdminAnnouncement(token, payload) {
+  const res = await fetch(api('/api/admin/announcements/broadcast'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.message || 'Failed to send admin broadcast');
+  }
+  return res.json();
+}
+
+export async function deleteAdminAnnouncement(token, id) {
+  const res = await fetch(api(`/api/admin/announcements/${id}`), {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to delete announcement');
+  return true;
+}
+
+
+export async function pauseAdminAdCampaign(token, id) {
+  const res = await fetch(api(`/api/admin/ads/${id}/pause`), {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to pause campaign');
+  return res.json();
+}
+
+export async function resumeAdminAdCampaign(token, id) {
+  const res = await fetch(api(`/api/admin/ads/${id}/resume`), {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to resume campaign');
+  return res.json();
+}

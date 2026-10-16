@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Compass, Sun, Moon, X, MapPin, ChevronDown } from 'lucide-react';
+import { Search, Compass, Sun, Moon, X, MapPin, ChevronDown, Bell } from 'lucide-react';
 import { FILTER_CHIPS } from '../services/api';
 
 export const CITIES = [
@@ -27,7 +27,9 @@ export default function TopBar({
   darkMode,
   onToggleDarkMode,
   selectedCity = 'Kolkata',
-  onSelectCity
+  onSelectCity,
+  unreadCount = 0,
+  onOpenNotifications
 }) {
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
@@ -95,6 +97,22 @@ export default function TopBar({
 
         {/* Right side buttons */}
         <div className="flex items-center gap-2">
+          {/* Notifications Bell */}
+          <button
+            type="button"
+            onClick={onOpenNotifications}
+            aria-label="View notifications"
+            title="Announcements & Notifications"
+            className="relative w-11 h-11 flex items-center justify-center rounded-full bg-white/95 dark:bg-slate-900/95 text-slate-700 dark:text-slate-200 shadow-float border border-white/60 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+          >
+            <Bell className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-rose-500 text-white rounded-full text-[10px] font-black flex items-center justify-center shadow-xs animate-pulse">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </button>
+
           {/* Near Me Button */}
           <button
             onClick={onNearMeClick}
