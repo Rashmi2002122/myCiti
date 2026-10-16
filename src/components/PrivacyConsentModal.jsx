@@ -4,7 +4,9 @@ import { ShieldCheck, MapPin, Bell, X, Check, ArrowRight } from 'lucide-react';
 export default function PrivacyConsentModal({
   isOpen,
   onClose,
-  onAccept
+  onAccept,
+  onConsentApplied,
+  onOpenPrivacyNotice
 }) {
   const [allowLocation, setAllowLocation] = useState(false);
   const [allowPush, setAllowPush] = useState(false);
@@ -12,15 +14,43 @@ export default function PrivacyConsentModal({
   if (!isOpen) return null;
 
   const handleConfirm = () => {
-    onAccept({ allowLocation, allowPush });
-    onClose();
+    try {
+      localStorage.setItem('myciti_consent_dismissed', 'true');
+    } catch (e) {
+      // Ignore storage errors
+    }
+
+    const callback = onConsentApplied || onAccept;
+    if (typeof callback === 'function') {
+      callback({
+        location: allowLocation,
+        push: allowPush,
+        allowLocation,
+        allowPush
+      });
+    }
+
+    if (typeof onClose === 'function') {
+      onClose();
+    }
+  };
+
+  const handleDismiss = () => {
+    try {
+      localStorage.setItem('myciti_consent_dismissed', 'true');
+    } catch (e) {
+      // Ignore storage errors
+    }
+    if (typeof onClose === 'function') {
+      onClose();
+    }
   };
 
   return (
     <div className="fixed inset-0 z-[3200] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
       <div className="bg-gradient-to-b from-[#cfe7ff] to-[#eaf4ff] dark:from-slate-900 dark:to-slate-950 p-6 rounded-[30px] max-w-md w-full shadow-2xl border border-white/60 dark:border-slate-800 animate-in zoom-in-95 duration-200 relative">
         <button
-          onClick={onClose}
+          onClick={handleDismiss}
           aria-label="Close"
           className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/80 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 flex items-center justify-center transition-colors shadow-soft"
         >
@@ -94,12 +124,24 @@ export default function PrivacyConsentModal({
 
           <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/60 text-[11px] text-slate-600 dark:text-slate-400 space-y-1">
             <p>🔒 <strong>Your Control:</strong> You can change or delete your area and unsubscribe anytime from your account menu.</p>
+            {onOpenPrivacyNotice && (
+              <button
+                type="button"
+                onClick={() => {
+                  handleDismiss();
+                  onOpenPrivacyNotice();
+                }}
+                className="text-city-blue dark:text-blue-400 font-bold underline hover:opacity-80 block pt-0.5 text-left"
+              >
+                Read our Privacy & Location Notice &rarr;
+              </button>
+            )}
           </div>
 
           <div className="flex items-center gap-2 pt-1">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleDismiss}
               className="flex-1 py-2.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition-colors"
             >
               Not Now
