@@ -57,7 +57,7 @@ export default function BottomNav({
             ) : (
               <UserIcon className="w-5 h-5" />
             )}
-            {user && !user.profileComplete && (
+            {user && !user.profileComplete && (user.role === 'CLIENT' || user.role === 'ADMIN' || user.role === 'SUBMITTER') && (
               <span
                 title="Profile incomplete"
                 className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-slate-900 animate-pulse"

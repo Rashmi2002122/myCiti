@@ -39,7 +39,7 @@ export default function PostAdvertisementModal({
   editingSubmission = null,
   onSuccess
 }) {
-  const { user, accessToken } = useAuth();
+  const { user, accessToken, canPost } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -317,6 +317,12 @@ export default function PostAdvertisementModal({
   // Final Submission
   const handleSubmit = async () => {
     setSubmitError('');
+
+    if (!canPost) {
+      setSubmitError('Only registered Client accounts and Admins can post advertisements. Please complete your business profile.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {

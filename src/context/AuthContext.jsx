@@ -191,6 +191,9 @@ export function AuthProvider({ children }) {
         updateUserProfile,
         isAuthenticated: !!accessToken && !!user,
         isAdmin: user?.role === 'ADMIN',
+        isClient: user?.role === 'CLIENT' || user?.role === 'SUBMITTER' || user?.role === 'ADMIN',
+        isConsumer: user?.role === 'USER',
+        canPost: user?.role === 'CLIENT' || user?.role === 'SUBMITTER' || user?.role === 'ADMIN',
         isProfileComplete: !!user?.profileComplete,
       }}
     >

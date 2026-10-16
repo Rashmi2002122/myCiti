@@ -17,7 +17,7 @@ export default function AccountMenuModal({
   darkMode,
   onToggleDarkMode
 }) {
-  const { user, isAdmin, handleLogout } = useAuth();
+  const { user, isAdmin, isClient, canPost, isConsumer, handleLogout } = useAuth();
   const { isInstalled, promptToInstall } = usePWAInstall();
 
   if (!isOpen || !user) return null;
@@ -95,9 +95,15 @@ export default function AccountMenuModal({
                   <Shield className="w-3 h-3 text-amber-600" />
                   ADMIN
                 </span>
+              ) : isClient ? (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                  <Store className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                  CLIENT
+                </span>
               ) : (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                  SUBMITTER
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                  <User className="w-3 h-3 text-slate-500" />
+                  USER
                 </span>
               )}
             </div>
@@ -120,8 +126,8 @@ export default function AccountMenuModal({
             </div>
           )}
 
-          {/* Profile Incomplete Banner */}
-          {!user.profileComplete && (
+          {/* Profile Incomplete Banner for Client/Admin */}
+          {!user.profileComplete && canPost && (
             <div
               onClick={() => {
                 onClose();
@@ -139,35 +145,59 @@ export default function AccountMenuModal({
 
           {/* Actions Menu */}
           <div className="space-y-2 pt-1 border-t border-slate-100 dark:border-slate-800">
-            {/* Post an Advertisement */}
-            <button
-              onClick={() => {
-                onClose();
-                if (onOpenPostAd) onOpenPostAd();
-              }}
-              className="w-full min-h-[44px] px-4 py-2.5 rounded-2xl bg-city-blue hover:bg-blue-600 text-white font-bold text-xs flex items-center justify-between transition-transform active:scale-[0.98] shadow-md"
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-sm">✨</span>
-                <span>Post an Advertisement</span>
-              </div>
-              <span className="text-[11px] font-extrabold">&rarr;</span>
-            </button>
+            {/* Post an Advertisement - CLIENT / ADMIN only */}
+            {canPost && (
+              <>
+                <button
+                  onClick={() => {
+                    onClose();
+                    if (onOpenPostAd) onOpenPostAd();
+                  }}
+                  className="w-full min-h-[44px] px-4 py-2.5 rounded-2xl bg-city-blue hover:bg-blue-600 text-white font-bold text-xs flex items-center justify-between transition-transform active:scale-[0.98] shadow-md"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm">✨</span>
+                    <span>Post an Advertisement</span>
+                  </div>
+                  <span className="text-[11px] font-extrabold">&rarr;</span>
+                </button>
 
-            {/* My Advertisements Link */}
-            <button
-              onClick={() => {
-                onClose();
-                if (onOpenMyPosts) onOpenMyPosts();
-              }}
-              className="w-full min-h-[44px] px-4 py-2.5 rounded-2xl bg-sky-50 dark:bg-slate-800/80 hover:bg-sky-100 dark:hover:bg-slate-800 text-city-blue dark:text-blue-400 font-bold text-xs flex items-center justify-between transition-colors border border-sky-200/60 dark:border-slate-700"
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-sm">📢</span>
-                <span>My Advertisements</span>
-              </div>
-              <span className="text-[11px] text-slate-400">&rarr;</span>
-            </button>
+                {/* My Advertisements Link */}
+                <button
+                  onClick={() => {
+                    onClose();
+                    if (onOpenMyPosts) onOpenMyPosts();
+                  }}
+                  className="w-full min-h-[44px] px-4 py-2.5 rounded-2xl bg-sky-50 dark:bg-slate-800/80 hover:bg-sky-100 dark:hover:bg-slate-800 text-city-blue dark:text-blue-400 font-bold text-xs flex items-center justify-between transition-colors border border-sky-200/60 dark:border-slate-700"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm">📢</span>
+                    <span>My Advertisements</span>
+                  </div>
+                  <span className="text-[11px] text-slate-400">&rarr;</span>
+                </button>
+              </>
+            )}
+
+            {/* Upgrade to Business / Client Account CTA for Consumers */}
+            {isConsumer && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenCompleteProfile();
+                }}
+                className="w-full min-h-[44px] px-4 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs flex items-center justify-between transition-transform active:scale-[0.98] shadow-md"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-base">🏢</span>
+                  <div className="text-left">
+                    <div className="font-extrabold leading-tight">Register Your Business</div>
+                    <div className="text-[10px] text-blue-100 font-normal">Become a Client to post ads & listings</div>
+                  </div>
+                </div>
+                <span className="text-[11px] font-extrabold">&rarr;</span>
+              </button>
+            )}
 
             {/* Edit / Complete Profile */}
             <button

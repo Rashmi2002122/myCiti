@@ -18,7 +18,7 @@ export default function MyPostsDashboard({
   onOpenPostForm,
   onViewOnMap
 }) {
-  const { accessToken, isAuthenticated } = useAuth();
+  const { accessToken, isAuthenticated, canPost } = useAuth();
   const [activeTab, setActiveTab] = useState('ALL'); // ALL | PENDING | APPROVED | DECLINED
   const [submissions, setSubmissions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -29,7 +29,7 @@ export default function MyPostsDashboard({
   const [actionLoadingId, setActionLoadingId] = useState(null);
 
   const loadSubmissions = useCallback(async () => {
-    if (!accessToken) return;
+    if (!accessToken || !canPost) return;
     try {
       setIsLoading(true);
       setError(null);
@@ -41,7 +41,7 @@ export default function MyPostsDashboard({
     } finally {
       setIsLoading(false);
     }
-  }, [accessToken, activeTab]);
+  }, [accessToken, canPost, activeTab]);
 
   useEffect(() => {
     if (isOpen && isAuthenticated) {

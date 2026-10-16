@@ -97,10 +97,12 @@ export default function CompleteProfileModal({ isOpen, onClose }) {
               ✨
             </div>
             <h2 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-              Complete Your Profile
+              {user.role === 'USER' ? 'Register Business Profile' : 'Complete Your Profile'}
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Welcome, <strong className="text-slate-800 dark:text-slate-200">{user.name || user.email}</strong>! Select your account type to continue.
+              {user.role === 'USER'
+                ? 'Upgrade to a Client account to post advertisements, deals, and listings on myCiti.'
+                : <>Welcome, <strong className="text-slate-800 dark:text-slate-200">{user.name || user.email}</strong>! Select your account type to continue.</>}
             </p>
           </div>
 

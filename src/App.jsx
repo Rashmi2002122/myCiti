@@ -21,7 +21,7 @@ const PostAdvertisementModal = lazy(() => import('./components/PostAdvertisement
 const SAVED_STORAGE_KEY = 'myciti_saved_listings';
 
 export default function App() {
-  const { user, isAuthenticated, isAdmin, isProfileComplete, handleLogout } = useAuth();
+  const { user, isAuthenticated, isAdmin, isClient, canPost, isConsumer, isProfileComplete, handleLogout } = useAuth();
   const [listings, setListings] = useState([]);
   const [selectedListing, setSelectedListing] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
@@ -137,12 +137,12 @@ export default function App() {
     loadListings();
   }, [loadListings]);
 
-  // Auto-open Complete Profile modal if user is logged in with incomplete profile
+  // Auto-open Complete Profile modal if Client/Admin is logged in with incomplete profile
   useEffect(() => {
-    if (isAuthenticated && !isProfileComplete) {
+    if (isAuthenticated && canPost && !isProfileComplete) {
       setIsCompleteProfileOpen(true);
     }
-  }, [isAuthenticated, isProfileComplete]);
+  }, [isAuthenticated, canPost, isProfileComplete]);
 
   // Route guards & URL handlers (/admin requires ADMIN; /account requires login)
   useEffect(() => {
@@ -161,7 +161,7 @@ export default function App() {
     } else if (path === '/account' || hash === '#account') {
       if (!isAuthenticated) {
         setIsLoginOpen(true);
-      } else if (!isProfileComplete) {
+      } else if (canPost && !isProfileComplete) {
         setIsCompleteProfileOpen(true);
       } else {
         setIsAccountMenuOpen(true);
@@ -323,10 +323,20 @@ export default function App() {
             onClose={() => setIsAccountMenuOpen(false)}
             onOpenCompleteProfile={() => setIsCompleteProfileOpen(true)}
             onOpenAdminPanel={() => setIsAdminOpen(true)}
-            onOpenMyPosts={() => setIsMyPostsOpen(true)}
+            onOpenMyPosts={() => {
+              if (!canPost) {
+                setIsCompleteProfileOpen(true);
+              } else {
+                setIsMyPostsOpen(true);
+              }
+            }}
             onOpenPostAd={() => {
-              setEditingSubmission(null);
-              setIsPostAdOpen(true);
+              if (!canPost) {
+                setIsCompleteProfileOpen(true);
+              } else {
+                setEditingSubmission(null);
+                setIsPostAdOpen(true);
+              }
             }}
             darkMode={darkMode}
             onToggleDarkMode={() => setDarkMode(!darkMode)}
