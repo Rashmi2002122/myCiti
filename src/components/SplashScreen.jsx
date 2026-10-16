@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react';
 import gsap from 'gsap';
 
 // ============================================================================
@@ -45,7 +45,12 @@ export default function SplashScreen({ onComplete }) {
   const canvasRef = useRef(null);
   const animFrameRef = useRef(null);
   const [showSkip, setShowSkip] = useState(false);
-  const [isReducedMotion, setIsReducedMotion] = useState(false);
+
+  // Synchronously detect prefers-reduced-motion on first render to avoid FOUC re-render
+  const [isReducedMotion] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  });
 
   // References for scene elements
   const scene1Ref = useRef(null);
@@ -86,12 +91,6 @@ export default function SplashScreen({ onComplete }) {
       },
     });
   }, [onComplete]);
-
-  // Check prefers-reduced-motion
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setIsReducedMotion(mediaQuery.matches);
-  }, []);
 
   // Ember Canvas Particle Engine for Scene 4
   useEffect(() => {
@@ -164,8 +163,8 @@ export default function SplashScreen({ onComplete }) {
     };
   }, []);
 
-  // Main GSAP Timeline
-  useEffect(() => {
+  // Main GSAP Timeline (useLayoutEffect ensures zero flash before paint)
+  useLayoutEffect(() => {
     // If reduced motion is requested, show clean static presentation
     if (isReducedMotion) {
       const timer = setTimeout(() => {
@@ -407,7 +406,7 @@ export default function SplashScreen({ onComplete }) {
           xmlns="http://www.w3.org/2000/svg"
         >
           {/* Round Central Portal / Window to Sky */}
-          <g ref={windowCircleRef}>
+          <g ref={windowCircleRef} style={{ opacity: 0 }}>
             <circle cx="960" cy="540" r="380" fill="url(#skyPortalGrad)" />
             <circle cx="960" cy="540" r="380" stroke="#165B37" strokeWidth="16" />
             {/* Soft Clouds inside circle */}
@@ -424,7 +423,7 @@ export default function SplashScreen({ onComplete }) {
           </g>
 
           {/* Rolling Jungle Hills */}
-          <g ref={hillsRef}>
+          <g ref={hillsRef} style={{ opacity: 0 }}>
             <path
               d="M-100 1100 Q 400 780 960 840 T 2020 1100 Z"
               fill="#0D3F25"
@@ -440,7 +439,7 @@ export default function SplashScreen({ onComplete }) {
 
           {/* Tropical Monstera & Palm Fronds (Corner Layers) */}
           {/* Top Left Palm / Monstera */}
-          <g ref={leafTLRef}>
+          <g ref={leafTLRef} style={{ opacity: 0 }}>
             <path
               d="M0 0 C 150 50 320 180 380 340 C 320 320 250 300 180 340 C 200 260 160 200 100 230 C 110 160 70 110 0 120 Z"
               fill="#1C7E4D"
@@ -458,7 +457,7 @@ export default function SplashScreen({ onComplete }) {
           </g>
 
           {/* Top Right Palm / Monstera */}
-          <g ref={leafTRRef}>
+          <g ref={leafTRRef} style={{ opacity: 0 }}>
             <path
               d="M1920 0 C 1770 50 1600 180 1540 340 C 1600 320 1670 300 1740 340 C 1720 260 1760 200 1820 230 C 1810 160 1850 110 1920 120 Z"
               fill="#1C7E4D"
@@ -476,7 +475,7 @@ export default function SplashScreen({ onComplete }) {
           </g>
 
           {/* Bottom Left Leaves */}
-          <g ref={leafBLRef}>
+          <g ref={leafBLRef} style={{ opacity: 0 }}>
             <path
               d="M0 1080 C 160 1010 320 900 390 750 C 330 780 260 790 200 760 C 210 830 170 880 100 870 C 110 930 60 970 0 980 Z"
               fill="#166B3F"
@@ -489,7 +488,7 @@ export default function SplashScreen({ onComplete }) {
           </g>
 
           {/* Bottom Right Leaves */}
-          <g ref={leafBRRef}>
+          <g ref={leafBRRef} style={{ opacity: 0 }}>
             <path
               d="M1920 1080 C 1760 1010 1600 900 1530 750 C 1590 780 1660 790 1720 760 C 1710 830 1750 880 1820 870 C 1810 930 1860 970 1920 980 Z"
               fill="#166B3F"
@@ -502,14 +501,14 @@ export default function SplashScreen({ onComplete }) {
           </g>
 
           {/* Exotic Bird of Paradise Flowers */}
-          <g ref={flowerLRef}>
+          <g ref={flowerLRef} style={{ opacity: 0 }}>
             <path d="M120 780 Q 240 720 280 640 Q 220 670 190 730 Z" fill="#FF5E00" />
             <path d="M130 790 Q 260 700 310 610 Q 240 650 200 720 Z" fill="#FFA500" />
             <path d="M140 800 Q 290 740 340 680 Q 270 710 210 760 Z" fill="#FF1A75" />
             <path d="M110 810 Q 180 770 210 800 Z" fill="#0D4B2A" />
           </g>
 
-          <g ref={flowerRRef}>
+          <g ref={flowerRRef} style={{ opacity: 0 }}>
             <path d="M1800 780 Q 1680 720 1640 640 Q 1700 670 1730 730 Z" fill="#FF5E00" />
             <path d="M1790 790 Q 1660 700 1610 610 Q 1680 650 1720 720 Z" fill="#FFA500" />
             <path d="M1780 800 Q 1630 740 1580 680 Q 1650 710 1710 760 Z" fill="#FF1A75" />
@@ -528,12 +527,14 @@ export default function SplashScreen({ onComplete }) {
       </div>
 
       {/* =================================================================== */}
+      {/* =================================================================== */}
       {/* SCENE 3: CITY SUNSET (Warm Gradient + 3-Layer Silhouettes) */}
       {/* =================================================================== */}
       <div
         ref={scene3Ref}
         className="absolute inset-0 w-full h-full pointer-events-none"
         style={{
+          opacity: 0,
           background: `linear-gradient(180deg, ${COLORS.SUNSET_TOP} 0%, #F8BA74 45%, ${COLORS.SUNSET_BOTTOM} 100%)`,
         }}
       >
@@ -545,7 +546,7 @@ export default function SplashScreen({ onComplete }) {
           xmlns="http://www.w3.org/2000/svg"
         >
           {/* Glowing Golden Sun */}
-          <g ref={sunRef}>
+          <g ref={sunRef} style={{ opacity: 0 }}>
             <circle cx="960" cy="460" r="180" fill="url(#sunGlowGrad)" />
             <circle cx="960" cy="460" r="120" fill="#FFFDF0" />
           </g>
@@ -563,7 +564,7 @@ export default function SplashScreen({ onComplete }) {
           />
 
           {/* Layer 1: Distant Skyline Silhouette (Far) */}
-          <g ref={skylineFarRef}>
+          <g ref={skylineFarRef} style={{ opacity: 0 }}>
             <path
               d="M0 1080 L0 740 L60 740 L60 700 L90 700 L90 740 L160 740 L160 670 L210 670 L210 740 L280 740 L310 640 L340 740 L450 740 L450 690 L520 690 L520 740 L640 740 L670 610 L680 570 L690 610 L720 740 L820 740 L820 660 L890 660 L890 740 L1020 740 L1020 680 L1080 680 L1080 740 L1200 740 L1240 630 L1280 740 L1380 740 L1380 670 L1450 670 L1450 740 L1580 740 L1610 590 L1630 590 L1660 740 L1760 740 L1760 690 L1840 690 L1840 740 L1920 740 L1920 1080 Z"
               fill={COLORS.SKYLINE_FAR}
@@ -572,7 +573,7 @@ export default function SplashScreen({ onComplete }) {
           </g>
 
           {/* Layer 2: Midground City Silhouette (High-rises & Monuments) */}
-          <g ref={skylineMidRef}>
+          <g ref={skylineMidRef} style={{ opacity: 0 }}>
             <path
               d="M0 1080 L0 820 L90 820 L90 760 L140 760 L140 820 L240 820 L240 710 L260 710 L270 660 L280 710 L300 710 L300 820 L420 820 L420 750 L480 750 L480 820 L600 820 L600 730 L660 730 L660 820 L780 820 L810 690 L850 690 L880 820 L980 820 L980 740 L1040 740 L1040 820 L1160 820 L1160 720 L1220 720 L1220 820 L1340 820 L1370 670 L1385 640 L1400 670 L1430 820 L1520 820 L1520 750 L1600 750 L1600 820 L1720 820 L1720 730 L1780 730 L1780 820 L1920 820 L1920 1080 Z"
               fill={COLORS.SKYLINE_MID}
@@ -580,7 +581,7 @@ export default function SplashScreen({ onComplete }) {
           </g>
 
           {/* Layer 3: Foreground City Silhouette (Roofs, Bridges, Trees, Streetlights) */}
-          <g ref={skylineNearRef}>
+          <g ref={skylineNearRef} style={{ opacity: 0 }}>
             <path
               d="M0 1080 L0 900 Q 100 880 200 900 L200 850 L270 850 L270 900 L380 900 L420 840 L460 900 L580 900 L580 870 L640 870 L640 900 Q 760 880 880 900 L950 860 L1020 900 L1140 900 L1180 830 L1220 900 L1320 900 L1320 860 L1400 860 L1400 900 Q 1520 880 1640 900 L1720 850 L1800 850 L1800 900 L1920 900 L1920 1080 Z"
               fill={COLORS.SKYLINE_NEAR}
@@ -608,6 +609,7 @@ export default function SplashScreen({ onComplete }) {
         ref={scene4Ref}
         className="absolute inset-0 w-full h-full pointer-events-none"
         style={{
+          opacity: 0,
           backgroundColor: COLORS.IGNITE_BG,
           background: `radial-gradient(circle at 50% 50%, #200B03 0%, #0D0502 55%, ${COLORS.IGNITE_BG} 100%)`,
         }}
@@ -623,6 +625,8 @@ export default function SplashScreen({ onComplete }) {
           ref={logoWrapperRef}
           className="flex flex-col items-center justify-center relative"
           style={{
+            opacity: 0,
+            transform: 'scale(0)',
             width: 'clamp(190px, 46vw, 360px)',
             maxWidth: '90vw',
           }}
@@ -632,6 +636,8 @@ export default function SplashScreen({ onComplete }) {
             ref={blueDropRef}
             className="mb-1 sm:mb-2 flex items-center justify-center relative"
             style={{
+              opacity: 0,
+              transform: 'translateY(-80px) scale(0.3)',
               width: 'clamp(36px, 8vw, 56px)',
               height: 'clamp(46px, 10vw, 70px)',
             }}
