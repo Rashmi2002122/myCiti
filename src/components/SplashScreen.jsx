@@ -2,16 +2,16 @@ import React, { useEffect, useLayoutEffect, useRef, useState, useCallback } from
 import gsap from 'gsap';
 
 // ============================================================================
-// TIMING CONSTANTS (Total: 10s + 0.6s fadeout)
+// TIMING CONSTANTS (Total: 6.0s + 0.5s fadeout)
 // ============================================================================
 export const TIMINGS = {
-  SCENE1_NATURE: 3.0,       // 0 - 3s Nature assembles
-  SCENE2_LOGO: 2.0,         // 3 - 5s Logo reveal + blue drop
-  SCENE3_SUNSET: 2.0,       // 5 - 7s City sunset transition
-  SCENE4_IGNITE: 3.0,       // 7 - 10s Ignite & flame
-  FADEOUT: 0.6,             // Exit fade duration
-  SKIP_DELAY: 1.0,          // Skip button appears after 1s
-  REDUCED_MOTION: 1.5,      // Reduced motion hold duration
+  SCENE1_NATURE: 1.8,       // 0.0 - 1.8s Nature assembles
+  SCENE2_LOGO: 1.4,         // 1.8 - 3.2s Logo reveal + blue drop
+  SCENE3_SUNSET: 1.3,       // 3.2 - 4.5s City sunset transition
+  SCENE4_IGNITE: 1.5,       // 4.5 - 6.0s Ignite & flame
+  FADEOUT: 0.5,             // Exit fade duration
+  SKIP_DELAY: 0.8,          // Skip button appears after 0.8s
+  REDUCED_MOTION: 1.2,      // Reduced motion hold duration
 };
 
 // ============================================================================
@@ -209,160 +209,160 @@ export default function SplashScreen({ onComplete }) {
     gsap.set(skylineNearRef.current, { y: 160, opacity: 0 });
 
     // ========================================================================
-    // SCENE 1: Nature Assembles (0.0s - 3.0s)
+    // SCENE 1: Nature Assembles (0.0s - 1.8s)
     // ========================================================================
     tl.to(windowCircleRef.current, {
       scale: 1,
       opacity: 1,
-      duration: 1.4,
+      duration: 0.8,
       ease: 'power3.out',
-    }, 0.2)
+    }, 0.1)
       .to(hillsRef.current, {
         y: 0,
         opacity: 1,
-        duration: 1.5,
+        duration: 0.9,
         ease: 'power3.out',
-      }, 0.4)
+      }, 0.25)
       .to([leafTLRef.current, leafTRRef.current, leafBLRef.current, leafBRRef.current], {
         x: 0,
         y: 0,
         rotation: 0,
         opacity: 1,
-        stagger: 0.15,
-        duration: 1.6,
+        stagger: 0.08,
+        duration: 1.0,
         ease: 'back.out(1.4)',
-      }, 0.5)
+      }, 0.3)
       .to([flowerLRef.current, flowerRRef.current], {
         scale: 1,
         rotation: 0,
-        stagger: 0.2,
-        duration: 1.2,
+        stagger: 0.1,
+        duration: 0.8,
         ease: 'elastic.out(1.2, 0.5)',
-      }, 1.2);
+      }, 0.6);
 
     // Continuous idle gentle sway on leaves
     gsap.to(leafTLRef.current, {
       rotation: 3,
-      duration: 3.5,
+      duration: 2.8,
       repeat: -1,
       yoyo: true,
       ease: 'sine.inOut',
     });
     gsap.to(leafTRRef.current, {
       rotation: -3,
-      duration: 4,
+      duration: 3.2,
       repeat: -1,
       yoyo: true,
       ease: 'sine.inOut',
-      delay: 0.5,
+      delay: 0.4,
     });
 
     // ========================================================================
-    // SCENE 2: Logo Reveal + Blue Drop (3.0s - 5.0s)
+    // SCENE 2: Logo Reveal + Blue Drop (1.8s - 3.2s)
     // ========================================================================
     tl.to(logoWrapperRef.current, {
       scale: 1,
       opacity: 1,
-      duration: 1.1,
+      duration: 0.7,
       ease: 'back.out(1.8)',
-    }, 2.8)
+    }, 1.7)
       .to(blueDropRef.current, {
         y: 0,
         opacity: 1,
         scale: 1,
-        duration: 0.8,
+        duration: 0.6,
         ease: 'bounce.out',
-      }, 3.3)
+      }, 2.1)
       .to(blueDropRef.current, {
         filter: 'drop-shadow(0 0 16px #60A5FA) drop-shadow(0 0 28px #2F7BFF)',
         repeat: 1,
         yoyo: true,
-        duration: 0.5,
+        duration: 0.35,
         ease: 'power1.inOut',
-      }, 4.1);
+      }, 2.65);
 
     // ========================================================================
-    // SCENE 3: City Sunset (5.0s - 7.0s)
+    // SCENE 3: City Sunset (3.2s - 4.5s)
     // ========================================================================
     tl.to(scene1Ref.current, {
       opacity: 0,
-      duration: 1.0,
+      duration: 0.6,
       ease: 'power2.inOut',
-    }, 4.9)
+    }, 3.1)
       .to(scene3Ref.current, {
         opacity: 1,
-        duration: 1.0,
+        duration: 0.6,
         ease: 'power2.inOut',
-      }, 4.9)
+      }, 3.1)
       .to(sunRef.current, {
         y: 0,
         opacity: 1,
-        duration: 1.4,
+        duration: 0.8,
         ease: 'power3.out',
-      }, 5.0)
+      }, 3.2)
       .to(skylineFarRef.current, {
         y: 0,
         opacity: 1,
-        duration: 1.5,
+        duration: 0.9,
         ease: 'power3.out',
-      }, 5.1)
+      }, 3.3)
       .to(skylineMidRef.current, {
         y: 0,
         opacity: 1,
-        duration: 1.6,
+        duration: 0.9,
         ease: 'power3.out',
-      }, 5.3)
+      }, 3.4)
       .to(skylineNearRef.current, {
         y: 0,
         opacity: 1,
-        duration: 1.7,
+        duration: 0.9,
         ease: 'power3.out',
-      }, 5.5);
+      }, 3.5);
 
     // ========================================================================
-    // SCENE 4: Ignite (7.0s - 10.0s)
+    // SCENE 4: Ignite (4.5s - 6.0s)
     // ========================================================================
     tl.to(scene3Ref.current, {
       opacity: 0,
-      duration: 0.9,
+      duration: 0.5,
       ease: 'power2.inOut',
-    }, 7.0)
+    }, 4.4)
       .to(scene4Ref.current, {
         opacity: 1,
-        duration: 0.9,
+        duration: 0.5,
         ease: 'power2.inOut',
-      }, 7.0)
+      }, 4.4)
       // Drop flashes into flame
       .to(blueDropRef.current, {
         scale: 1.4,
         filter: 'drop-shadow(0 0 24px #FFFFFF) drop-shadow(0 0 40px #60A5FA)',
-        duration: 0.25,
+        duration: 0.18,
         ease: 'power2.in',
-      }, 7.2)
+      }, 4.55)
       .to(blueDropRef.current, {
         opacity: 0,
         scale: 0.2,
-        duration: 0.2,
-      }, 7.45)
+        duration: 0.12,
+      }, 4.73)
       .to(flameContainerRef.current, {
         opacity: 1,
         scale: 1,
-        duration: 0.4,
+        duration: 0.3,
         ease: 'elastic.out(1.2, 0.4)',
-      }, 7.45);
+      }, 4.73);
 
     // Flickering Flame Loop during Scene 4
     const flameLoop = gsap.timeline({ repeat: -1 });
     flameLoop
-      .to(flameCoreRef.current, { scaleY: 1.15, scaleX: 0.92, rotation: 2, duration: 0.12, ease: 'sine.inOut' })
-      .to(flameCoreRef.current, { scaleY: 0.88, scaleX: 1.08, rotation: -2, duration: 0.14, ease: 'sine.inOut' })
-      .to(flameInnerRef.current, { scaleY: 1.12, scaleX: 0.95, rotation: -3, duration: 0.16, ease: 'sine.inOut' }, 0)
-      .to(flameInnerRef.current, { scaleY: 0.93, scaleX: 1.05, rotation: 3, duration: 0.13, ease: 'sine.inOut' }, 0.16)
-      .to(flameOuterRef.current, { scaleY: 1.2, scaleX: 0.9, duration: 0.18, ease: 'sine.inOut' }, 0)
-      .to(flameOuterRef.current, { scaleY: 0.85, scaleX: 1.1, duration: 0.15, ease: 'sine.inOut' }, 0.18);
+      .to(flameCoreRef.current, { scaleY: 1.15, scaleX: 0.92, rotation: 2, duration: 0.1, ease: 'sine.inOut' })
+      .to(flameCoreRef.current, { scaleY: 0.88, scaleX: 1.08, rotation: -2, duration: 0.12, ease: 'sine.inOut' })
+      .to(flameInnerRef.current, { scaleY: 1.12, scaleX: 0.95, rotation: -3, duration: 0.14, ease: 'sine.inOut' }, 0)
+      .to(flameInnerRef.current, { scaleY: 0.93, scaleX: 1.05, rotation: 3, duration: 0.11, ease: 'sine.inOut' }, 0.14)
+      .to(flameOuterRef.current, { scaleY: 1.2, scaleX: 0.9, duration: 0.15, ease: 'sine.inOut' }, 0)
+      .to(flameOuterRef.current, { scaleY: 0.85, scaleX: 1.1, duration: 0.12, ease: 'sine.inOut' }, 0.15);
 
-    // Hold on ignite till 10s, then timeline finishes and triggers handleExit
-    tl.to({}, { duration: 2.6 }, 7.4);
+    // Hold on ignite till 6.0s, then timeline finishes and triggers handleExit
+    tl.to({}, { duration: 1.0 }, 5.0);
 
     return () => {
       clearTimeout(skipTimer);
