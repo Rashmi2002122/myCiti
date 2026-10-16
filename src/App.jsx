@@ -9,6 +9,7 @@ import { useAuth } from './context/AuthContext';
 import { fetchListings, fetchListingById } from './services/api';
 import AddToHomeScreenBanner from './components/AddToHomeScreenBanner';
 import InstallGuideModal from './components/InstallGuideModal';
+import SplashScreen from './components/SplashScreen';
 
 const AdminModal = lazy(() => import('./components/AdminModal'));
 const LoginModal = lazy(() => import('./components/LoginModal'));
@@ -48,6 +49,19 @@ export default function App() {
       return [];
     }
   });
+
+  // Full-screen Splash Screen (once per session, force with ?splash=1)
+  const [showSplash, setShowSplash] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('splash') === '1') return true;
+    return !sessionStorage.getItem('myciti_splash_shown');
+  });
+
+  const handleSplashComplete = useCallback(() => {
+    sessionStorage.setItem('myciti_splash_shown', 'true');
+    setShowSplash(false);
+  }, []);
 
   // Sync dark mode class on document
   useEffect(() => {
@@ -364,6 +378,9 @@ export default function App() {
       {/* Add to Home Screen Banner & iOS / Desktop Guide Modal */}
       <AddToHomeScreenBanner />
       <InstallGuideModal />
+
+      {/* Full-Screen Animated Splash Screen (once per session, force with ?splash=1) */}
+      {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
     </div>
   );
 }
