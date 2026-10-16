@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { updateMyProfile } from '../services/api';
 import { User, Store, Building2, CheckCircle2, AlertCircle, Phone, ArrowRight } from 'lucide-react';
@@ -6,12 +6,22 @@ import { User, Store, Building2, CheckCircle2, AlertCircle, Phone, ArrowRight } 
 export default function CompleteProfileModal({ isOpen, onClose }) {
   const { user, accessToken, updateUserProfile } = useAuth();
 
-  const [accountType, setAccountType] = useState('INDIVIDUAL'); // INDIVIDUAL | STORE | COMPANY
-  const [businessName, setBusinessName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [accountType, setAccountType] = useState(() => user?.accountType || 'INDIVIDUAL'); // INDIVIDUAL | STORE | COMPANY
+  const [businessName, setBusinessName] = useState(() => user?.businessName || '');
+  const [phone, setPhone] = useState(() => user?.phone || '');
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState('');
+
+  useEffect(() => {
+    if (user && isOpen) {
+      setAccountType(user.accountType || 'INDIVIDUAL');
+      setBusinessName(user.businessName || '');
+      setPhone(user.phone || '');
+      setErrors({});
+      setServerError('');
+    }
+  }, [user, isOpen]);
 
   if (!isOpen || !user) return null;
 
