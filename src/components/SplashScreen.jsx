@@ -183,14 +183,14 @@ export default function SplashScreen({ onComplete }) {
     });
     timelineRef.current = tl;
 
-    // Set initial element states
-    gsap.set(containerRef.current, { opacity: 1 });
-    gsap.set(scene1Ref.current, { opacity: 1 });
-    gsap.set(scene3Ref.current, { opacity: 0 });
-    gsap.set(scene4Ref.current, { opacity: 0 });
-    gsap.set(logoWrapperRef.current, { scale: 0, opacity: 0, transformOrigin: 'center center' });
-    gsap.set(blueDropRef.current, { y: -80, opacity: 0, scale: 0.3 });
-    gsap.set(flameContainerRef.current, { opacity: 0, scale: 0 });
+    // Set initial element states with autoAlpha (manages both opacity and visibility)
+    gsap.set(containerRef.current, { autoAlpha: 1 });
+    gsap.set(scene1Ref.current, { autoAlpha: 1 });
+    gsap.set(scene3Ref.current, { autoAlpha: 0 });
+    gsap.set(scene4Ref.current, { autoAlpha: 0 });
+    gsap.set(logoWrapperRef.current, { scale: 0, autoAlpha: 0, transformOrigin: 'center center' });
+    gsap.set(blueDropRef.current, { y: -80, autoAlpha: 0, scale: 0.3 });
+    gsap.set(flameContainerRef.current, { autoAlpha: 0, scale: 0 });
 
     // Initial offsets for jungle pieces (Scene 1)
     gsap.set(windowCircleRef.current, { scale: 0.2, opacity: 0 });
@@ -262,13 +262,13 @@ export default function SplashScreen({ onComplete }) {
     // ========================================================================
     tl.to(logoWrapperRef.current, {
       scale: 1,
-      opacity: 1,
+      autoAlpha: 1,
       duration: 1.1,
       ease: 'back.out(1.8)',
     }, 2.8)
       .to(blueDropRef.current, {
         y: 0,
-        opacity: 1,
+        autoAlpha: 1,
         scale: 1,
         duration: 0.8,
         ease: 'bounce.out',
@@ -285,12 +285,12 @@ export default function SplashScreen({ onComplete }) {
     // SCENE 3: City Sunset (5.0s - 7.0s)
     // ========================================================================
     tl.to(scene1Ref.current, {
-      opacity: 0,
+      autoAlpha: 0,
       duration: 1.0,
       ease: 'power2.inOut',
     }, 4.9)
       .to(scene3Ref.current, {
-        opacity: 1,
+        autoAlpha: 1,
         duration: 1.0,
         ease: 'power2.inOut',
       }, 4.9)
@@ -323,12 +323,12 @@ export default function SplashScreen({ onComplete }) {
     // SCENE 4: Ignite (7.0s - 10.0s)
     // ========================================================================
     tl.to(scene3Ref.current, {
-      opacity: 0,
+      autoAlpha: 0,
       duration: 0.9,
       ease: 'power2.inOut',
     }, 7.0)
       .to(scene4Ref.current, {
-        opacity: 1,
+        autoAlpha: 1,
         duration: 0.9,
         ease: 'power2.inOut',
       }, 7.0)
@@ -340,12 +340,12 @@ export default function SplashScreen({ onComplete }) {
         ease: 'power2.in',
       }, 7.2)
       .to(blueDropRef.current, {
-        opacity: 0,
+        autoAlpha: 0,
         scale: 0.2,
         duration: 0.2,
       }, 7.45)
       .to(flameContainerRef.current, {
-        opacity: 1,
+        autoAlpha: 1,
         scale: 1,
         duration: 0.4,
         ease: 'elastic.out(1.2, 0.4)',
@@ -535,6 +535,7 @@ export default function SplashScreen({ onComplete }) {
         className="absolute inset-0 w-full h-full pointer-events-none"
         style={{
           opacity: 0,
+          visibility: 'hidden',
           background: `linear-gradient(180deg, ${COLORS.SUNSET_TOP} 0%, #F8BA74 45%, ${COLORS.SUNSET_BOTTOM} 100%)`,
         }}
       >
@@ -610,6 +611,7 @@ export default function SplashScreen({ onComplete }) {
         className="absolute inset-0 w-full h-full pointer-events-none"
         style={{
           opacity: 0,
+          visibility: 'hidden',
           backgroundColor: COLORS.IGNITE_BG,
           background: `radial-gradient(circle at 50% 50%, #200B03 0%, #0D0502 55%, ${COLORS.IGNITE_BG} 100%)`,
         }}
@@ -626,6 +628,7 @@ export default function SplashScreen({ onComplete }) {
           className="flex flex-col items-center justify-center relative"
           style={{
             opacity: 0,
+            visibility: 'hidden',
             transform: 'scale(0)',
             width: 'clamp(190px, 46vw, 360px)',
             maxWidth: '90vw',
@@ -637,6 +640,7 @@ export default function SplashScreen({ onComplete }) {
             className="mb-1 sm:mb-2 flex items-center justify-center relative"
             style={{
               opacity: 0,
+              visibility: 'hidden',
               transform: 'translateY(-80px) scale(0.3)',
               width: 'clamp(36px, 8vw, 56px)',
               height: 'clamp(46px, 10vw, 70px)',
@@ -679,6 +683,9 @@ export default function SplashScreen({ onComplete }) {
             ref={flameContainerRef}
             className="absolute -top-12 sm:-top-16 flex items-center justify-center pointer-events-none"
             style={{
+              opacity: 0,
+              visibility: 'hidden',
+              transform: 'scale(0)',
               width: 'clamp(60px, 14vw, 100px)',
               height: 'clamp(80px, 18vw, 130px)',
             }}
