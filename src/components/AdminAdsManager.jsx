@@ -32,15 +32,29 @@ export default function AdminAdsManager({ token, onOpenCreateAnnouncement }) {
     try {
       setIsLoading(true);
       setError('');
-      if (activeTab === 'CAMPAIGNS') {
-        const data = await fetchAdminAdCampaigns(token);
-        setCampaigns(data);
-      } else if (activeTab === 'ANNOUNCEMENTS') {
-        const data = await fetchAdminAnnouncements(token);
-        setAnnouncements(data);
-      } else if (activeTab === 'REPORTS') {
-        const data = await fetchAdminAdReports(token);
-        setReports(data);
+      const [cData, aData, rData] = await Promise.all([
+        fetchAdminAdCampaigns(token).catch((err) => {
+          console.warn('Failed to load campaigns:', err);
+          return [];
+        }),
+        fetchAdminAnnouncements(token).catch((err) => {
+          console.warn('Failed to load announcements:', err);
+          return [];
+        }),
+        fetchAdminAdReports(token).catch((err) => {
+          console.warn('Failed to load reports:', err);
+          return [];
+        })
+      ]);
+      setCampaigns(cData || []);
+      setAnnouncements(aData || []);
+      setReports(rData || []);
+
+      // If announcements have pending items but campaigns don't, automatically switch to announcements tab
+      const pendingAnn = (aData || []).filter((a) => a.status === 'PENDING').length;
+      const pendingCamp = (cData || []).filter((c) => c.status === 'PENDING').length;
+      if (pendingAnn > 0 && pendingCamp === 0) {
+        setActiveTab('ANNOUNCEMENTS');
       }
     } catch (err) {
       console.error('Failed to load admin marketing data:', err);
@@ -48,7 +62,7 @@ export default function AdminAdsManager({ token, onOpenCreateAnnouncement }) {
     } finally {
       setIsLoading(false);
     }
-  }, [token, activeTab]);
+  }, [token]);
 
   useEffect(() => {
     loadData();
@@ -189,6 +203,9 @@ export default function AdminAdsManager({ token, onOpenCreateAnnouncement }) {
     }
   };
 
+  const pendingCampaignsCount = campaigns.filter((c) => c.status === 'PENDING').length;
+  const pendingAnnouncementsCount = announcements.filter((a) => a.status === 'PENDING').length;
+
   return (
     <div className="space-y-4">
       {/* Sub Navigation */}
@@ -197,24 +214,34 @@ export default function AdminAdsManager({ token, onOpenCreateAnnouncement }) {
           <button
             type="button"
             onClick={() => setActiveTab('CAMPAIGNS')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 ${
               activeTab === 'CAMPAIGNS'
                 ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
             }`}
           >
-            Ad Campaigns ({campaigns.length})
+            <span>Ad Campaigns ({campaigns.length})</span>
+            {pendingCampaignsCount > 0 && (
+              <span className="px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black">
+                {pendingCampaignsCount} pending
+              </span>
+            )}
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('ANNOUNCEMENTS')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 ${
               activeTab === 'ANNOUNCEMENTS'
                 ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
             }`}
           >
-            Announcements ({announcements.length})
+            <span>Announcements ({announcements.length})</span>
+            {pendingAnnouncementsCount > 0 && (
+              <span className="px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black animate-pulse">
+                {pendingAnnouncementsCount} review
+              </span>
+            )}
           </button>
           <button
             type="button"
