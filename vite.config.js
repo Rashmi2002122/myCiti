@@ -106,24 +106,7 @@ export default defineConfig({
   build: {
     target: 'esnext',
     cssCodeSplit: true,
-    chunkSizeWarningLimit: 1000,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            if (id.includes('maplibre-gl') || id.includes('leaflet')) {
-              return 'vendor-map';
-            }
-            if (id.includes('lucide-react')) {
-              return 'vendor-icons';
-            }
-            if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler')) {
-              return 'vendor-react';
-            }
-          }
-        }
-      }
-    }
+    chunkSizeWarningLimit: 2000,
   },
   server: {
     port: 5173,

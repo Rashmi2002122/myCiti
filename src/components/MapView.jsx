@@ -82,13 +82,21 @@ export default function MapView({
   userLocation,
   targetCity = null,
   darkMode = false,
-  sponsoredListingIds = []
+  sponsoredListingIds = [],
+  isVisible = true
 }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const tileLayerRef = useRef(null);
   const clusterGroupRef = useRef(null);
   const userMarkerRef = useRef(null);
+  const onSelectListingRef = useRef(onSelectListing);
+  const prevCityKeyRef = useRef(null);
+
+  // Keep callback ref updated without triggering marker rebuilds
+  useEffect(() => {
+    onSelectListingRef.current = onSelectListing;
+  }, [onSelectListing]);
 
   // Initialize Map
   useEffect(() => {
@@ -101,6 +109,7 @@ export default function MapView({
       minZoom: 3,
       maxZoom: 19,
       zoomControl: false,
+      preferCanvas: true,
     });
 
     // Native GPU Vector Map via OpenFreeMap: 100% vector-sharp on mobile retina screens, zero blurriness, no API key required
@@ -114,29 +123,6 @@ export default function MapView({
         style: styleUrl,
         attribution: '&copy; <a href="https://openfreemap.org">OpenFreeMap</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
-
-      // Async runtime safety: if WebGL or worker encounters an error, gracefully swap to raster tiles
-      if (vectorLayer && vectorLayer.getMaplibreMap) {
-        const glMap = vectorLayer.getMaplibreMap();
-        if (glMap && typeof glMap.once === 'function') {
-          glMap.once('error', (err) => {
-            console.warn('MapLibre runtime error, falling back to raster OSM:', err);
-            try {
-              if (map.hasLayer(vectorLayer)) {
-                map.removeLayer(vectorLayer);
-              }
-              const rasterFallback = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                subdomains: ['a', 'b', 'c'],
-                attribution: '&copy; OpenStreetMap contributors',
-              }).addTo(map);
-              tileLayerRef.current = rasterFallback;
-            } catch (fallbackErr) {
-              console.error('Failed to attach raster fallback:', fallbackErr);
-            }
-          });
-        }
-      }
     } catch (e) {
       console.warn('MapLibre GL initialization error, falling back to raster OSM:', e);
       vectorLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -158,12 +144,18 @@ export default function MapView({
     window.addEventListener('resize', invalidate);
     window.addEventListener('orientationchange', invalidate);
 
-    // Marker cluster group
+    // Marker cluster group with high-performance mobile options
     const clusterGroup = L.markerClusterGroup({
       showCoverageOnHover: false,
       maxClusterRadius: 45,
       spiderfyOnMaxZoom: true,
       zoomToBoundsOnClick: true,
+      chunkedLoading: true,
+      chunkInterval: 100,
+      chunkDelay: 10,
+      removeOutsideVisibleBounds: true,
+      animate: false,
+      animateAddingMarkers: false,
     });
 
     map.addLayer(clusterGroup);
@@ -184,15 +176,23 @@ export default function MapView({
     };
   }, []);
 
+  // When map becomes visible after tab switch, re-calculate viewport size instantly
+  useEffect(() => {
+    if (isVisible && mapInstanceRef.current) {
+      setTimeout(() => {
+        mapInstanceRef.current?.invalidateSize();
+      }, 50);
+    }
+  }, [isVisible]);
 
-
-  // Update Markers when listings change
+  // Update Markers when listings change (batched via addLayers for 60fps smoothness)
   useEffect(() => {
     if (!clusterGroupRef.current) return;
 
     const clusterGroup = clusterGroupRef.current;
     clusterGroup.clearLayers();
 
+    const markers = [];
     listings.forEach((listing) => {
       if (listing.latitude && listing.longitude) {
         const isSponsored = sponsoredListingIds.includes(listing.id);
@@ -200,13 +200,19 @@ export default function MapView({
         const marker = L.marker([listing.latitude, listing.longitude], { icon });
 
         marker.on('click', () => {
-          onSelectListing(listing);
+          if (onSelectListingRef.current) {
+            onSelectListingRef.current(listing);
+          }
         });
 
-        clusterGroup.addLayer(marker);
+        markers.push(marker);
       }
     });
-  }, [listings, onSelectListing, sponsoredListingIds]);
+
+    if (markers.length > 0) {
+      clusterGroup.addLayers(markers);
+    }
+  }, [listings, sponsoredListingIds]);
 
   // Update User Location pin & pan
   useEffect(() => {
@@ -238,13 +244,21 @@ export default function MapView({
     map.flyTo([userLocation.lat, userLocation.lng], 14, { duration: 1.2 });
   }, [userLocation]);
 
-  // Fly to selected city
+  // Fly to selected city only when city actually changes
   useEffect(() => {
-    if (!mapInstanceRef.current || !targetCity) return;
-    const map = mapInstanceRef.current;
-    if (targetCity.lat && targetCity.lng) {
-      map.flyTo([targetCity.lat, targetCity.lng], targetCity.zoom || 12, { duration: 1.4 });
+    if (!mapInstanceRef.current || !targetCity || !targetCity.lat || !targetCity.lng) return;
+    const key = `${targetCity.lat},${targetCity.lng},${targetCity.zoom || 12}`;
+    if (prevCityKeyRef.current === key) return;
+
+    // Skip the flyTo on initial page load so camera doesn't jerk
+    if (prevCityKeyRef.current === null) {
+      prevCityKeyRef.current = key;
+      return;
     }
+
+    prevCityKeyRef.current = key;
+    const map = mapInstanceRef.current;
+    map.flyTo([targetCity.lat, targetCity.lng], targetCity.zoom || 12, { duration: 1.2 });
   }, [targetCity]);
 
   return (
