@@ -8,6 +8,7 @@ import {
   markNotificationAsRead,
   markAllNotificationsAsRead
 } from '../services/api';
+import { requestPushPermissionAndSubscribe } from '../services/pushNotifications';
 import { useAuth } from '../context/AuthContext';
 
 export default function NotificationCenterModal({
@@ -58,13 +59,13 @@ export default function NotificationCenterModal({
     }
     try {
       setIsRequestingPermission(true);
-      const perm = await Notification.requestPermission();
-      setPermissionState(perm);
-      if (perm === 'granted') {
+      const res = await requestPushPermissionAndSubscribe(accessToken);
+      setPermissionState(res.status);
+      if (res.status === 'granted') {
         if ('serviceWorker' in navigator) {
           const reg = await navigator.serviceWorker.ready;
           await reg.showNotification('myCiti Phone Alerts Enabled! 🎉', {
-            body: 'You will now receive community announcements and alerts directly on your phone.',
+            body: 'You will now receive community announcements and alerts directly on your phone even when the app is closed.',
             icon: '/icon.svg',
             badge: '/icon.svg',
             tag: 'myciti-alert-test',
@@ -76,7 +77,7 @@ export default function NotificationCenterModal({
             icon: '/icon.svg'
           });
         }
-      } else if (perm === 'denied') {
+      } else if (res.status === 'denied') {
         alert('Notification permission was blocked in browser settings. Please allow notifications in site settings to receive phone alerts.');
       }
     } catch (err) {

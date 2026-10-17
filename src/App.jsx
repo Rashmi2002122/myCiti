@@ -12,6 +12,7 @@ import {
   fetchActiveAds,
   fetchMyNotifications
 } from './services/api';
+import { registerPushSubscription } from './services/pushNotifications';
 import AddToHomeScreenBanner from './components/AddToHomeScreenBanner';
 import InstallGuideModal from './components/InstallGuideModal';
 import SplashScreen from './components/SplashScreen';
@@ -44,6 +45,7 @@ export default function App() {
   const [isPostAdOpen, setIsPostAdOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+  const [incomingToast, setIncomingToast] = useState(null);
   const [isCreateCampaignOpen, setIsCreateCampaignOpen] = useState(false);
   const [campaignListingId, setCampaignListingId] = useState(null);
   const [isCreateAnnouncementOpen, setIsCreateAnnouncementOpen] = useState(false);
@@ -171,8 +173,29 @@ export default function App() {
     loadActiveAds();
   }, [loadActiveAds]);
 
-  // Ref to track known notifications and trigger system alerts for brand new ones
-  const knownNotificationIdsRef = useRef(new Set());
+  // Ref to track notification IDs that have already triggered a system alert popup
+  const alertedNotificationIdsRef = useRef(new Set());
+
+  // Auto-sync background Web Push subscription if permission is already granted
+  useEffect(() => {
+    if (isAuthenticated && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+      const token = localStorage.getItem('myciti_token');
+      if (token) {
+        registerPushSubscription(token).catch((err) => {
+          console.warn('[WebPush] Auto-registration background push skipped:', err?.message);
+        });
+      }
+    }
+  }, [isAuthenticated]);
+
+  // Auto-dismiss in-app floating announcement toast after 7s
+  useEffect(() => {
+    if (!incomingToast) return;
+    const timer = setTimeout(() => {
+      setIncomingToast(null);
+    }, 7000);
+    return () => clearTimeout(timer);
+  }, [incomingToast]);
 
   // Check and poll notifications for logged in user
   const checkNotifications = useCallback(async () => {
@@ -188,36 +211,48 @@ export default function App() {
       const unreadList = list.filter((n) => !n.isRead);
       setUnreadNotificationsCount(unreadList.length);
 
-      // Trigger native phone notification bar alert for new unread notifications
-      if (
-        knownNotificationIdsRef.current.size > 0 &&
-        typeof window !== 'undefined' &&
-        'Notification' in window &&
-        Notification.permission === 'granted'
-      ) {
-        const brandNew = unreadList.filter((n) => !knownNotificationIdsRef.current.has(n.id));
-        for (const notif of brandNew) {
-          if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-            navigator.serviceWorker.ready.then((reg) => {
-              reg.showNotification(notif.title || 'myCiti Announcement', {
-                body: notif.message,
-                icon: '/icon.svg',
-                badge: '/icon.svg',
-                tag: `myciti-${notif.id}`,
-                data: { url: notif.actionUrl || '/' },
-                renotify: true
+      // Trigger automatic alerts for unread notifications not yet alerted on this device
+      const unalerted = unreadList.filter((n) => !alertedNotificationIdsRef.current.has(n.id));
+      if (unalerted.length > 0) {
+        // Show the newest incoming announcement as an in-app popup toast
+        setIncomingToast(unalerted[0]);
+
+        // Pop up in the native phone notification bar if permission is granted
+        if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+          for (const notif of unalerted) {
+            alertedNotificationIdsRef.current.add(notif.id);
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.ready.then((reg) => {
+                reg.showNotification(notif.title || 'myCiti Announcement', {
+                  body: notif.message,
+                  icon: '/icon.svg',
+                  badge: '/icon.svg',
+                  tag: `myciti-${notif.id}`,
+                  data: { url: notif.actionUrl || '/' },
+                  renotify: true
+                });
+              }).catch(() => {
+                try {
+                  new Notification(notif.title || 'myCiti Announcement', {
+                    body: notif.message,
+                    icon: '/icon.svg'
+                  });
+                } catch (_) {}
               });
-            }).catch(() => {});
-          } else {
-            new Notification(notif.title || 'myCiti Announcement', {
-              body: notif.message,
-              icon: '/icon.svg'
-            });
+            } else {
+              try {
+                new Notification(notif.title || 'myCiti Announcement', {
+                  body: notif.message,
+                  icon: '/icon.svg'
+                });
+              } catch (_) {}
+            }
           }
+        } else {
+          // Track to prevent spamming toasts continuously on every poll
+          unalerted.forEach((n) => alertedNotificationIdsRef.current.add(n.id));
         }
       }
-
-      list.forEach((n) => knownNotificationIdsRef.current.add(n.id));
     } catch (e) {
       console.warn('Failed to check notifications:', e);
     }
@@ -306,6 +341,50 @@ export default function App() {
 
   return (
     <div className="fixed inset-0 w-full h-full h-[100dvh] overflow-hidden bg-transparent dark:bg-slate-950">
+      {/* Real-time In-App Announcement Popup Toast */}
+      {incomingToast && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md animate-in slide-in-from-top-4 fade-in duration-300 pointer-events-auto">
+          <div className="bg-slate-900/95 dark:bg-slate-800/95 backdrop-blur-md text-white p-3.5 sm:p-4 rounded-2xl shadow-2xl border border-amber-400/30 flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3 min-w-0">
+              <span className="text-2xl mt-0.5 animate-bounce shrink-0">📢</span>
+              <div className="min-w-0 space-y-0.5">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded">
+                    New Alert
+                  </span>
+                </div>
+                <h4 className="text-xs sm:text-sm font-bold text-white truncate">
+                  {incomingToast.title || 'Community Announcement'}
+                </h4>
+                <p className="text-[11px] sm:text-xs text-slate-300 line-clamp-2 leading-relaxed">
+                  {incomingToast.message}
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-col gap-1.5 items-end shrink-0 ml-1">
+              <button
+                type="button"
+                onClick={() => setIncomingToast(null)}
+                className="text-slate-400 hover:text-white p-0.5 text-xs font-bold leading-none cursor-pointer"
+                aria-label="Dismiss alert"
+              >
+                ✕
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIncomingToast(null);
+                  setIsNotificationsOpen(true);
+                }}
+                className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-black shadow-sm transition-all cursor-pointer"
+              >
+                View
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Top Floating Controls */}
       <TopBar
         selectedCategory={selectedCategory}
