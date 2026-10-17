@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import TopBar from './components/TopBar';
-import MapView from './components/MapView';
 import BottomSheet from './components/BottomSheet';
 import BottomNav from './components/BottomNav';
 import HomeView from './components/HomeView';
@@ -16,6 +15,7 @@ import AddToHomeScreenBanner from './components/AddToHomeScreenBanner';
 import InstallGuideModal from './components/InstallGuideModal';
 import SplashScreen from './components/SplashScreen';
 
+const MapView = lazy(() => import('./components/MapView'));
 const AdminModal = lazy(() => import('./components/AdminModal'));
 const LoginModal = lazy(() => import('./components/LoginModal'));
 const CompleteProfileModal = lazy(() => import('./components/CompleteProfileModal'));
@@ -333,41 +333,50 @@ export default function App() {
 
       {/* Main Views */}
       <main className="w-full h-full relative">
-        {activeTab === 'map' && (
-          <MapView
-            listings={listings}
-            onSelectListing={(listing) => setSelectedListing(listing)}
-            userLocation={userLocation}
-            targetCity={mapCenter}
-            darkMode={darkMode}
-            sponsoredListingIds={sponsoredListingIds}
-          />
-        )}
+        <Suspense fallback={
+          <div className="w-full h-full flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Loading map...</span>
+            </div>
+          </div>
+        }>
+          {activeTab === 'map' && (
+            <MapView
+              listings={listings}
+              onSelectListing={(listing) => setSelectedListing(listing)}
+              userLocation={userLocation}
+              targetCity={mapCenter}
+              darkMode={darkMode}
+              sponsoredListingIds={sponsoredListingIds}
+            />
+          )}
 
-        {activeTab === 'home' && (
-          <HomeView
-            listings={listings}
-            onSelectListing={(listing) => setSelectedListing(listing)}
-            savedIds={savedIds}
-            onToggleSave={handleToggleSave}
-            onShare={handleShare}
-            userLocation={userLocation}
-            onNearMeClick={handleNearMe}
-            isLocating={isLocating}
-            selectedCity={selectedCity}
-          />
-        )}
+          {activeTab === 'home' && (
+            <HomeView
+              listings={listings}
+              onSelectListing={(listing) => setSelectedListing(listing)}
+              savedIds={savedIds}
+              onToggleSave={handleToggleSave}
+              onShare={handleShare}
+              userLocation={userLocation}
+              onNearMeClick={handleNearMe}
+              isLocating={isLocating}
+              selectedCity={selectedCity}
+            />
+          )}
 
-        {activeTab === 'saved' && (
-          <SavedView
-            listings={listings}
-            savedIds={savedIds}
-            onSelectListing={(listing) => setSelectedListing(listing)}
-            onToggleSave={handleToggleSave}
-            onShare={handleShare}
-            onExploreClick={() => setActiveTab('map')}
-          />
-        )}
+          {activeTab === 'saved' && (
+            <SavedView
+              listings={listings}
+              savedIds={savedIds}
+              onSelectListing={(listing) => setSelectedListing(listing)}
+              onToggleSave={handleToggleSave}
+              onShare={handleShare}
+              onExploreClick={() => setActiveTab('map')}
+            />
+          )}
+        </Suspense>
       </main>
 
       {/* Loading Overlay */}

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Sparkles, Flag, ExternalLink, MapPin, Tag } from 'lucide-react';
 import { recordAdImpression, recordAdClick, CATEGORIES } from '../services/api';
+import { getOptimizedImageUrl } from '../utils/imageUtils';
 import ReportAdModal from './ReportAdModal';
 
 export default function SponsoredAdCard({
@@ -45,7 +46,8 @@ export default function SponsoredAdCard({
     }
   };
 
-  const imageUrl = ad.imageUrl || ad.listingImageUrl;
+  const rawImageUrl = ad.imageUrl || ad.listingImageUrl;
+  const imageUrl = getOptimizedImageUrl(rawImageUrl, 400, 300);
 
   return (
     <>

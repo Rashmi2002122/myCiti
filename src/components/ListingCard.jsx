@@ -1,6 +1,7 @@
 import React from 'react';
 import { Tag, MapPin, Clock, Navigation, Bookmark, Share2 } from 'lucide-react';
 import { CATEGORIES } from '../services/api';
+import { getOptimizedImageUrl } from '../utils/imageUtils';
 
 export default function ListingCard({
   listing,
@@ -10,7 +11,8 @@ export default function ListingCard({
   onShare
 }) {
   const categoryConfig = CATEGORIES[listing.category] || CATEGORIES.PANDAL;
-  const imageUrl = listing.primaryImageUrl || (listing.images && listing.images[0]?.url);
+  const rawImageUrl = listing.primaryImageUrl || (listing.images && listing.images[0]?.url);
+  const imageUrl = getOptimizedImageUrl(rawImageUrl, 600, 375);
 
   return (
     <article

@@ -84,14 +84,14 @@ export default defineConfig({
               },
             },
           },
-          // 3. Cache Unsplash / Upload Images
+          // 3. Cache Cloudinary / Unsplash / Upload Images
           {
-            urlPattern: /(?:https:\/\/images\.unsplash\.com\/.*|\/uploads\/.*)/i,
+            urlPattern: /(?:https:\/\/res\.cloudinary\.com\/.*|https:\/\/images\.unsplash\.com\/.*|\/uploads\/.*)/i,
             handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'listings-images-cache',
               expiration: {
-                maxEntries: 100,
+                maxEntries: 150,
                 maxAgeSeconds: 60 * 60 * 24 * 14, // 14 days
               },
               cacheableResponse: {
@@ -103,6 +103,28 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    target: 'esnext',
+    cssCodeSplit: true,
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('maplibre-gl') || id.includes('leaflet')) {
+              return 'vendor-map';
+            }
+            if (id.includes('lucide-react')) {
+              return 'vendor-icons';
+            }
+            if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler')) {
+              return 'vendor-react';
+            }
+          }
+        }
+      }
+    }
+  },
   server: {
     port: 5173,
     proxy: {
