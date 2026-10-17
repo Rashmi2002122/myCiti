@@ -13,19 +13,23 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
 
+let pendingRegistrationPromise = null;
+
 /**
  * Register background Web Push subscription with the browser and backend.
  * Enables phone bar notifications even when the application is closed.
  */
 export async function registerPushSubscription(token) {
-  if (typeof window === 'undefined') return null;
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-    console.warn('[WebPush] PushManager not supported in this browser.');
-    return null;
-  }
-  if (!('Notification' in window) || Notification.permission !== 'granted') {
-    return null;
-  }
+  if (pendingRegistrationPromise) return pendingRegistrationPromise;
+  pendingRegistrationPromise = (async () => {
+    if (typeof window === 'undefined') return null;
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      console.warn('[WebPush] PushManager not supported in this browser.');
+      return null;
+    }
+    if (!('Notification' in window) || Notification.permission !== 'granted') {
+      return null;
+    }
 
   try {
     const vapidKey = await fetchVapidKey();
@@ -51,10 +55,14 @@ export async function registerPushSubscription(token) {
       console.log('[WebPush] Device registered for background notifications.');
     }
     return subscription;
-  } catch (err) {
-    console.error('[WebPush] Error setting up push subscription:', err);
-    return null;
-  }
+    } catch (err) {
+      console.error('[WebPush] Error setting up push subscription:', err);
+      return null;
+    } finally {
+      pendingRegistrationPromise = null;
+    }
+  })();
+  return pendingRegistrationPromise;
 }
 
 /**
