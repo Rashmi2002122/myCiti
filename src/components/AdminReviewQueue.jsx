@@ -18,12 +18,7 @@ const QUICK_REASONS = [
   'Not allowed festival or business content'
 ];
 
-export default function AdminReviewQueue({
-  token,
-  onApprovedOrDeclined,
-  onSwitchToMarketing,
-  pendingMarketingCount = 0
-}) {
+export default function AdminReviewQueue({ token, onApprovedOrDeclined }) {
   const [activeTab, setActiveTab] = useState('PENDING'); // PENDING | APPROVED | DECLINED
   const [submissions, setSubmissions] = useState([]);
   const [counts, setCounts] = useState({ PENDING: 0, APPROVED: 0, DECLINED: 0 });
@@ -138,32 +133,6 @@ export default function AdminReviewQueue({
 
   return (
     <div className="space-y-4">
-      {/* Marketing / Announcement Pending Alert Banner */}
-      {pendingMarketingCount > 0 && (
-        <div className="flex items-center justify-between p-3.5 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-transparent border border-amber-300 dark:border-amber-700/50 rounded-2xl text-amber-900 dark:text-amber-200 shadow-sm">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl animate-bounce">📢</span>
-            <div>
-              <p className="text-xs font-black tracking-wide">
-                Notice: {pendingMarketingCount} Client Announcement(s) or Ad Campaign(s) waiting for review!
-              </p>
-              <p className="text-[11px] text-amber-700 dark:text-amber-400">
-                Client announcements are reviewed in the Ads &amp; Announcements section.
-              </p>
-            </div>
-          </div>
-          {onSwitchToMarketing && (
-            <button
-              type="button"
-              onClick={onSwitchToMarketing}
-              className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-black shadow-sm transition-all whitespace-nowrap ml-2 cursor-pointer"
-            >
-              Review Announcements &rarr;
-            </button>
-          )}
-        </div>
-      )}
-
       {/* Tab Switcher */}
       <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-2">

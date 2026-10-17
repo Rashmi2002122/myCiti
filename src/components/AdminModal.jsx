@@ -9,8 +9,6 @@ import {
   updateAdminListing,
   deleteAdminListing,
   uploadListingImage,
-  fetchAdminAdCampaigns,
-  fetchAdminAnnouncements,
   CATEGORIES
 } from '../services/api';
 import LocationPickerMap from './LocationPickerMap';
@@ -21,8 +19,7 @@ import { useAuth } from '../context/AuthContext';
 export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCreateAnnouncement }) {
   const { accessToken, isAdmin, handleLogout: authLogout } = useAuth();
   const token = (isAdmin && accessToken) ? accessToken : null;
-  const [adminSection, setAdminSection] = useState('QUEUE'); // 'QUEUE' | 'LISTINGS' | 'MARKETING'
-  const [pendingMarketingCount, setPendingMarketingCount] = useState(0);
+  const [adminSection, setAdminSection] = useState('QUEUE'); // 'QUEUE' | 'LISTINGS'
 
   // Listing management state
   const [listings, setListings] = useState([]);
@@ -31,19 +28,6 @@ export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCr
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formError, setFormError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-
-  // Fetch pending campaigns and announcements count for badges
-  useEffect(() => {
-    if (!token) return;
-    Promise.all([
-      fetchAdminAdCampaigns(token).catch(() => []),
-      fetchAdminAnnouncements(token).catch(() => [])
-    ]).then(([camps, anns]) => {
-      const pC = (camps || []).filter((c) => c.status === 'PENDING').length;
-      const pA = (anns || []).filter((a) => a.status === 'PENDING').length;
-      setPendingMarketingCount(pC + pA);
-    });
-  }, [token, adminSection]);
 
   // Image upload state
   const [uploadListingId, setUploadListingId] = useState(null);
@@ -269,18 +253,13 @@ export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCr
                 setAdminSection('MARKETING');
                 setIsFormOpen(false);
               }}
-              className={`min-h-[40px] px-4 py-1.5 rounded-full text-xs font-black transition-all flex items-center gap-1.5 ${
+              className={`min-h-[40px] px-4 py-1.5 rounded-full text-xs font-black transition-all ${
                 adminSection === 'MARKETING'
                   ? 'bg-city-blue text-white shadow-sm'
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
-              <span>📢 Ads & Announcements</span>
-              {pendingMarketingCount > 0 && (
-                <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black animate-pulse">
-                  {pendingMarketingCount} Review
-                </span>
-              )}
+              📢 Ads & Announcements
             </button>
           </div>
         )}
@@ -317,8 +296,6 @@ export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCr
                 loadAdminListings(token);
                 if (onListingChanged) onListingChanged();
               }}
-              onSwitchToMarketing={() => setAdminSection('MARKETING')}
-              pendingMarketingCount={pendingMarketingCount}
             />
           ) : isFormOpen ? (
             /* Add / Edit Listing Form with Pick Location Step */

@@ -405,18 +405,10 @@ export async function fetchVapidKey() {
 }
 
 export async function subscribePush(token, subscription) {
-  const json = subscription.toJSON ? subscription.toJSON() : {};
-  let p256dh = json.keys?.p256dh;
-  let authSecret = json.keys?.auth;
-
-  if (!p256dh && subscription.getKey) {
-    const key = subscription.getKey('p256dh');
-    if (key) p256dh = btoa(String.fromCharCode.apply(null, new Uint8Array(key)));
-  }
-  if (!authSecret && subscription.getKey) {
-    const auth = subscription.getKey('auth');
-    if (auth) authSecret = btoa(String.fromCharCode.apply(null, new Uint8Array(auth)));
-  }
+  const key = subscription.getKey ? subscription.getKey('p256dh') : null;
+  const auth = subscription.getKey ? subscription.getKey('auth') : null;
+  const p256dh = key ? btoa(String.fromCharCode.apply(null, new Uint8Array(key))) : '';
+  const authSecret = auth ? btoa(String.fromCharCode.apply(null, new Uint8Array(auth))) : '';
 
   const res = await fetch(api('/api/notifications/subscribe'), {
     method: 'POST',
@@ -426,8 +418,8 @@ export async function subscribePush(token, subscription) {
     },
     body: JSON.stringify({
       endpoint: subscription.endpoint,
-      p256dh: p256dh || '',
-      auth: authSecret || ''
+      p256dh,
+      auth: authSecret
     })
   });
   if (!res.ok) throw new Error('Failed to save push subscription');
