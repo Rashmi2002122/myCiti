@@ -20,6 +20,13 @@ export default function NotificationCenterModal({
   const [notifications, setNotifications] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [permissionState, setPermissionState] = useState(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      return Notification.permission;
+    }
+    return 'unsupported';
+  });
+  const [isRequestingPermission, setIsRequestingPermission] = useState(false);
 
   const loadNotifications = useCallback(async () => {
     if (!accessToken || !isAuthenticated) return;
@@ -43,6 +50,41 @@ export default function NotificationCenterModal({
       loadNotifications();
     }
   }, [isOpen, isAuthenticated, loadNotifications]);
+
+  const handleEnablePhoneAlerts = async () => {
+    if (!('Notification' in window)) {
+      alert('Your browser or phone does not support web notifications.');
+      return;
+    }
+    try {
+      setIsRequestingPermission(true);
+      const perm = await Notification.requestPermission();
+      setPermissionState(perm);
+      if (perm === 'granted') {
+        if ('serviceWorker' in navigator) {
+          const reg = await navigator.serviceWorker.ready;
+          await reg.showNotification('myCiti Phone Alerts Enabled! 🎉', {
+            body: 'You will now receive community announcements and alerts directly on your phone.',
+            icon: '/icon.svg',
+            badge: '/icon.svg',
+            tag: 'myciti-alert-test',
+            renotify: true
+          });
+        } else {
+          new Notification('myCiti Phone Alerts Enabled! 🎉', {
+            body: 'You will now receive community announcements and alerts directly on your phone.',
+            icon: '/icon.svg'
+          });
+        }
+      } else if (perm === 'denied') {
+        alert('Notification permission was blocked in browser settings. Please allow notifications in site settings to receive phone alerts.');
+      }
+    } catch (err) {
+      console.error('Failed to request notification permission:', err);
+    } finally {
+      setIsRequestingPermission(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -138,6 +180,47 @@ export default function NotificationCenterModal({
 
         {/* Content list */}
         <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
+          {/* Phone Notification Bar Banner */}
+          {permissionState !== 'granted' ? (
+            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800/90 dark:to-slate-800/60 border border-blue-200/60 dark:border-slate-700 flex items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-city-blue text-white flex items-center justify-center flex-shrink-0">
+                  <Bell className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                    Get alerts on your phone
+                  </div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Show instant popups in your phone's notification bar
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleEnablePhoneAlerts}
+                disabled={isRequestingPermission}
+                className="px-3 py-1.5 rounded-full bg-city-blue hover:bg-blue-600 text-white font-extrabold text-xs shadow-xs transition-transform active:scale-95 flex-shrink-0 disabled:opacity-50"
+              >
+                {isRequestingPermission ? 'Enabling...' : 'Enable'}
+              </button>
+            </div>
+          ) : (
+            <div className="px-3 py-2 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-900/40 flex items-center justify-between text-[11px] text-emerald-700 dark:text-emerald-300 font-bold">
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Phone notification bar alerts active</span>
+              </span>
+              <button
+                type="button"
+                onClick={handleEnablePhoneAlerts}
+                className="text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline"
+              >
+                Send Test Alert
+              </button>
+            </div>
+          )}
+
           {isLoading && (
             <div className="py-12 text-center text-xs text-slate-400 font-semibold">
               Loading announcements...

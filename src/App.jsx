@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import TopBar from './components/TopBar';
 import MapView from './components/MapView';
 import BottomSheet from './components/BottomSheet';
@@ -171,21 +171,68 @@ export default function App() {
     loadActiveAds();
   }, [loadActiveAds]);
 
-  // Load unread notifications count for logged in user
-  useEffect(() => {
+  // Ref to track known notifications and trigger system alerts for brand new ones
+  const knownNotificationIdsRef = useRef(new Set());
+
+  // Check and poll notifications for logged in user
+  const checkNotifications = useCallback(async () => {
     if (!isAuthenticated || !user) {
       setUnreadNotificationsCount(0);
       return;
     }
     const token = localStorage.getItem('myciti_token');
     if (!token) return;
-    fetchMyNotifications(token)
-      .then((data) => {
-        const unread = (data || []).filter((n) => !n.isRead).length;
-        setUnreadNotificationsCount(unread);
-      })
-      .catch((e) => console.warn('Failed to check notifications:', e));
+    try {
+      const data = await fetchMyNotifications(token);
+      const list = data || [];
+      const unreadList = list.filter((n) => !n.isRead);
+      setUnreadNotificationsCount(unreadList.length);
+
+      // Trigger native phone notification bar alert for new unread notifications
+      if (
+        knownNotificationIdsRef.current.size > 0 &&
+        typeof window !== 'undefined' &&
+        'Notification' in window &&
+        Notification.permission === 'granted'
+      ) {
+        const brandNew = unreadList.filter((n) => !knownNotificationIdsRef.current.has(n.id));
+        for (const notif of brandNew) {
+          if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.ready.then((reg) => {
+              reg.showNotification(notif.title || 'myCiti Announcement', {
+                body: notif.message,
+                icon: '/icon.svg',
+                badge: '/icon.svg',
+                tag: `myciti-${notif.id}`,
+                data: { url: notif.actionUrl || '/' },
+                renotify: true
+              });
+            }).catch(() => {});
+          } else {
+            new Notification(notif.title || 'myCiti Announcement', {
+              body: notif.message,
+              icon: '/icon.svg'
+            });
+          }
+        }
+      }
+
+      list.forEach((n) => knownNotificationIdsRef.current.add(n.id));
+    } catch (e) {
+      console.warn('Failed to check notifications:', e);
+    }
   }, [isAuthenticated, user]);
+
+  useEffect(() => {
+    checkNotifications();
+    const interval = setInterval(checkNotifications, 20000); // Poll every 20s for fresh announcements
+    const onFocus = () => checkNotifications();
+    window.addEventListener('focus', onFocus);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [checkNotifications]);
 
   const sponsoredListingIds = activeAds
     .map((a) => a.listingId)
