@@ -558,7 +558,10 @@ export async function createAdCampaign(token, payload) {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => null);
-    throw new Error(err?.message || 'Failed to create campaign');
+    const detailMsg = Array.isArray(err?.details) && err.details.length > 0
+      ? err.details.join(', ')
+      : (err?.message || 'Failed to create campaign');
+    throw new Error(detailMsg);
   }
   return res.json();
 }
@@ -602,7 +605,10 @@ export async function createAnnouncement(token, payload) {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => null);
-    throw new Error(err?.message || 'Failed to create announcement');
+    const detailMsg = Array.isArray(err?.details) && err.details.length > 0
+      ? err.details.join(', ')
+      : (err?.message || 'Failed to create announcement');
+    throw new Error(detailMsg);
   }
   return res.json();
 }

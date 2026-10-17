@@ -109,10 +109,11 @@ export default function CreateAnnouncementModal({
         title: title.trim(),
         message: message.trim(),
         targetType,
-        radiusKm: targetType === 'RADIUS' ? Number(radiusKm) : null,
+        radiusKm: targetType === 'RADIUS' ? Number(radiusKm) : 5.0,
         targetLat: targetType === 'RADIUS' ? lat : null,
         targetLng: targetType === 'RADIUS' ? lng : null,
-        targetAreaName: targetType === 'CITY' || targetType === 'BROADCAST' ? targetCity : null,
+        targetCity: targetType === 'CITY' || targetType === 'BROADCAST' ? targetCity : (activeListing?.city || 'Kolkata'),
+        targetAreaName: targetType === 'CITY' || targetType === 'BROADCAST' ? targetCity : (activeListing?.city || 'Kolkata'),
         expiresHours: Number(expiryHours)
       };
 

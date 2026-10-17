@@ -23,6 +23,7 @@ export default function CreateCampaignModal({
   const [isLoadingListings, setIsLoadingListings] = useState(false);
 
   // Form Fields
+  const [campaignTitle, setCampaignTitle] = useState('');
   const [headline, setHeadline] = useState('');
   const [description, setDescription] = useState('');
   const [callToAction, setCallToAction] = useState('Visit Listing');
@@ -59,6 +60,7 @@ export default function CreateCampaignModal({
         setApprovedListings(valid);
         if (valid.length > 0 && !selectedListingId) {
           setSelectedListingId(valid[0].listingId);
+          setCampaignTitle(`${valid[0].title} Promotion`);
           setHeadline(`Special Offer at ${valid[0].title}`);
           setDescription(valid[0].description || '');
         }
@@ -120,19 +122,29 @@ export default function CreateCampaignModal({
       setError('Please enter an ad headline.');
       return;
     }
+    if (new Date(startDate) > new Date(endDate)) {
+      setError('Start date cannot be after end date.');
+      return;
+    }
 
     try {
       setIsSubmitting(true);
       setError('');
 
+      const computedTitle = (campaignTitle.trim() || headline.trim() || activeListing?.title || 'Ad Campaign').slice(0, 150);
+
       const payload = {
         listingId: Number(selectedListingId),
+        title: computedTitle,
         headline: headline.trim(),
         description: description.trim() || null,
         callToAction: callToAction.trim() || 'Visit Listing',
         targetType,
-        radiusKm: targetType === 'RADIUS' ? Number(radiusKm) : null,
-        targetAreaName: targetType === 'CITY' ? targetCity : null,
+        radiusKm: targetType === 'RADIUS' ? Number(radiusKm) : 5.0,
+        targetCity: targetType === 'CITY' ? targetCity : (activeListing?.city || 'Kolkata'),
+        targetAreaName: targetType === 'CITY' ? targetCity : (activeListing?.city || 'Kolkata'),
+        targetLat: activeListing?.latitude || 22.5726,
+        targetLng: activeListing?.longitude || 88.3639,
         startDate,
         endDate
       };
@@ -219,6 +231,7 @@ export default function CreateCampaignModal({
                     setSelectedListingId(id);
                     const l = approvedListings.find((x) => Number(x.listingId) === Number(id));
                     if (l) {
+                      setCampaignTitle(`${l.title} Promotion`);
                       setHeadline(`Special Highlight: ${l.title}`);
                     }
                   }}
@@ -231,6 +244,20 @@ export default function CreateCampaignModal({
                   ))}
                 </select>
               )}
+            </div>
+
+            {/* Campaign Name */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Campaign Name (Optional)
+              </label>
+              <input
+                type="text"
+                value={campaignTitle}
+                onChange={(e) => setCampaignTitle(e.target.value.slice(0, 150))}
+                placeholder="e.g. Diwali Special Promo"
+                className="w-full px-3.5 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 font-bold focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+              />
             </div>
 
             {/* Headline */}
