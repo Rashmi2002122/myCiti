@@ -484,6 +484,24 @@ export async function markAllNotificationsAsRead(token) {
   return true;
 }
 
+export async function deleteNotification(token, id) {
+  const res = await fetch(api(`/api/notifications/${id}`), {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to delete notification');
+  return true;
+}
+
+export async function clearAllNotifications(token) {
+  const res = await fetch(api('/api/notifications/clear-all'), {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to clear notifications');
+  return true;
+}
+
 // --- Geo-Targeted Ads APIs ---
 
 export async function fetchActiveAds(latOrOptions = null, maybeLng = null, maybeCity = null) {

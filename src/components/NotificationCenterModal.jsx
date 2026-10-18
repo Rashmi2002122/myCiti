@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   X, Bell, CheckCheck, MapPin, Sparkles, ExternalLink,
-  Calendar, Clock, CheckCircle2, AlertCircle
+  Calendar, Clock, CheckCircle2, AlertCircle, Trash2
 } from 'lucide-react';
 import {
   fetchMyNotifications,
   markNotificationAsRead,
-  markAllNotificationsAsRead
+  markAllNotificationsAsRead,
+  deleteNotification,
+  clearAllNotifications
 } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { registerPushSubscription } from '../utils/pushUtils';
@@ -29,14 +31,17 @@ export default function NotificationCenterModal({
   });
   const [isRequestingPermission, setIsRequestingPermission] = useState(false);
 
+  const isNotificationUnread = (n) => !(n.read ?? n.isRead);
+
   const loadNotifications = useCallback(async () => {
     if (!accessToken || !isAuthenticated) return;
     try {
       setIsLoading(true);
       setError('');
       const data = await fetchMyNotifications(accessToken);
-      setNotifications(data);
-      const unread = data.filter((n) => !n.isRead).length;
+      const list = Array.isArray(data) ? data : [];
+      setNotifications(list);
+      const unread = list.filter(isNotificationUnread).length;
       if (onUnreadCountChanged) onUnreadCountChanged(unread);
     } catch (err) {
       console.error('Failed to load notifications:', err);
@@ -94,8 +99,8 @@ export default function NotificationCenterModal({
     try {
       await markNotificationAsRead(accessToken, id);
       setNotifications((prev) => {
-        const next = prev.map((n) => (n.id === id ? { ...n, isRead: true } : n));
-        const unread = next.filter((n) => !n.isRead).length;
+        const next = prev.map((n) => (n.id === id ? { ...n, read: true, isRead: true } : n));
+        const unread = next.filter(isNotificationUnread).length;
         if (onUnreadCountChanged) onUnreadCountChanged(unread);
         return next;
       });
@@ -107,32 +112,60 @@ export default function NotificationCenterModal({
   const handleMarkAllRead = async () => {
     try {
       await markAllNotificationsAsRead(accessToken);
-      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true, isRead: true })));
       if (onUnreadCountChanged) onUnreadCountChanged(0);
     } catch (err) {
       console.error('Failed to mark all read:', err);
     }
   };
 
+  const handleDeleteNotification = async (id) => {
+    try {
+      setNotifications((prev) => {
+        const next = prev.filter((n) => n.id !== id);
+        const unread = next.filter(isNotificationUnread).length;
+        if (onUnreadCountChanged) onUnreadCountChanged(unread);
+        return next;
+      });
+      await deleteNotification(accessToken, id);
+    } catch (err) {
+      console.warn('Failed to delete notification:', err);
+      loadNotifications();
+    }
+  };
+
+  const handleClearAll = async () => {
+    if (!window.confirm('Clear all notifications from your notification center?')) return;
+    try {
+      setNotifications([]);
+      if (onUnreadCountChanged) onUnreadCountChanged(0);
+      await clearAllNotifications(accessToken);
+    } catch (err) {
+      console.error('Failed to clear notifications:', err);
+      loadNotifications();
+    }
+  };
+
   const handleNotificationClick = async (notif) => {
-    if (!notif.isRead) {
+    if (isNotificationUnread(notif)) {
       await handleMarkAsRead(notif.id);
     }
 
-    if (notif.actionUrl) {
-      const match = notif.actionUrl.match(/listingId=([0-9]+)/);
+    const url = notif.linkUrl || notif.actionUrl;
+    if (url) {
+      const match = url.match(/listingId=([0-9]+)/);
       if (match && match[1] && onSelectListingId) {
         onClose();
         onSelectListingId(Number(match[1]));
         return;
       }
-      if (notif.actionUrl.startsWith('http')) {
-        window.open(notif.actionUrl, '_blank', 'noopener,noreferrer');
+      if (url.startsWith('http')) {
+        window.open(url, '_blank', 'noopener,noreferrer');
       }
     }
   };
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const unreadCount = notifications.filter(isNotificationUnread).length;
 
   return (
     <div className="fixed inset-0 z-[3000] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
@@ -159,21 +192,34 @@ export default function NotificationCenterModal({
           </div>
 
           <div className="flex items-center gap-1.5">
-            {unreadCount > 0 && (
-              <button
-                type="button"
-                onClick={handleMarkAllRead}
-                title="Mark all as read"
-                className="px-2.5 py-1 text-[11px] font-bold text-city-blue hover:bg-sky-50 dark:hover:bg-slate-800 rounded-full transition-colors flex items-center gap-1"
-              >
-                <CheckCheck className="w-3.5 h-3.5" />
-                <span>Read all</span>
-              </button>
+            {notifications.length > 0 && (
+              <>
+                {unreadCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleMarkAllRead}
+                    title="Mark all as read"
+                    className="px-2.5 py-1 text-[11px] font-bold text-city-blue hover:bg-sky-50 dark:hover:bg-slate-800 rounded-full transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    <CheckCheck className="w-3.5 h-3.5" />
+                    <span>Read all</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={handleClearAll}
+                  title="Clear all notifications"
+                  className="px-2.5 py-1 text-[11px] font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-full transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Clear all</span>
+                </button>
+              </>
             )}
             <button
               onClick={onClose}
               aria-label="Close"
-              className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 flex items-center justify-center transition-colors"
+              className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 flex items-center justify-center transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -202,7 +248,7 @@ export default function NotificationCenterModal({
                 type="button"
                 onClick={handleEnablePhoneAlerts}
                 disabled={isRequestingPermission}
-                className="px-3 py-1.5 rounded-full bg-city-blue hover:bg-blue-600 text-white font-extrabold text-xs shadow-xs transition-transform active:scale-95 flex-shrink-0 disabled:opacity-50"
+                className="px-3 py-1.5 rounded-full bg-city-blue hover:bg-blue-600 text-white font-extrabold text-xs shadow-xs transition-transform active:scale-95 flex-shrink-0 disabled:opacity-50 cursor-pointer"
               >
                 {isRequestingPermission ? 'Enabling...' : 'Enable'}
               </button>
@@ -216,7 +262,7 @@ export default function NotificationCenterModal({
               <button
                 type="button"
                 onClick={handleEnablePhoneAlerts}
-                className="text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline"
+                className="text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline cursor-pointer"
               >
                 Send Test Alert
               </button>
@@ -250,46 +296,68 @@ export default function NotificationCenterModal({
             </div>
           )}
 
-          {notifications.map((notif) => (
-            <div
-              key={notif.id}
-              onClick={() => handleNotificationClick(notif)}
-              className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 relative ${
-                !notif.isRead
-                  ? 'bg-sky-50/70 dark:bg-blue-950/30 border-sky-200 dark:border-blue-900/60'
-                  : 'bg-white dark:bg-slate-800/40 border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
-              }`}
-            >
-              {/* Unread dot */}
-              {!notif.isRead && (
-                <span className="w-2 h-2 rounded-full bg-city-blue absolute top-3.5 right-3.5" />
-              )}
+          {notifications.map((notif) => {
+            const unread = isNotificationUnread(notif);
+            const content = notif.message || notif.body;
+            const targetUrl = notif.linkUrl || notif.actionUrl;
 
-              <div className="w-8 h-8 rounded-xl bg-city-blue/10 text-city-blue flex items-center justify-center flex-shrink-0 mt-0.5">
-                <Sparkles className="w-4 h-4" />
-              </div>
+            return (
+              <div
+                key={notif.id}
+                onClick={() => handleNotificationClick(notif)}
+                className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 relative group ${
+                  unread
+                    ? 'bg-sky-50/70 dark:bg-blue-950/30 border-sky-200 dark:border-blue-900/60'
+                    : 'bg-white dark:bg-slate-800/40 border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
+                }`}
+              >
+                {/* Unread dot */}
+                {unread && (
+                  <span className="w-2 h-2 rounded-full bg-city-blue absolute top-3.5 right-3.5" />
+                )}
 
-              <div className="flex-1 space-y-1 pr-3">
-                <h4 className="text-xs font-black text-slate-900 dark:text-slate-100 leading-snug">
-                  {notif.title}
-                </h4>
-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  {notif.body}
-                </p>
-                <div className="text-[10px] text-slate-400 pt-1 flex items-center gap-2">
-                  <span>
-                    {notif.createdAt ? new Date(notif.createdAt).toLocaleDateString() : 'Recent'}
-                  </span>
-                  {notif.actionUrl && (
-                    <span className="text-city-blue font-bold flex items-center gap-0.5">
-                      <span>Tap to view</span>
-                      <ExternalLink className="w-2.5 h-2.5" />
-                    </span>
+                <div className="w-8 h-8 rounded-xl bg-city-blue/10 text-city-blue flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+
+                <div className="flex-1 space-y-1 pr-2 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <h4 className="text-xs font-black text-slate-900 dark:text-slate-100 leading-snug">
+                      {notif.title}
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteNotification(notif.id);
+                      }}
+                      title="Delete notification"
+                      aria-label="Delete notification"
+                      className="opacity-60 hover:opacity-100 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 p-1 rounded-lg transition-colors cursor-pointer flex-shrink-0"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  {content && (
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                      {content}
+                    </p>
                   )}
+                  <div className="text-[10px] text-slate-400 pt-1 flex items-center gap-2">
+                    <span>
+                      {notif.createdAt ? new Date(notif.createdAt).toLocaleDateString() : 'Recent'}
+                    </span>
+                    {targetUrl && (
+                      <span className="text-city-blue font-bold flex items-center gap-0.5">
+                        <span>Tap to view</span>
+                        <ExternalLink className="w-2.5 h-2.5" />
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

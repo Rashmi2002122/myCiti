@@ -211,8 +211,8 @@ export default function App() {
     if (!token) return;
     try {
       const data = await fetchMyNotifications(token);
-      const list = data || [];
-      const unreadList = list.filter((n) => !n.isRead);
+      const list = Array.isArray(data) ? data : [];
+      const unreadList = list.filter((n) => !(n.read ?? n.isRead));
       setUnreadNotificationsCount(unreadList.length);
 
       // Find brand new announcements that have not been seen yet
@@ -243,7 +243,7 @@ export default function App() {
             try {
               const reg = await navigator.serviceWorker.ready;
               await reg.showNotification(notif.title || 'myCiti Announcement', {
-                body: notif.message,
+                body: notif.message || notif.body,
                 icon: '/icon.svg',
                 badge: '/icon.svg',
                 tag: `myciti-${notif.id}`,
@@ -742,7 +742,7 @@ export default function App() {
                 </button>
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 line-clamp-2 leading-relaxed">
-                {activePopupNotification.message}
+                {activePopupNotification.message || activePopupNotification.body}
               </p>
               <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-100 dark:border-slate-800">
                 <span className="text-[10px] text-slate-400 font-medium">Just now</span>
