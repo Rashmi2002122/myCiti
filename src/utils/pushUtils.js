@@ -32,17 +32,22 @@ export async function registerPushSubscription(accessToken) {
       return null;
     }
 
+    const DEFAULT_VAPID_PUBLIC_KEY = 'BI6X8efg0NneUwweP4_8iN03fs8lni8tJxhAuVeSIe47d_KMgAvurPgHCs1hQWVHdRcPEDKeclb3i0lVxQSF5aU';
+
     let sub = await reg.pushManager.getSubscription();
     if (!sub) {
-      const subscribeOptions = { userVisibleOnly: true };
+      let vapidKey = null;
       try {
-        const vapidKey = await fetchVapidKey();
-        if (vapidKey && vapidKey.trim().length > 0) {
-          subscribeOptions.applicationServerKey = urlBase64ToUint8Array(vapidKey.trim());
-        }
+        vapidKey = await fetchVapidKey();
       } catch (vapidErr) {
-        console.warn('[Push] Failed to fetch VAPID key:', vapidErr);
+        console.warn('[Push] Error fetching VAPID key from API:', vapidErr);
       }
+
+      const activeKey = (vapidKey && vapidKey.trim().length > 0) ? vapidKey.trim() : DEFAULT_VAPID_PUBLIC_KEY;
+      const subscribeOptions = {
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(activeKey)
+      };
 
       sub = await reg.pushManager.subscribe(subscribeOptions);
     }

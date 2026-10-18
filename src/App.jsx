@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
-import { MapPin, X } from 'lucide-react';
+import { MapPin, X, Bell } from 'lucide-react';
 import TopBar, { CITIES } from './components/TopBar';
 import MapView from './components/MapView';
 import BottomSheet from './components/BottomSheet';
@@ -47,6 +47,7 @@ export default function App() {
   const [isPostAdOpen, setIsPostAdOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+  const [activePopupNotification, setActivePopupNotification] = useState(null);
   const [isCreateCampaignOpen, setIsCreateCampaignOpen] = useState(false);
   const [campaignListingId, setCampaignListingId] = useState(null);
   const [isCreateAnnouncementOpen, setIsCreateAnnouncementOpen] = useState(false);
@@ -214,23 +215,29 @@ export default function App() {
       const unreadList = list.filter((n) => !n.isRead);
       setUnreadNotificationsCount(unreadList.length);
 
-      // Trigger native phone notification bar alert for new unread notifications
+      // Find brand new announcements that have not been seen yet
+      const brandNew = unreadList.filter((n) => {
+        if (knownNotificationIdsRef.current.has(n.id)) return false;
+        if (knownNotificationIdsRef.current.size > 0) return true;
+        // Fresh session: only alert if created within last 2 hours
+        if (n.createdAt) {
+          const ageMs = Date.now() - new Date(n.createdAt).getTime();
+          return ageMs < 2 * 60 * 60 * 1000;
+        }
+        return true;
+      });
+
+      // Show in-app visual popup immediately
+      if (brandNew.length > 0) {
+        setActivePopupNotification(brandNew[0]);
+      }
+
+      // Also trigger native phone notification bar alert if permission is granted
       if (
         typeof window !== 'undefined' &&
         'Notification' in window &&
         Notification.permission === 'granted'
       ) {
-        const brandNew = unreadList.filter((n) => {
-          if (knownNotificationIdsRef.current.has(n.id)) return false;
-          if (knownNotificationIdsRef.current.size > 0) return true;
-          // Fresh session: only alert if created within last 2 hours
-          if (n.createdAt) {
-            const ageMs = Date.now() - new Date(n.createdAt).getTime();
-            return ageMs < 2 * 60 * 60 * 1000;
-          }
-          return true;
-        });
-
         for (const notif of brandNew) {
           if ('serviceWorker' in navigator) {
             try {
@@ -276,6 +283,15 @@ export default function App() {
       registerPushSubscription(accessToken).catch(() => {});
     }
   }, [isAuthenticated, accessToken]);
+
+  // Auto-dismiss in-app notification popup after 10 seconds
+  useEffect(() => {
+    if (!activePopupNotification) return;
+    const timer = setTimeout(() => {
+      setActivePopupNotification(null);
+    }, 10000);
+    return () => clearTimeout(timer);
+  }, [activePopupNotification]);
 
   const handleSelectListing = useCallback((listing) => {
     setSelectedListing(listing);
@@ -704,6 +720,45 @@ export default function App() {
               setIsMyPostsOpen(true);
             }}
           />
+        )}
+
+        {/* Real-time In-App Notification Toast / Popup */}
+        {activePopupNotification && (
+          <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[4000] max-w-sm w-[92%] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl shadow-2xl border border-sky-300 dark:border-slate-700 p-4 animate-in slide-in-from-top-4 duration-300 flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-city-blue/10 dark:bg-sky-500/20 text-city-blue dark:text-sky-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <Bell className="w-5 h-5 animate-bounce" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-2">
+                <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100 truncate">
+                  {activePopupNotification.title || 'Community Announcement'}
+                </h4>
+                <button
+                  onClick={() => setActivePopupNotification(null)}
+                  className="w-6 h-6 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                  aria-label="Dismiss alert"
+                >
+                  <X className="w-3.5 h-3.5 stroke-[2.5]" />
+                </button>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 line-clamp-2 leading-relaxed">
+                {activePopupNotification.message}
+              </p>
+              <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-[10px] text-slate-400 font-medium">Just now</span>
+                <button
+                  onClick={() => {
+                    setActivePopupNotification(null);
+                    setIsNotificationsOpen(true);
+                  }}
+                  className="text-xs font-bold text-city-blue dark:text-sky-400 hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <span>View Details</span>
+                  <span>&rarr;</span>
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
         {isNotificationsOpen && (
