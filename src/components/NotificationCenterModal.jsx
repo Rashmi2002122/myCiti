@@ -9,6 +9,7 @@ import {
   markAllNotificationsAsRead
 } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { registerPushSubscription } from '../utils/pushUtils';
 
 export default function NotificationCenterModal({
   isOpen,
@@ -61,6 +62,12 @@ export default function NotificationCenterModal({
       const perm = await Notification.requestPermission();
       setPermissionState(perm);
       if (perm === 'granted') {
+        // Register Push Subscription with Backend for background alerts
+        if (accessToken) {
+          await registerPushSubscription(accessToken);
+        }
+
+        // Show test alert
         if ('serviceWorker' in navigator) {
           const reg = await navigator.serviceWorker.ready;
           await reg.showNotification('myCiti Phone Alerts Enabled! 🎉', {
@@ -69,11 +76,6 @@ export default function NotificationCenterModal({
             badge: '/icon.svg',
             tag: 'myciti-alert-test',
             renotify: true
-          });
-        } else {
-          new Notification('myCiti Phone Alerts Enabled! 🎉', {
-            body: 'You will now receive community announcements and alerts directly on your phone.',
-            icon: '/icon.svg'
           });
         }
       } else if (perm === 'denied') {

@@ -17,6 +17,7 @@ import AddToHomeScreenBanner from './components/AddToHomeScreenBanner';
 import InstallGuideModal from './components/InstallGuideModal';
 import SplashScreen from './components/SplashScreen';
 import { reverseGeocodeCity } from './utils/locationUtils';
+import { registerPushSubscription } from './utils/pushUtils';
 
 const AdminModal = lazy(() => import('./components/AdminModal'));
 const LoginModal = lazy(() => import('./components/LoginModal'));
@@ -32,7 +33,7 @@ const CampaignsDashboardModal = lazy(() => import('./components/CampaignsDashboa
 const SAVED_STORAGE_KEY = 'myciti_saved_listings';
 
 export default function App() {
-  const { user, isAuthenticated, isAdmin, isClient, canPost, isConsumer, isProfileComplete, handleLogout, syncLocation } = useAuth();
+  const { user, accessToken, isAuthenticated, isAdmin, isClient, canPost, isConsumer, isProfileComplete, handleLogout, syncLocation } = useAuth();
   const [listings, setListings] = useState([]);
   const [selectedListing, setSelectedListing] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
@@ -188,7 +189,16 @@ export default function App() {
   }, [loadActiveAds]);
 
   // Ref to track known notifications and trigger system alerts for brand new ones
-  const knownNotificationIdsRef = useRef(new Set());
+  const knownNotificationIdsRef = useRef(new Set(
+    (() => {
+      try {
+        const stored = sessionStorage.getItem('myciti_seen_notif_ids');
+        return stored ? JSON.parse(stored) : [];
+      } catch {
+        return [];
+      }
+    })()
+  ));
 
   // Check and poll notifications for logged in user
   const checkNotifications = useCallback(async () => {
@@ -196,7 +206,7 @@ export default function App() {
       setUnreadNotificationsCount(0);
       return;
     }
-    const token = localStorage.getItem('myciti_token');
+    const token = accessToken || localStorage.getItem('myciti_access_token');
     if (!token) return;
     try {
       const data = await fetchMyNotifications(token);
@@ -206,16 +216,26 @@ export default function App() {
 
       // Trigger native phone notification bar alert for new unread notifications
       if (
-        knownNotificationIdsRef.current.size > 0 &&
         typeof window !== 'undefined' &&
         'Notification' in window &&
         Notification.permission === 'granted'
       ) {
-        const brandNew = unreadList.filter((n) => !knownNotificationIdsRef.current.has(n.id));
+        const brandNew = unreadList.filter((n) => {
+          if (knownNotificationIdsRef.current.has(n.id)) return false;
+          if (knownNotificationIdsRef.current.size > 0) return true;
+          // Fresh session: only alert if created within last 2 hours
+          if (n.createdAt) {
+            const ageMs = Date.now() - new Date(n.createdAt).getTime();
+            return ageMs < 2 * 60 * 60 * 1000;
+          }
+          return true;
+        });
+
         for (const notif of brandNew) {
-          if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-            navigator.serviceWorker.ready.then((reg) => {
-              reg.showNotification(notif.title || 'myCiti Announcement', {
+          if ('serviceWorker' in navigator) {
+            try {
+              const reg = await navigator.serviceWorker.ready;
+              await reg.showNotification(notif.title || 'myCiti Announcement', {
                 body: notif.message,
                 icon: '/icon.svg',
                 badge: '/icon.svg',
@@ -223,21 +243,21 @@ export default function App() {
                 data: { url: notif.actionUrl || '/' },
                 renotify: true
               });
-            }).catch(() => {});
-          } else {
-            new Notification(notif.title || 'myCiti Announcement', {
-              body: notif.message,
-              icon: '/icon.svg'
-            });
+            } catch (err) {
+              console.warn('[Notification] Error showing system notification:', err);
+            }
           }
         }
       }
 
       list.forEach((n) => knownNotificationIdsRef.current.add(n.id));
+      try {
+        sessionStorage.setItem('myciti_seen_notif_ids', JSON.stringify([...knownNotificationIdsRef.current]));
+      } catch {}
     } catch (e) {
       console.warn('Failed to check notifications:', e);
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, accessToken]);
 
   useEffect(() => {
     checkNotifications();
@@ -249,6 +269,13 @@ export default function App() {
       window.removeEventListener('focus', onFocus);
     };
   }, [checkNotifications]);
+
+  // Auto-sync Web Push subscription when user is authenticated and permission is granted
+  useEffect(() => {
+    if (isAuthenticated && accessToken && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+      registerPushSubscription(accessToken).catch(() => {});
+    }
+  }, [isAuthenticated, accessToken]);
 
   const handleSelectListing = useCallback((listing) => {
     setSelectedListing(listing);
