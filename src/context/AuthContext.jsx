@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { refreshSession, logoutSession, loginWithGoogle } from '../services/api';
+import { refreshSession, logoutSession, loginWithGoogle, updateMyCoarseLocation } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -163,6 +163,20 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  // Sync location to backend
+  const syncLocation = useCallback(async (locationData) => {
+    if (!accessToken) return null;
+    try {
+      const updatedUser = await updateMyCoarseLocation(accessToken, locationData);
+      setUser(updatedUser);
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(updatedUser));
+      return updatedUser;
+    } catch (err) {
+      console.warn('Failed to sync location to backend:', err);
+      return null;
+    }
+  }, [accessToken]);
+
   // Logout
   const handleLogout = useCallback(async () => {
     try {
@@ -189,6 +203,7 @@ export function AuthProvider({ children }) {
         handleLogout,
         refreshCurrentToken,
         updateUserProfile,
+        syncLocation,
         isAuthenticated: !!accessToken && !!user,
         isAdmin: user?.role === 'ADMIN',
         isClient: user?.role === 'CLIENT' || user?.role === 'SUBMITTER' || user?.role === 'ADMIN',

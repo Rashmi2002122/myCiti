@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
-import TopBar from './components/TopBar';
+import { MapPin, X } from 'lucide-react';
+import TopBar, { CITIES } from './components/TopBar';
 import MapView from './components/MapView';
 import BottomSheet from './components/BottomSheet';
 import BottomNav from './components/BottomNav';
@@ -15,6 +16,7 @@ import {
 import AddToHomeScreenBanner from './components/AddToHomeScreenBanner';
 import InstallGuideModal from './components/InstallGuideModal';
 import SplashScreen from './components/SplashScreen';
+import { reverseGeocodeCity } from './utils/locationUtils';
 
 const AdminModal = lazy(() => import('./components/AdminModal'));
 const LoginModal = lazy(() => import('./components/LoginModal'));
@@ -30,7 +32,7 @@ const CampaignsDashboardModal = lazy(() => import('./components/CampaignsDashboa
 const SAVED_STORAGE_KEY = 'myciti_saved_listings';
 
 export default function App() {
-  const { user, isAuthenticated, isAdmin, isClient, canPost, isConsumer, isProfileComplete, handleLogout } = useAuth();
+  const { user, isAuthenticated, isAdmin, isClient, canPost, isConsumer, isProfileComplete, handleLogout, syncLocation } = useAuth();
   const [listings, setListings] = useState([]);
   const [selectedListing, setSelectedListing] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
@@ -50,8 +52,22 @@ export default function App() {
   const [isCampaignsDashboardOpen, setIsCampaignsDashboardOpen] = useState(false);
   const [activeAds, setActiveAds] = useState([]);
   const [editingSubmission, setEditingSubmission] = useState(null);
-  const [selectedCity, setSelectedCity] = useState('Kolkata');
-  const [mapCenter, setMapCenter] = useState({ lat: 22.5726, lng: 88.3639, zoom: 12 });
+  const [selectedCity, setSelectedCity] = useState(() => {
+    try {
+      return localStorage.getItem('myciti_selected_city') || 'Kolkata';
+    } catch {
+      return 'Kolkata';
+    }
+  });
+  const [mapCenter, setMapCenter] = useState(() => {
+    try {
+      const savedCityName = localStorage.getItem('myciti_selected_city') || 'Kolkata';
+      const match = CITIES.find((c) => c.name.toLowerCase() === savedCityName.toLowerCase());
+      if (match) return { lat: match.lat, lng: match.lng, zoom: match.zoom || 12 };
+    } catch {}
+    return { lat: 22.5726, lng: 88.3639, zoom: 12 };
+  });
+  const [locationToast, setLocationToast] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
   const [isLocating, setIsLocating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -284,15 +300,41 @@ export default function App() {
     }
   }, [isAuthenticated, isAdmin, isProfileComplete]);
 
-  // Near Me handler (Request geolocation ONLY on click)
-  const handleNearMe = () => {
+  // Handler for explicit city selection from TopBar dropdown
+  const handleSelectCity = useCallback(
+    (cityObj) => {
+      const oldCity = selectedCity;
+      const newCity = cityObj.name;
+      setSelectedCity(newCity);
+      setMapCenter({ lat: cityObj.lat, lng: cityObj.lng, zoom: cityObj.zoom || 12 });
+      localStorage.setItem('myciti_selected_city', newCity);
+      localStorage.setItem('myciti_user_lat', String(cityObj.lat));
+      localStorage.setItem('myciti_user_lng', String(cityObj.lng));
+
+      if (oldCity !== newCity) {
+        setLocationToast(`Location updated to ${newCity}`);
+      }
+
+      if (syncLocation) {
+        syncLocation({
+          latitude: cityObj.lat,
+          longitude: cityObj.lng,
+          city: newCity,
+        });
+      }
+    },
+    [selectedCity, syncLocation]
+  );
+
+  // Near Me handler (Request GPS position and reverse-geocode/store city)
+  const handleNearMe = useCallback(() => {
     if (!navigator.geolocation) {
       alert('Geolocation is not supported by your browser.');
       return;
     }
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      async (pos) => {
         const coords = {
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
@@ -300,6 +342,29 @@ export default function App() {
         setUserLocation(coords);
         setMapCenter({ ...coords, zoom: 14 });
         setIsLocating(false);
+
+        const detectedCity = await reverseGeocodeCity(coords.lat, coords.lng);
+        if (detectedCity) {
+          const oldCity = selectedCity;
+          setSelectedCity(detectedCity);
+          localStorage.setItem('myciti_selected_city', detectedCity);
+          localStorage.setItem('myciti_user_lat', String(coords.lat));
+          localStorage.setItem('myciti_user_lng', String(coords.lng));
+
+          if (oldCity !== detectedCity) {
+            setLocationToast(`Location updated to ${detectedCity}`);
+          } else {
+            setLocationToast(`Location refreshed: ${detectedCity}`);
+          }
+
+          if (syncLocation) {
+            syncLocation({
+              latitude: coords.lat,
+              longitude: coords.lng,
+              city: detectedCity,
+            });
+          }
+        }
       },
       (err) => {
         console.warn('Geolocation error or denied:', err);
@@ -308,7 +373,97 @@ export default function App() {
       },
       { timeout: 10000, enableHighAccuracy: true }
     );
-  };
+  }, [selectedCity, syncLocation]);
+
+  // Auto-fetch user location on startup and store in database
+  useEffect(() => {
+    if (typeof window === 'undefined' || !navigator.geolocation) return;
+
+    const fetchAndStoreLocation = () => {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          setUserLocation({ lat, lng });
+
+          localStorage.setItem('myciti_user_lat', String(lat));
+          localStorage.setItem('myciti_user_lng', String(lng));
+
+          const detectedCity = await reverseGeocodeCity(lat, lng);
+          const currentSavedCity = localStorage.getItem('myciti_selected_city');
+
+          if (detectedCity && detectedCity !== currentSavedCity) {
+            setSelectedCity(detectedCity);
+            localStorage.setItem('myciti_selected_city', detectedCity);
+            setLocationToast(`Location updated to ${detectedCity}`);
+
+            const match = CITIES.find((c) => c.name.toLowerCase() === detectedCity.toLowerCase());
+            if (match) {
+              setMapCenter({ lat: match.lat, lng: match.lng, zoom: match.zoom || 12 });
+            }
+          }
+
+          if (syncLocation) {
+            syncLocation({
+              latitude: lat,
+              longitude: lng,
+              city: detectedCity || selectedCity,
+            });
+          }
+        },
+        (err) => {
+          // Geolocation not granted; sync stored city for authenticated user
+          const savedCity = localStorage.getItem('myciti_selected_city') || selectedCity;
+          const cityObj = CITIES.find((c) => c.name.toLowerCase() === savedCity.toLowerCase()) || CITIES[1];
+          if (syncLocation) {
+            syncLocation({
+              latitude: cityObj.lat,
+              longitude: cityObj.lng,
+              city: savedCity,
+            });
+          }
+        },
+        { timeout: 8000, maximumAge: 300000 }
+      );
+    };
+
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'geolocation' }).then((status) => {
+        if (status.state === 'granted' || status.state === 'prompt') {
+          fetchAndStoreLocation();
+        }
+      }).catch(() => {
+        fetchAndStoreLocation();
+      });
+    } else {
+      fetchAndStoreLocation();
+    }
+  }, [syncLocation]);
+
+  // Sync stored location when user logs in
+  useEffect(() => {
+    if (isAuthenticated && syncLocation) {
+      const savedCity = localStorage.getItem('myciti_selected_city') || selectedCity;
+      const savedLat = parseFloat(localStorage.getItem('myciti_user_lat')) || null;
+      const savedLng = parseFloat(localStorage.getItem('myciti_user_lng')) || null;
+      const cityObj = CITIES.find((c) => c.name.toLowerCase() === savedCity.toLowerCase()) || CITIES[1];
+
+      syncLocation({
+        latitude: savedLat || cityObj.lat,
+        longitude: savedLng || cityObj.lng,
+        city: savedCity,
+      });
+    }
+  }, [isAuthenticated, syncLocation]);
+
+  // Auto-dismiss location toast after 3.5 seconds
+  useEffect(() => {
+    if (!locationToast) return;
+    const timer = setTimeout(() => {
+      setLocationToast(null);
+    }, 3500);
+    return () => clearTimeout(timer);
+  }, [locationToast]);
 
   return (
     <div className="fixed inset-0 w-full h-full h-[100dvh] overflow-hidden bg-transparent dark:bg-slate-950">
@@ -323,10 +478,7 @@ export default function App() {
         darkMode={darkMode}
         onToggleDarkMode={() => setDarkMode(!darkMode)}
         selectedCity={selectedCity}
-        onSelectCity={(cityObj) => {
-          setSelectedCity(cityObj.name);
-          setMapCenter({ lat: cityObj.lat, lng: cityObj.lng, zoom: 12 });
-        }}
+        onSelectCity={handleSelectCity}
         unreadCount={unreadNotificationsCount}
         onOpenNotifications={() => {
           if (!isAuthenticated) {
@@ -376,6 +528,25 @@ export default function App() {
           />
         )}
       </main>
+
+      {/* Location Updated Popup Toast */}
+      {locationToast && (
+        <div className="fixed top-24 sm:top-28 left-1/2 -translate-x-1/2 z-[1100] animate-bounce-in flex items-center gap-2.5 bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-900 px-4 py-2.5 rounded-full shadow-2xl border border-white/20 dark:border-slate-800 backdrop-blur-md transition-all duration-300 pointer-events-auto">
+          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500 text-white text-xs flex-shrink-0">
+            <MapPin className="w-3.5 h-3.5" />
+          </span>
+          <span className="text-xs font-bold tracking-tight whitespace-nowrap">
+            {locationToast}
+          </span>
+          <button
+            type="button"
+            onClick={() => setLocationToast(null)}
+            className="ml-1 p-0.5 text-slate-400 hover:text-white dark:hover:text-slate-800 transition-colors"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* Loading Overlay */}
       {isLoading && (

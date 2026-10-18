@@ -216,6 +216,22 @@ export async function updateMyProfile(token, profileData) {
   return res.json();
 }
 
+export async function updateMyCoarseLocation(token, locationData) {
+  const res = await fetch(api('/api/me/location'), {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(locationData)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.message || 'Failed to update location');
+  }
+  return res.json();
+}
+
 // Admin User Management APIs
 export async function fetchAdminUsers(token, query = '') {
   const url = query ? api(`/api/admin/users?q=${encodeURIComponent(query)}`) : api('/api/admin/users');
