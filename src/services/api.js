@@ -421,10 +421,35 @@ export async function fetchVapidKey() {
 }
 
 export async function subscribePush(token, subscription) {
-  const key = subscription.getKey ? subscription.getKey('p256dh') : null;
-  const auth = subscription.getKey ? subscription.getKey('auth') : null;
-  const p256dh = key ? btoa(String.fromCharCode.apply(null, new Uint8Array(key))) : '';
-  const authSecret = auth ? btoa(String.fromCharCode.apply(null, new Uint8Array(auth))) : '';
+  let endpoint = '';
+  let p256dh = '';
+  let authSecret = '';
+
+  if (subscription && typeof subscription.toJSON === 'function') {
+    const subJson = subscription.toJSON();
+    endpoint = subJson.endpoint || subscription.endpoint || '';
+    p256dh = subJson.keys?.p256dh || '';
+    authSecret = subJson.keys?.auth || '';
+  }
+
+  // Fallback to getKey() if toJSON() keys were empty
+  if (!p256dh && subscription.getKey) {
+    const key = subscription.getKey('p256dh');
+    if (key) {
+      p256dh = btoa(String.fromCharCode.apply(null, new Uint8Array(key)))
+        .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+  }
+  if (!authSecret && subscription.getKey) {
+    const auth = subscription.getKey('auth');
+    if (auth) {
+      authSecret = btoa(String.fromCharCode.apply(null, new Uint8Array(auth)))
+        .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+  }
+  if (!endpoint && subscription.endpoint) {
+    endpoint = subscription.endpoint;
+  }
 
   const res = await fetch(api('/api/notifications/subscribe'), {
     method: 'POST',
@@ -433,12 +458,15 @@ export async function subscribePush(token, subscription) {
       'Authorization': `Bearer ${token}`
     },
     body: JSON.stringify({
-      endpoint: subscription.endpoint,
+      endpoint,
       p256dh,
       auth: authSecret
     })
   });
-  if (!res.ok) throw new Error('Failed to save push subscription');
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.message || 'Failed to save push subscription');
+  }
   return res.json();
 }
 
