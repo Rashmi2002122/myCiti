@@ -1,4 +1,4 @@
-import { CITIES } from '../components/TopBar';
+import { CITIES, DEFAULT_LOCATION } from '../constants/cities';
 
 /**
  * Calculates distance in kilometers between two coordinates using Haversine formula.
@@ -19,7 +19,7 @@ export function calculateDistanceKm(lat1, lon1, lat2, lon2) {
  * Find closest city from supported CITIES list.
  */
 export function findClosestCity(lat, lng) {
-  let closest = CITIES[1] || { id: 'Kolkata', name: 'Kolkata', lat: 22.5726, lng: 88.3639, zoom: 12.5 };
+  let closest = DEFAULT_LOCATION;
   let minDistance = Infinity;
 
   // Skip "ALL" (index 0)

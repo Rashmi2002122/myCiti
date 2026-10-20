@@ -43,8 +43,6 @@ export async function registerPushSubscription(accessToken) {
       return null;
     }
 
-    const DEFAULT_VAPID_PUBLIC_KEY = 'BI6X8efg0NneUwweP4_8iN03fs8lni8tJxhAuVeSIe47d_KMgAvurPgHCs1hQWVHdRcPEDKeclb3i0lVxQSF5aU';
-
     let vapidKey = null;
     try {
       vapidKey = await fetchVapidKey();
@@ -52,7 +50,15 @@ export async function registerPushSubscription(accessToken) {
       console.warn('[Push] Error fetching VAPID key from API:', vapidErr);
     }
 
-    const activeKey = (vapidKey && vapidKey.trim().length > 0) ? vapidKey.trim() : DEFAULT_VAPID_PUBLIC_KEY;
+    const activeKey = (vapidKey && vapidKey.trim().length > 0)
+      ? vapidKey.trim()
+      : (import.meta.env.VITE_WEBPUSH_PUBLIC_KEY || '');
+
+    if (!activeKey) {
+      console.warn('[Push] No VAPID public key available. Push registration skipped.');
+      return null;
+    }
+
     const keyBytes = urlBase64ToUint8Array(activeKey);
 
     let sub = await reg.pushManager.getSubscription();

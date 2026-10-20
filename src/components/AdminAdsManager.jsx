@@ -5,17 +5,17 @@ import {
   ExternalLink, Eye, MousePointerClick, TrendingUp, Plus
 } from 'lucide-react';
 import {
-  fetchAdminAdCampaigns,
-  approveAdminAdCampaign,
-  rejectAdminAdCampaign,
-  pauseAdminAdCampaign,
-  resumeAdminAdCampaign,
-  deleteAdminAdCampaign,
+  fetchAdminCampaigns,
+  approveAdminCampaign,
+  rejectAdminCampaign,
+  deleteAdminCampaign,
   fetchAdminAnnouncements,
   approveAdminAnnouncement,
   rejectAdminAnnouncement,
   deleteAdminAnnouncement,
-  fetchAdminAdReports
+  fetchAdminReports,
+  pauseCampaign,
+  resumeCampaign
 } from '../services/api';
 
 export default function AdminAdsManager({ token, onOpenCreateAnnouncement }) {
@@ -33,13 +33,13 @@ export default function AdminAdsManager({ token, onOpenCreateAnnouncement }) {
       setIsLoading(true);
       setError('');
       if (activeTab === 'CAMPAIGNS') {
-        const data = await fetchAdminAdCampaigns(token);
+        const data = await fetchAdminCampaigns(token);
         setCampaigns(data);
       } else if (activeTab === 'ANNOUNCEMENTS') {
         const data = await fetchAdminAnnouncements(token);
         setAnnouncements(data);
       } else if (activeTab === 'REPORTS') {
-        const data = await fetchAdminAdReports(token);
+        const data = await fetchAdminReports(token);
         setReports(data);
       }
     } catch (err) {
@@ -58,7 +58,7 @@ export default function AdminAdsManager({ token, onOpenCreateAnnouncement }) {
   const handleApproveCampaign = async (id) => {
     try {
       setActionLoadingId(id);
-      const updated = await approveAdminAdCampaign(token, id);
+      const updated = await approveAdminCampaign(token, id);
       setCampaigns((prev) => prev.map((c) => (c.id === id ? updated : c)));
     } catch (err) {
       alert(err.message || 'Failed to approve campaign');
@@ -72,7 +72,7 @@ export default function AdminAdsManager({ token, onOpenCreateAnnouncement }) {
     if (!reason) return;
     try {
       setActionLoadingId(id);
-      const updated = await rejectAdminAdCampaign(token, id, reason);
+      const updated = await rejectAdminCampaign(token, id, reason);
       setCampaigns((prev) => prev.map((c) => (c.id === id ? updated : c)));
     } catch (err) {
       alert(err.message || 'Failed to reject campaign');
@@ -85,10 +85,10 @@ export default function AdminAdsManager({ token, onOpenCreateAnnouncement }) {
     try {
       setActionLoadingId(camp.id);
       if (camp.status === 'ACTIVE') {
-        const updated = await pauseAdminAdCampaign(token, camp.id);
+        const updated = await pauseCampaign(token, camp.id);
         setCampaigns((prev) => prev.map((c) => (c.id === camp.id ? updated : c)));
       } else {
-        const updated = await resumeAdminAdCampaign(token, camp.id);
+        const updated = await resumeCampaign(token, camp.id);
         setCampaigns((prev) => prev.map((c) => (c.id === camp.id ? updated : c)));
       }
     } catch (err) {
@@ -102,7 +102,7 @@ export default function AdminAdsManager({ token, onOpenCreateAnnouncement }) {
     if (!window.confirm('Are you sure you want to delete this campaign?')) return;
     try {
       setActionLoadingId(id);
-      await deleteAdminAdCampaign(token, id);
+      await deleteAdminCampaign(token, id);
       setCampaigns((prev) => prev.filter((c) => c.id !== id));
     } catch (err) {
       alert(err.message || 'Failed to delete campaign');

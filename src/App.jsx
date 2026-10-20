@@ -11,7 +11,7 @@ import {
   fetchListings,
   fetchListingById,
   fetchActiveAds,
-  fetchMyNotifications
+  fetchNotifications
 } from './services/api';
 import AddToHomeScreenBanner from './components/AddToHomeScreenBanner';
 import InstallGuideModal from './components/InstallGuideModal';
@@ -210,7 +210,7 @@ export default function App() {
     const token = accessToken || localStorage.getItem('myciti_access_token');
     if (!token) return;
     try {
-      const data = await fetchMyNotifications(token);
+      const data = await fetchNotifications(token);
       const list = Array.isArray(data) ? data : [];
       const unreadList = list.filter((n) => !(n.read ?? n.isRead));
       setUnreadNotificationsCount(unreadList.length);

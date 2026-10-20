@@ -5,10 +5,10 @@ import {
   MapPin, CheckCircle2, Clock, ShieldCheck
 } from 'lucide-react';
 import {
-  fetchMyAdCampaigns,
-  pauseAdCampaign,
-  resumeAdCampaign,
-  deleteAdCampaign,
+  fetchMyCampaigns,
+  pauseCampaign,
+  resumeCampaign,
+  deleteCampaign,
   fetchMyAnnouncements
 } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -33,7 +33,7 @@ export default function CampaignsDashboardModal({
       setIsLoading(true);
       setError('');
       if (activeTab === 'CAMPAIGNS') {
-        const data = await fetchMyAdCampaigns(accessToken);
+        const data = await fetchMyCampaigns(accessToken);
         setCampaigns(data);
       } else {
         const data = await fetchMyAnnouncements(accessToken);
@@ -59,10 +59,10 @@ export default function CampaignsDashboardModal({
     try {
       setActionLoadingId(camp.id);
       if (camp.status === 'ACTIVE') {
-        const updated = await pauseAdCampaign(accessToken, camp.id);
+        const updated = await pauseCampaign(accessToken, camp.id);
         setCampaigns((prev) => prev.map((c) => (c.id === camp.id ? updated : c)));
       } else if (camp.status === 'PAUSED') {
-        const updated = await resumeAdCampaign(accessToken, camp.id);
+        const updated = await resumeCampaign(accessToken, camp.id);
         setCampaigns((prev) => prev.map((c) => (c.id === camp.id ? updated : c)));
       }
     } catch (err) {
@@ -76,7 +76,7 @@ export default function CampaignsDashboardModal({
     if (!window.confirm(`Are you sure you want to delete campaign "${camp.headline}"?`)) return;
     try {
       setActionLoadingId(camp.id);
-      await deleteAdCampaign(accessToken, camp.id);
+      await deleteCampaign(accessToken, camp.id);
       setCampaigns((prev) => prev.filter((c) => c.id !== camp.id));
     } catch (err) {
       alert(err.message || 'Failed to delete campaign');

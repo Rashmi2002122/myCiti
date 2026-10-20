@@ -6,11 +6,10 @@ import {
 import {
   fetchMySubmissions,
   createAnnouncement,
-  createAdminAnnouncement,
   fetchAudienceEstimate
 } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { CITIES } from './TopBar';
+import { CITIES } from '../constants/cities';
 
 export default function CreateAnnouncementModal({
   isOpen,
@@ -117,11 +116,7 @@ export default function CreateAnnouncementModal({
         expiresHours: Number(expiryHours)
       };
 
-      if (isAdmin && !selectedListingId) {
-        await createAdminAnnouncement(accessToken, payload);
-      } else {
-        await createAnnouncement(accessToken, payload);
-      }
+      await createAnnouncement(accessToken, payload);
 
       setIsSuccess(true);
       if (onAnnouncementCreated) onAnnouncementCreated();

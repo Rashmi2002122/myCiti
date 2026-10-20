@@ -654,6 +654,15 @@ export async function resumeCampaign(token, id) {
   return res.json();
 }
 
+export async function deleteCampaign(token, id) {
+  const res = await fetch(api(`/api/ads/campaigns/${id}`), {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to delete campaign');
+  return true;
+}
+
 // --- Announcements APIs ---
 
 export async function createAnnouncement(token, payload) {
@@ -764,43 +773,6 @@ export async function rejectAdminAnnouncement(token, id, reason) {
 }
 
 
-// --- Aliases and Missing Marketing Oversight Methods ---
-export const fetchMyNotifications = fetchNotifications;
-export const fetchMyAdCampaigns = fetchMyCampaigns;
-export const pauseAdCampaign = pauseCampaign;
-export const resumeAdCampaign = resumeCampaign;
-
-export async function deleteAdCampaign(token, id) {
-  const res = await fetch(api(`/api/ads/campaigns/${id}`), {
-    method: 'DELETE',
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
-  if (!res.ok) throw new Error('Failed to delete campaign');
-  return true;
-}
-
-export const fetchAdminAdCampaigns = fetchAdminCampaigns;
-export const approveAdminAdCampaign = approveAdminCampaign;
-export const rejectAdminAdCampaign = rejectAdminCampaign;
-export const deleteAdminAdCampaign = deleteAdminCampaign;
-export const fetchAdminAdReports = fetchAdminReports;
-
-export async function createAdminAnnouncement(token, payload) {
-  const res = await fetch(api('/api/admin/announcements/broadcast'), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify(payload)
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => null);
-    throw new Error(err?.message || 'Failed to send admin broadcast');
-  }
-  return res.json();
-}
-
 export async function deleteAdminAnnouncement(token, id) {
   const res = await fetch(api(`/api/admin/announcements/${id}`), {
     method: 'DELETE',
@@ -808,23 +780,4 @@ export async function deleteAdminAnnouncement(token, id) {
   });
   if (!res.ok) throw new Error('Failed to delete announcement');
   return true;
-}
-
-
-export async function pauseAdminAdCampaign(token, id) {
-  const res = await fetch(api(`/api/admin/ads/${id}/pause`), {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
-  if (!res.ok) throw new Error('Failed to pause campaign');
-  return res.json();
-}
-
-export async function resumeAdminAdCampaign(token, id) {
-  const res = await fetch(api(`/api/admin/ads/${id}/resume`), {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
-  if (!res.ok) throw new Error('Failed to resume campaign');
-  return res.json();
 }

@@ -4,7 +4,7 @@ import {
   Calendar, Clock, CheckCircle2, AlertCircle, Trash2
 } from 'lucide-react';
 import {
-  fetchMyNotifications,
+  fetchNotifications,
   markNotificationAsRead,
   markAllNotificationsAsRead,
   deleteNotification,
@@ -38,7 +38,7 @@ export default function NotificationCenterModal({
     try {
       setIsLoading(true);
       setError('');
-      const data = await fetchMyNotifications(accessToken);
+      const data = await fetchNotifications(accessToken);
       const list = Array.isArray(data) ? data : [];
       setNotifications(list);
       const unread = list.filter(isNotificationUnread).length;

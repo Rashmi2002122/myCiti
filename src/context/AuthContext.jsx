@@ -27,9 +27,9 @@ function persistSession(data) {
   if (data?.user) {
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
   }
-  if (data?.refreshToken) {
-    localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
-  }
+  // SEC-02: Do NOT write raw refresh tokens to localStorage. The backend sets an HttpOnly cookie.
+  // Purge any legacy token from prior versions.
+  localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
 }
 
 function clearSessionStorage() {
@@ -65,17 +65,18 @@ export function AuthProvider({ children }) {
     let isMounted = true;
 
     async function initSession() {
-      const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
+      const storedAccessToken = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
       const storedUser = localStorage.getItem(USER_STORAGE_KEY);
+      const legacyRefreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
 
       // If user is not logged in at all, skip network call
-      if (!storedRefreshToken && !storedUser) {
+      if (!storedAccessToken && !storedUser && !legacyRefreshToken) {
         if (isMounted) setIsInitializing(false);
         return;
       }
 
       try {
-        const data = await executeRefresh(storedRefreshToken);
+        const data = await executeRefresh(legacyRefreshToken || null);
         if (isMounted) {
           setAccessToken(data.accessToken);
           setUser(data.user);
@@ -110,8 +111,8 @@ export function AuthProvider({ children }) {
   // Proactive session refresh (e.g. on 401 or timer)
   const refreshCurrentToken = useCallback(async () => {
     try {
-      const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
-      const data = await executeRefresh(storedRefreshToken);
+      const legacyRefreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
+      const data = await executeRefresh(legacyRefreshToken || null);
       setAccessToken(data.accessToken);
       setUser(data.user);
       persistSession(data);

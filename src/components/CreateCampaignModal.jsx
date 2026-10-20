@@ -9,7 +9,7 @@ import {
   fetchAudienceEstimate
 } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { CITIES } from './TopBar';
+import { CITIES } from '../constants/cities';
 
 export default function CreateCampaignModal({
   isOpen,
