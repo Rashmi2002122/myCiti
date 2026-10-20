@@ -2,7 +2,10 @@ const rawApiUrl = import.meta.env.VITE_API_URL || '';
 export const API_BASE = rawApiUrl.endsWith('/') ? rawApiUrl.slice(0, -1) : rawApiUrl;
 
 function api(endpoint) {
-  return `${API_BASE}${endpoint}`;
+  // If API_BASE already ends with /api and endpoint starts with /api, prevent /api/api duplication
+  const base = API_BASE.endsWith('/api') ? API_BASE.slice(0, -4) : API_BASE;
+  const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  return `${base}${path}`;
 }
 
 // Category configuration for colors, icons, and styling

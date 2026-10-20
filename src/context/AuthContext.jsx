@@ -7,6 +7,19 @@ const USER_STORAGE_KEY = 'myciti_user';
 const ACCESS_TOKEN_STORAGE_KEY = 'myciti_access_token';
 const REFRESH_TOKEN_STORAGE_KEY = 'myciti_refresh_token';
 
+// Check if JWT access token has expired (or is close to expiring within 30s)
+function isTokenExpired(token) {
+  if (!token) return true;
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return true;
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    return !payload.exp || (payload.exp * 1000) < (Date.now() + 30000);
+  } catch {
+    return true;
+  }
+}
+
 // Singleton in-flight promise to avoid multiple simultaneous refresh requests
 let inFlightRefresh = null;
 
@@ -27,9 +40,10 @@ function persistSession(data) {
   if (data?.user) {
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
   }
-  // SEC-02: Do NOT write raw refresh tokens to localStorage. The backend sets an HttpOnly cookie.
-  // Purge any legacy token from prior versions.
-  localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
+  // Store rotated refresh token so cross-origin SPAs / browsers blocking 3rd-party cookies maintain session
+  if (data?.refreshToken) {
+    localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
+  }
 }
 
 function clearSessionStorage() {
@@ -67,16 +81,25 @@ export function AuthProvider({ children }) {
     async function initSession() {
       const storedAccessToken = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
       const storedUser = localStorage.getItem(USER_STORAGE_KEY);
-      const legacyRefreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
+      const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
 
       // If user is not logged in at all, skip network call
-      if (!storedAccessToken && !storedUser && !legacyRefreshToken) {
+      if (!storedAccessToken && !storedUser && !storedRefreshToken) {
         if (isMounted) setIsInitializing(false);
         return;
       }
 
+      // If the cached access token is still completely valid, user is authenticated immediately
+      if (storedAccessToken && !isTokenExpired(storedAccessToken) && storedUser) {
+        if (isMounted) {
+          setIsInitializing(false);
+        }
+        return;
+      }
+
+      // If access token is expired or missing, refresh via refresh token / cookie
       try {
-        const data = await executeRefresh(legacyRefreshToken || null);
+        const data = await executeRefresh(storedRefreshToken || null);
         if (isMounted) {
           setAccessToken(data.accessToken);
           setUser(data.user);
@@ -84,7 +107,10 @@ export function AuthProvider({ children }) {
           setAuthError(null);
         }
       } catch (err) {
-        console.warn('[Auth] Session validation/refresh warning:', err);
+        // Only warn if the user was expected to have an active session
+        if (storedRefreshToken || (storedAccessToken && isTokenExpired(storedAccessToken))) {
+          console.warn('[Auth] Session validation/refresh notice:', err?.message || err);
+        }
         // Only clear storage if backend explicitly rejected credentials (401 or 403)
         // If it's a network glitch or Render free-tier cold-start (502/503/504), KEEP cached user
         if (err.status === 401 || err.status === 403) {
@@ -111,8 +137,8 @@ export function AuthProvider({ children }) {
   // Proactive session refresh (e.g. on 401 or timer)
   const refreshCurrentToken = useCallback(async () => {
     try {
-      const legacyRefreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
-      const data = await executeRefresh(legacyRefreshToken || null);
+      const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
+      const data = await executeRefresh(storedRefreshToken || null);
       setAccessToken(data.accessToken);
       setUser(data.user);
       persistSession(data);
