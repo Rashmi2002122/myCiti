@@ -56,6 +56,7 @@ export default function App() {
     clearRoleChangeNotice,
     refreshUserProfile
   } = useAuth();
+  const role = user?.role || 'USER';
   const [listings, setListings] = useState([]);
   const [selectedListing, setSelectedListing] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
