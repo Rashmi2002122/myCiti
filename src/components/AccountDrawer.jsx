@@ -89,6 +89,28 @@ export default function AccountDrawer({
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         onClose();
+        return;
+      }
+
+      if (e.key === 'Tab' && drawerElement) {
+        const focusable = drawerElement.querySelectorAll(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
       }
     };
 
@@ -308,7 +330,7 @@ export default function AccountDrawer({
         aria-label="Account navigation drawer"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        className="fixed top-0 bottom-0 left-0 z-[3001] w-[82vw] max-w-[340px] sm:w-[360px] bg-gradient-to-b from-[#cfe7ff] via-[#e2efff] to-[#eaf4ff] dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 rounded-r-[32px] sm:rounded-r-[36px] shadow-2xl border-r border-white/60 dark:border-slate-800 flex flex-col h-full overflow-hidden transform transition-transform duration-250 ease-out motion-reduce:transition-none translate-x-0"
+        className="fixed top-0 bottom-0 left-0 z-[3001] w-[82vw] max-w-[380px] sm:w-[360px] bg-gradient-to-b from-[#cfe7ff] via-[#e2efff] to-[#eaf4ff] dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 rounded-r-[32px] sm:rounded-r-[36px] shadow-2xl border-r border-white/60 dark:border-slate-800 flex flex-col h-full overflow-hidden animate-in slide-in-from-left duration-250 ease-out motion-reduce:animate-none"
       >
         {/* Drawer Header Controls */}
         <div className="pt-[max(1rem,env(safe-area-inset-top))] px-5 pb-3 flex items-center justify-between">
@@ -691,7 +713,7 @@ export default function AccountDrawer({
           )}
 
           <div className="text-center text-[10px] font-bold text-slate-400 dark:text-slate-500">
-            myCiti • v1.2.0 PWA
+            myCiti • v2.0.0 PWA
           </div>
         </div>
       </div>
