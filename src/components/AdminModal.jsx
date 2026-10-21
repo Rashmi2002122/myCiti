@@ -15,12 +15,13 @@ import LocationPickerMap from './LocationPickerMap';
 import AdminReviewQueue from './AdminReviewQueue';
 import AdminAdsManager from './AdminAdsManager';
 import AdminClientRequestsQueue from './AdminClientRequestsQueue';
+import AdminUsersManager from './AdminUsersManager';
 import { useAuth } from '../context/AuthContext';
 
 export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCreateAnnouncement, initialSection = 'QUEUE' }) {
-  const { accessToken, isAdmin, handleLogout: authLogout } = useAuth();
+  const { user, accessToken, isAdmin, handleLogout: authLogout } = useAuth();
   const token = (isAdmin && accessToken) ? accessToken : null;
-  const [adminSection, setAdminSection] = useState(initialSection || 'QUEUE'); // 'QUEUE' | 'CLIENT_REQUESTS' | 'LISTINGS' | 'MARKETING'
+  const [adminSection, setAdminSection] = useState(initialSection || 'QUEUE'); // 'QUEUE' | 'CLIENT_REQUESTS' | 'USERS' | 'LISTINGS' | 'MARKETING'
 
   useEffect(() => {
     if (initialSection) {
@@ -254,6 +255,20 @@ export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCr
               }`}
             >
               Client Requests
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setAdminSection('USERS');
+                setIsFormOpen(false);
+              }}
+              className={`min-h-[40px] px-4 py-1.5 rounded-full text-xs font-black transition-all ${
+                adminSection === 'USERS'
+                  ? 'bg-city-blue text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              Users
             </button>
             <button
               type="button"
@@ -659,6 +674,14 @@ export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCr
             <AdminClientRequestsQueue
               token={token}
               onRequestsChanged={onListingChanged}
+            />
+          )}
+
+          {/* Section 5: Users Management Panel */}
+          {token && adminSection === 'USERS' && (
+            <AdminUsersManager
+              token={token}
+              currentUserId={user?.id}
             />
           )}
         </div>

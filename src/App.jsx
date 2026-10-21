@@ -36,6 +36,7 @@ const NotificationCenterModal = lazy(() => import('./components/NotificationCent
 const CreateCampaignModal = lazy(() => import('./components/CreateCampaignModal'));
 const CreateAnnouncementModal = lazy(() => import('./components/CreateAnnouncementModal'));
 const CampaignsDashboardModal = lazy(() => import('./components/CampaignsDashboardModal'));
+const SettingsModal = lazy(() => import('./components/SettingsModal'));
 
 const SAVED_STORAGE_KEY = 'myciti_saved_listings';
 
@@ -72,6 +73,7 @@ export default function App() {
   const [isPostAdOpen, setIsPostAdOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [notificationsInitialTab, setNotificationsInitialTab] = useState('announcements');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
   const [activePopupNotification, setActivePopupNotification] = useState(null);
   const [isCreateCampaignOpen, setIsCreateCampaignOpen] = useState(false);
@@ -418,38 +420,99 @@ export default function App() {
     }
   }, [isAuthenticated, canPost, isProfileComplete]);
 
-  // Route guards & URL handlers (/admin requires ADMIN; /account requires login)
+  // Route guards & URL handlers (/admin requires ADMIN; /account/posts requires CLIENT/ADMIN)
   useEffect(() => {
-    const path = window.location.pathname;
-    const hash = window.location.hash;
+    const evaluateRoute = () => {
+      const path = window.location.pathname;
+      const hash = window.location.hash;
 
-    if (path === '/admin' || hash === '#admin') {
-      if (!isAuthenticated) {
-        setIsLoginOpen(true);
-      } else if (!isAdmin) {
-        alert('Access denied: Admin permissions required.');
-        window.history.pushState({}, '', '/');
-      } else {
-        setIsAdminOpen(true);
+      // Admin routes
+      if (path === '/admin' || path.startsWith('/admin/') || hash === '#admin' || hash.startsWith('#admin-')) {
+        if (!isAuthenticated) {
+          setIsLoginOpen(true);
+        } else if (!isAdmin) {
+          setAccessDeniedInfo({ isOpen: true, requiredRole: 'ADMIN' });
+          window.history.replaceState({}, '', '/');
+        } else {
+          if (path.includes('users') || hash.includes('users')) {
+            setAdminInitialSection('USERS');
+          } else if (path.includes('client-requests') || hash.includes('client-requests')) {
+            setAdminInitialSection('CLIENT_REQUESTS');
+          } else if (path.includes('marketing') || hash.includes('marketing')) {
+            setAdminInitialSection('MARKETING');
+          } else {
+            setAdminInitialSection('QUEUE');
+          }
+          setIsAdminOpen(true);
+        }
       }
-    } else if (path === '/account' || hash === '#account') {
-      if (!isAuthenticated) {
-        setIsLoginOpen(true);
-      } else if (canPost && !isProfileComplete) {
-        setIsCompleteProfileOpen(true);
-      } else {
-        setIsAccountMenuOpen(true);
+      // Client posts & campaigns routes (guarded: USER gets friendly AccessDeniedModal)
+      else if (
+        path === '/account/posts' ||
+        path === '/posts' ||
+        hash === '#posts' ||
+        path === '/campaigns' ||
+        hash === '#campaigns'
+      ) {
+        if (!isAuthenticated) {
+          setIsLoginOpen(true);
+        } else if (!canPost) {
+          setAccessDeniedInfo({ isOpen: true, requiredRole: 'CLIENT' });
+          window.history.replaceState({}, '', '/');
+        } else {
+          if (path.includes('campaigns') || hash.includes('campaigns')) {
+            setIsCampaignsDashboardOpen(true);
+          } else {
+            setIsMyPostsOpen(true);
+          }
+        }
       }
-    }
+      // Become Client route
+      else if (
+        path === '/become-client' ||
+        path === '/account/client-request' ||
+        hash === '#become-client'
+      ) {
+        if (!isAuthenticated) {
+          setIsLoginOpen(true);
+        } else if (role === 'USER') {
+          setIsBecomeClientOpen(true);
+        } else {
+          setIsAccountMenuOpen(true);
+        }
+      }
+      // Account drawer route
+      else if (path === '/account' || hash === '#account') {
+        if (!isAuthenticated) {
+          setIsLoginOpen(true);
+        } else if (canPost && !isProfileComplete) {
+          setIsCompleteProfileOpen(true);
+        } else {
+          setIsAccountMenuOpen(true);
+        }
+      }
+      // Settings route
+      else if (path === '/settings' || hash === '#settings') {
+        setIsSettingsOpen(true);
+      }
 
-    const params = new URLSearchParams(window.location.search);
-    const listingId = params.get('listingId');
-    if (listingId) {
-      fetchListingById(listingId)
-        .then((data) => setSelectedListing(data))
-        .catch((err) => console.error('Failed to load shared listing', err));
-    }
-  }, [isAuthenticated, isAdmin, isProfileComplete]);
+      const params = new URLSearchParams(window.location.search);
+      const listingId = params.get('listingId');
+      if (listingId) {
+        fetchListingById(listingId)
+          .then((data) => setSelectedListing(data))
+          .catch((err) => console.error('Failed to load shared listing', err));
+      }
+    };
+
+    evaluateRoute();
+    window.addEventListener('hashchange', evaluateRoute);
+    window.addEventListener('popstate', evaluateRoute);
+    return () => {
+      window.removeEventListener('hashchange', evaluateRoute);
+      window.removeEventListener('popstate', evaluateRoute);
+    };
+  }, [isAuthenticated, isAdmin, canPost, role, isProfileComplete]);
 
   // Handler for explicit city selection from TopBar dropdown
   const handleSelectCity = useCallback(
@@ -790,6 +853,7 @@ export default function App() {
             onOpenLogin={() => setIsLoginOpen(true)}
             onOpenBecomeClient={() => setIsBecomeClientOpen(true)}
             onOpenDeclineInfo={(req) => setDeclineSheetRequest(req)}
+            onOpenSettings={() => setIsSettingsOpen(true)}
             darkMode={darkMode}
             onToggleDarkMode={() => setDarkMode(!darkMode)}
           />
@@ -967,6 +1031,16 @@ export default function App() {
             onClose={() => setIsCampaignsDashboardOpen(false)}
             onOpenCreateCampaign={() => setIsCreateCampaignOpen(true)}
             onOpenCreateAnnouncement={() => setIsCreateAnnouncementOpen(true)}
+          />
+        )}
+
+        {isSettingsOpen && (
+          <SettingsModal
+            isOpen={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
+            darkMode={darkMode}
+            onToggleDarkMode={() => setDarkMode(!darkMode)}
+            onOpenNotifications={handleOpenNotifications}
           />
         )}
       </Suspense>

@@ -22,11 +22,12 @@ export default function AccountDrawer({
   onOpenLogin,
   onOpenBecomeClient,
   onOpenDeclineInfo,
+  onOpenSettings,
   darkMode,
   onToggleDarkMode,
   triggerRef
 }) {
-  const { user, accessToken, isAuthenticated, isAdmin, isClient, handleLogout } = useAuth();
+  const { user, accessToken, isAuthenticated, handleLogout } = useAuth();
 
   const [counts, setCounts] = useState(null);
   const [isLoadingCounts, setIsLoadingCounts] = useState(false);
@@ -254,7 +255,11 @@ export default function AccountDrawer({
       roles: ['USER', 'CLIENT', 'ADMIN'],
       action: () => {
         onClose();
-        if (onOpenNotifications) onOpenNotifications('preferences');
+        if (onOpenSettings) {
+          onOpenSettings();
+        } else if (onOpenNotifications) {
+          onOpenNotifications('preferences');
+        }
       }
     }
   ];
