@@ -8,7 +8,8 @@ export default function ListingCard({
   onSelect,
   isSaved,
   onToggleSave,
-  onShare
+  onShare,
+  onOpenClientProfile
 }) {
   const categoryConfig = CATEGORIES[listing.category] || CATEGORIES.PANDAL;
   const rawImageUrl = listing.primaryImageUrl || (listing.images && listing.images[0]?.url);
@@ -69,6 +70,43 @@ export default function ListingCard({
 
       {/* Content */}
       <div className="flex flex-col gap-1.5 px-1">
+        {/* Client Attribution / Link */}
+        {listing.clientSlug && (
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onOpenClientProfile) {
+                onOpenClientProfile(listing.clientSlug);
+              } else {
+                window.history.pushState({}, '', `/c/${listing.clientSlug}`);
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }
+            }}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-city-blue dark:hover:text-sky-400 active:scale-95 transition-all cursor-pointer w-fit group/client"
+          >
+            <span className="truncate group-hover/client:underline">
+              @{listing.clientBusinessName || listing.clientSlug}
+            </span>
+            {listing.clientVerified && (
+              <span
+                className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-[#1d9bf0] text-white flex-shrink-0 shadow-sm"
+                title="Verified business"
+              >
+                <svg
+                  className="w-2.5 h-2.5 fill-current stroke-current"
+                  viewBox="0 0 24 24"
+                  strokeWidth="3"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </span>
+            )}
+          </div>
+        )}
+
         <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100 line-clamp-1 group-hover:text-city-blue transition-colors">
           {listing.title}
         </h3>

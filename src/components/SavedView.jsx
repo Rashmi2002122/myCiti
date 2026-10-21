@@ -8,7 +8,8 @@ export default function SavedView({
   onSelectListing,
   onToggleSave,
   onShare,
-  onExploreClick
+  onExploreClick,
+  onOpenClientProfile
 }) {
   const savedListings = listings.filter((l) => savedIds.includes(l.id));
 
@@ -59,6 +60,7 @@ export default function SavedView({
               isSaved={true}
               onToggleSave={onToggleSave}
               onShare={onShare}
+              onOpenClientProfile={onOpenClientProfile}
             />
           ))}
         </div>

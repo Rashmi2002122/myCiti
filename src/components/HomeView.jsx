@@ -13,7 +13,8 @@ export default function HomeView({
   userLocation,
   onNearMeClick,
   isLocating,
-  selectedCity = 'Kolkata'
+  selectedCity = 'Kolkata',
+  onOpenClientProfile
 }) {
   const [activeAds, setActiveAds] = useState([]);
 
@@ -116,6 +117,7 @@ export default function HomeView({
                 isSaved={savedIds.includes(listing.id)}
                 onToggleSave={onToggleSave}
                 onShare={onShare}
+                onOpenClientProfile={onOpenClientProfile}
               />
             ))}
           </div>

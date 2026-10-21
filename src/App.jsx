@@ -37,6 +37,7 @@ const CreateCampaignModal = lazy(() => import('./components/CreateCampaignModal'
 const CreateAnnouncementModal = lazy(() => import('./components/CreateAnnouncementModal'));
 const CampaignsDashboardModal = lazy(() => import('./components/CampaignsDashboardModal'));
 const SettingsModal = lazy(() => import('./components/SettingsModal'));
+const ClientPublicProfileView = lazy(() => import('./components/ClientPublicProfileView'));
 
 const SAVED_STORAGE_KEY = 'myciti_saved_listings';
 
@@ -83,6 +84,7 @@ export default function App() {
   const [isCampaignsDashboardOpen, setIsCampaignsDashboardOpen] = useState(false);
   const [activeAds, setActiveAds] = useState([]);
   const [editingSubmission, setEditingSubmission] = useState(null);
+  const [viewingClientSlug, setViewingClientSlug] = useState(null);
   const [selectedCity, setSelectedCity] = useState(() => {
     try {
       return localStorage.getItem('myciti_selected_city') || 'Kolkata';
@@ -408,6 +410,19 @@ export default function App() {
     setIsNotificationsOpen(true);
   }, [isAuthenticated]);
 
+  const handleOpenClientProfile = useCallback((slug) => {
+    if (!slug) return;
+    setViewingClientSlug(slug);
+    window.history.pushState({}, '', `/c/${slug}`);
+  }, []);
+
+  const handleCloseClientProfile = useCallback(() => {
+    setViewingClientSlug(null);
+    if (window.location.pathname.startsWith('/c/')) {
+      window.history.pushState({}, '', '/');
+    }
+  }, []);
+
   const sponsoredListingIds = useMemo(() => {
     return activeAds
       .map((a) => a.listingId)
@@ -495,6 +510,24 @@ export default function App() {
       // Settings route
       else if (path === '/settings' || hash === '#settings') {
         setIsSettingsOpen(true);
+      }
+      // Client public profile route (/c/:slug, #c-:slug, or #/c/:slug)
+      else if (path.startsWith('/c/') || hash.startsWith('#c-') || hash.startsWith('#/c/')) {
+        let slug = '';
+        if (path.startsWith('/c/')) {
+          slug = path.slice(3).split('/')[0].split('?')[0];
+        } else if (hash.startsWith('#c-')) {
+          slug = hash.slice(3).split('?')[0];
+        } else if (hash.startsWith('#/c/')) {
+          slug = hash.slice(4).split('?')[0];
+        }
+        if (slug) {
+          setViewingClientSlug(decodeURIComponent(slug));
+        }
+      }
+
+      if (!path.startsWith('/c/') && !hash.startsWith('#c-') && !hash.startsWith('#/c/')) {
+        setViewingClientSlug(null);
       }
 
       const params = new URLSearchParams(window.location.search);
@@ -726,6 +759,7 @@ export default function App() {
             onNearMeClick={handleNearMe}
             isLocating={isLocating}
             selectedCity={selectedCity}
+            onOpenClientProfile={handleOpenClientProfile}
           />
         )}
 
@@ -737,6 +771,7 @@ export default function App() {
             onToggleSave={handleToggleSave}
             onShare={handleShare}
             onExploreClick={() => setActiveTab('map')}
+            onOpenClientProfile={handleOpenClientProfile}
           />
         )}
       </main>
@@ -783,6 +818,7 @@ export default function App() {
           onClose={() => setSelectedListing(null)}
           isSaved={savedIds.includes(selectedListing.id)}
           onToggleSave={handleToggleSave}
+          onOpenClientProfile={handleOpenClientProfile}
         />
       )}
 
@@ -1042,6 +1078,20 @@ export default function App() {
             darkMode={darkMode}
             onToggleDarkMode={() => setDarkMode(!darkMode)}
             onOpenNotifications={handleOpenNotifications}
+          />
+        )}
+
+        {viewingClientSlug && (
+          <ClientPublicProfileView
+            slug={viewingClientSlug}
+            onClose={handleCloseClientProfile}
+            onSelectListing={(listing) => {
+              setSelectedListing(listing);
+            }}
+            savedListingIds={savedIds}
+            onToggleSave={handleToggleSave}
+            onShareListing={handleShare}
+            accessToken={accessToken}
           />
         )}
       </Suspense>

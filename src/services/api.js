@@ -923,3 +923,114 @@ export async function checkListingSaved(token, listingId) {
   if (!res.ok) return { saved: false };
   return res.json();
 }
+
+// --- Client Profile & Reports APIs ---
+
+export async function fetchPublicClientProfile(slug) {
+  const res = await fetch(api(`/api/clients/${encodeURIComponent(slug)}`));
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    const error = new Error(err?.message || 'Client profile not found');
+    error.status = res.status;
+    throw error;
+  }
+  return res.json();
+}
+
+export async function fetchClientListings(slug, tab = 'active', page = 0, size = 10) {
+  const res = await fetch(api(`/api/clients/${encodeURIComponent(slug)}/listings?tab=${tab}&page=${page}&size=${size}`));
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    const error = new Error(err?.message || 'Failed to load client listings');
+    error.status = res.status;
+    throw error;
+  }
+  return res.json();
+}
+
+export async function reportClientProfile(slug, reportData, token = null) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  const res = await fetch(api(`/api/clients/${encodeURIComponent(slug)}/report`), {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(reportData)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    const error = new Error(err?.message || 'Failed to submit report');
+    error.status = res.status;
+    throw error;
+  }
+  return res.json();
+}
+
+export async function fetchMyClientProfile(token) {
+  const res = await fetch(api('/api/me/client-profile'), {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    const error = new Error(err?.message || 'Failed to load business profile');
+    error.status = res.status;
+    throw error;
+  }
+  return res.json();
+}
+
+export async function updateMyClientProfile(token, profileData) {
+  const res = await fetch(api('/api/me/client-profile'), {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(profileData)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    const detailMsg = Array.isArray(err?.details) && err.details.length > 0
+      ? err.details.join(', ')
+      : (err?.message || 'Failed to update business profile');
+    const error = new Error(detailMsg);
+    error.status = res.status;
+    throw error;
+  }
+  return res.json();
+}
+
+export async function uploadClientLogo(token, file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await fetch(api('/api/me/client-profile/logo'), {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+    body: formData
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    const error = new Error(err?.message || 'Failed to upload logo');
+    error.status = res.status;
+    throw error;
+  }
+  return res.json();
+}
+
+export async function uploadClientCover(token, file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await fetch(api('/api/me/client-profile/cover'), {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+    body: formData
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    const error = new Error(err?.message || 'Failed to upload cover banner');
+    error.status = res.status;
+    throw error;
+  }
+  return res.json();
+}
