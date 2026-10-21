@@ -162,10 +162,8 @@ export default function AccountDrawer({
       roles: ['USER'],
       isSpecial: true,
       action: () => {
-        if (latestClientRequest?.status === 'DECLINED') {
+        if (latestClientRequest?.status === 'DECLINED' || latestClientRequest?.status === 'PENDING') {
           if (onOpenDeclineInfo) onOpenDeclineInfo(latestClientRequest);
-        } else if (latestClientRequest?.status === 'PENDING') {
-          // View status or info
         } else {
           onClose();
           if (onOpenBecomeClient) onOpenBecomeClient();
@@ -382,9 +380,12 @@ export default function AccountDrawer({
                 {/* Stats Row (Replaces Twitter Followers/Following) */}
                 <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80">
                   {isLoadingCounts && !counts ? (
-                    <div className="grid grid-cols-2 gap-2 animate-pulse">
+                    <div className={`grid ${role === 'CLIENT' ? 'grid-cols-3' : 'grid-cols-2'} gap-2 animate-pulse`}>
                       <div className="h-10 bg-slate-100 dark:bg-slate-800 rounded-xl" />
                       <div className="h-10 bg-slate-100 dark:bg-slate-800 rounded-xl" />
+                      {role === 'CLIENT' && (
+                        <div className="h-10 bg-slate-100 dark:bg-slate-800 rounded-xl" />
+                      )}
                     </div>
                   ) : role === 'USER' ? (
                     <div className="grid grid-cols-2 gap-2 text-center">
@@ -544,9 +545,22 @@ export default function AccountDrawer({
                           {/* "Become a client" special pill status */}
                           {item.id === 'become_client' && (
                             latestClientRequest?.status === 'PENDING' ? (
-                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
-                                Under review
-                              </span>
+                              <div className="flex items-center gap-1">
+                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                                  Under review
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (onOpenDeclineInfo) onOpenDeclineInfo(latestClientRequest);
+                                  }}
+                                  aria-label="View request details"
+                                  className="w-6 h-6 rounded-full bg-amber-50 text-amber-700 dark:bg-amber-950 flex items-center justify-center hover:scale-110 transition-transform"
+                                >
+                                  <Info className="w-3.5 h-3.5 stroke-[2.5]" />
+                                </button>
+                              </div>
                             ) : latestClientRequest?.status === 'DECLINED' ? (
                               <div className="flex items-center gap-1">
                                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300">
