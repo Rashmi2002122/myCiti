@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Compass, Sun, Moon, X, MapPin, ChevronDown, Bell } from 'lucide-react';
+import { Search, Compass, X, MapPin, ChevronDown, Bell } from 'lucide-react';
 import { FILTER_CHIPS } from '../services/api';
 import { CITIES } from '../constants/cities';
 
@@ -17,7 +17,10 @@ export default function TopBar({
   selectedCity = 'Kolkata',
   onSelectCity,
   unreadCount = 0,
-  onOpenNotifications
+  onOpenNotifications,
+  onOpenAccountDrawer,
+  user,
+  isAuthenticated
 }) {
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
@@ -37,14 +40,47 @@ export default function TopBar({
     <header className="absolute top-0 left-0 right-0 z-[1000] p-3 sm:p-4 pt-[max(0.75rem,env(safe-area-inset-top))] pointer-events-none flex flex-col gap-2.5">
       {/* Floating Action Controls */}
       <div className="flex items-center justify-between gap-2 pointer-events-auto">
-        {/* Title pill with Dynamic City Selector */}
-        <div className="relative" ref={cityDropdownRef}>
+        {/* Left: Round Avatar Button & Title pill with Dynamic City Selector */}
+        <div className="flex items-center gap-2">
+          {/* Round Profile Avatar / Hamburger Button (Twitter/X style) */}
+          <button
+            type="button"
+            onClick={onOpenAccountDrawer}
+            aria-label="Open account menu"
+            className="w-11 h-11 rounded-full bg-white/95 dark:bg-slate-900/95 shadow-float border border-white/60 dark:border-slate-800 flex items-center justify-center overflow-hidden hover:bg-slate-50 dark:hover:bg-slate-800 transition-all active:scale-95 cursor-pointer relative flex-shrink-0"
+          >
+            {user?.pictureUrl ? (
+              <img
+                src={user.pictureUrl}
+                alt={user.name || 'User profile'}
+                className="w-full h-full object-cover"
+              />
+            ) : isAuthenticated ? (
+              <div className="w-full h-full bg-city-blue/10 dark:bg-sky-500/20 text-city-blue dark:text-sky-400 flex items-center justify-center font-black text-sm">
+                {user?.name ? user.name.charAt(0).toUpperCase() : '👤'}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center gap-1 w-5 h-5 text-slate-700 dark:text-slate-200">
+                <span className="w-4 h-0.5 bg-current rounded-full" />
+                <span className="w-4 h-0.5 bg-current rounded-full" />
+                <span className="w-2.5 h-0.5 bg-current rounded-full self-start" />
+              </div>
+            )}
+            {isAuthenticated && (
+              <span className={`absolute bottom-0.5 right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-slate-900 ${
+                user?.role === 'ADMIN' ? 'bg-amber-500' : user?.role === 'CLIENT' ? 'bg-emerald-500' : 'bg-city-blue'
+              }`} />
+            )}
+          </button>
+
+          {/* Title pill with Dynamic City Selector */}
+          <div className="relative" ref={cityDropdownRef}>
           <button
             type="button"
             onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
             className="flex items-center gap-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-3.5 py-2.5 rounded-full shadow-float border border-white/60 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors"
           >
-            <span className="text-xl">🪔</span>
+            <span className="text-xl">ðŸª”</span>
             <span className="font-extrabold text-base tracking-tight text-slate-800 dark:text-slate-100">
               my<span className="text-city-blue">Citi</span>
             </span>
@@ -75,13 +111,14 @@ export default function TopBar({
                     }`}
                   >
                     <span>{c.name}</span>
-                    {selectedCity === c.id && <span className="text-city-blue text-xs">✓</span>}
+                    {selectedCity === c.id && <span className="text-city-blue text-xs">âœ“</span>}
                   </button>
                 ))}
               </div>
             </div>
           )}
         </div>
+      </div>
 
         {/* Right side buttons */}
         <div className="flex items-center gap-2">

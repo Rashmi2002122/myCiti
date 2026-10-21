@@ -1,4 +1,4 @@
-import { fetchVapidKey, subscribePush } from '../services/api';
+import { fetchVapidKey, subscribePush, unsubscribePush } from '../services/api';
 
 /**
  * Converts a base64 string to a Uint8Array for VAPID applicationServerKey.
@@ -93,5 +93,48 @@ export async function registerPushSubscription(accessToken) {
   } catch (err) {
     console.warn('[Push] Error subscribing to push:', err);
     return null;
+  }
+}
+
+/**
+ * Checks if the browser has an active push subscription.
+ */
+export async function isPushSubscribed() {
+  if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return false;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    if (!reg.pushManager) return false;
+    const sub = await reg.pushManager.getSubscription();
+    return Boolean(sub);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Unsubscribes from push notifications on the client and notifies backend.
+ */
+export async function unsubscribePushSubscription(accessToken) {
+  if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return false;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    if (!reg.pushManager) return false;
+    const sub = await reg.pushManager.getSubscription();
+    if (sub) {
+      const endpoint = sub.endpoint;
+      const unsubscribed = await sub.unsubscribe();
+      if (accessToken && endpoint) {
+        try {
+          await unsubscribePush(accessToken, endpoint);
+        } catch (backendErr) {
+          console.warn('[Push] Error updating backend after unsubscribe:', backendErr);
+        }
+      }
+      return unsubscribed;
+    }
+    return true;
+  } catch (err) {
+    console.warn('[Push] Error unsubscribing:', err);
+    return false;
   }
 }

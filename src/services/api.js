@@ -14,38 +14,38 @@ export const CATEGORIES = {
     label: 'Pandal',
     color: '#f0592a',
     badgeBg: 'bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-900',
-    icon: '🪔',
+    icon: 'ðŸª”',
     description: 'Durga Puja Pandals & Installations'
   },
   MELA: {
     label: 'Mela',
     color: '#8a4fe0',
     badgeBg: 'bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-900',
-    icon: '🎡',
+    icon: 'ðŸŽ¡',
     description: 'Carnivals, Fairs & Food Streets'
   },
   OFFER: {
     label: 'Offer',
     color: '#17a673',
     badgeBg: 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900',
-    icon: '🛍️',
+    icon: 'ðŸ›ï¸',
     description: 'Festive Discounts & Sales'
   },
   INAUGURATION: {
     label: 'Inauguration',
     color: '#2f7bff',
     badgeBg: 'bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-900',
-    icon: '🎀',
+    icon: 'ðŸŽ€',
     description: 'Store Launches & Openings'
   }
 };
 
 export const FILTER_CHIPS = [
-  { id: 'ALL', label: 'All', icon: '✨' },
-  { id: 'PANDAL', label: 'Pandal', icon: '🪔' },
-  { id: 'MELA', label: 'Mela', icon: '🎡' },
-  { id: 'OFFER', label: 'Offer', icon: '🛍️' },
-  { id: 'INAUGURATION', label: 'Inauguration', icon: '🎀' }
+  { id: 'ALL', label: 'All', icon: 'âœ¨' },
+  { id: 'PANDAL', label: 'Pandal', icon: 'ðŸª”' },
+  { id: 'MELA', label: 'Mela', icon: 'ðŸŽ¡' },
+  { id: 'OFFER', label: 'Offer', icon: 'ðŸ›ï¸' },
+  { id: 'INAUGURATION', label: 'Inauguration', icon: 'ðŸŽ€' }
 ];
 
 export async function fetchListings({ category = null, city = null, lat = null, lng = null, radiusKm = null, q = null } = {}) {
@@ -783,4 +783,143 @@ export async function deleteAdminAnnouncement(token, id) {
   });
   if (!res.ok) throw new Error('Failed to delete announcement');
   return true;
+}
+
+// ---------------------------------------------------------------------------
+// Client Upgrade Requests ("Become a client" flow)
+// ---------------------------------------------------------------------------
+
+export async function createClientRequest(token, payload) {
+  const res = await fetch(api('/api/client-requests'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    const error = new Error(err?.message || 'Failed to submit client request');
+    error.status = res.status;
+    throw error;
+  }
+  return res.json();
+}
+
+export async function fetchMyClientRequest(token) {
+  const res = await fetch(api('/api/client-requests/my'), {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (res.status === 204) return null;
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    const error = new Error(err?.message || 'Failed to fetch client request');
+    error.status = res.status;
+    throw error;
+  }
+  return res.json();
+}
+
+export async function fetchAdminClientRequests(token, status = null, page = 0, size = 20) {
+  const params = new URLSearchParams();
+  if (status) params.append('status', status);
+  params.append('page', page);
+  params.append('size', size);
+
+  const res = await fetch(api(`/api/admin/client-requests?${params.toString()}`), {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    const error = new Error(err?.message || 'Failed to fetch client requests');
+    error.status = res.status;
+    throw error;
+  }
+  return res.json();
+}
+
+export async function approveAdminClientRequest(token, id) {
+  const res = await fetch(api(`/api/admin/client-requests/${id}/approve`), {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    const error = new Error(err?.message || 'Failed to approve client request');
+    error.status = res.status;
+    throw error;
+  }
+  return res.json();
+}
+
+export async function declineAdminClientRequest(token, id, reason) {
+  const res = await fetch(api(`/api/admin/client-requests/${id}/decline`), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ reason })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    const error = new Error(err?.message || 'Failed to decline client request');
+    error.status = res.status;
+    throw error;
+  }
+  return res.json();
+}
+
+// ---------------------------------------------------------------------------
+// Saved Listings Endpoints
+// ---------------------------------------------------------------------------
+
+export async function fetchSavedListings(token) {
+  const res = await fetch(api('/api/me/saved'), {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    const error = new Error(err?.message || 'Failed to fetch saved listings');
+    error.status = res.status;
+    throw error;
+  }
+  return res.json();
+}
+
+export async function saveListing(token, listingId) {
+  const res = await fetch(api(`/api/me/saved/${listingId}`), {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    const error = new Error(err?.message || 'Failed to save listing');
+    error.status = res.status;
+    throw error;
+  }
+  return res.json();
+}
+
+export async function unsaveListing(token, listingId) {
+  const res = await fetch(api(`/api/me/saved/${listingId}`), {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    const error = new Error(err?.message || 'Failed to unsave listing');
+    error.status = res.status;
+    throw error;
+  }
+  return res.json();
+}
+
+export async function checkListingSaved(token, listingId) {
+  const res = await fetch(api(`/api/me/saved/${listingId}`), {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) return { saved: false };
+  return res.json();
 }

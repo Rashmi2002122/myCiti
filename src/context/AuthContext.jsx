@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { refreshSession, logoutSession, loginWithGoogle, updateMyCoarseLocation } from '../services/api';
+import { refreshSession, logoutSession, loginWithGoogle, updateMyCoarseLocation, getMyProfile } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -73,6 +73,35 @@ export function AuthProvider({ children }) {
 
   const [isInitializing, setIsInitializing] = useState(true);
   const [authError, setAuthError] = useState(null);
+  const [roleChangeNotice, setRoleChangeNotice] = useState(null);
+
+  // Check for role change on user change
+  useEffect(() => {
+    if (user?.role) {
+      const knownRole = localStorage.getItem('myciti_known_role');
+      if (knownRole && knownRole !== user.role) {
+        setRoleChangeNotice({
+          oldRole: knownRole,
+          newRole: user.role
+        });
+      }
+      localStorage.setItem('myciti_known_role', user.role);
+    }
+  }, [user?.role]);
+
+  const refreshUserProfile = useCallback(async () => {
+    const token = accessToken || localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
+    if (!token) return null;
+    try {
+      const profile = await getMyProfile(token);
+      setUser(profile);
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(profile));
+      return profile;
+    } catch (err) {
+      console.warn('Failed to refresh user profile:', err);
+      return null;
+    }
+  }, [accessToken]);
 
   // Restore and validate session in background on mount
   useEffect(() => {
@@ -231,6 +260,9 @@ export function AuthProvider({ children }) {
         refreshCurrentToken,
         updateUserProfile,
         syncLocation,
+        refreshUserProfile,
+        roleChangeNotice,
+        clearRoleChangeNotice: () => setRoleChangeNotice(null),
         isAuthenticated: !!accessToken && !!user,
         isAdmin: user?.role === 'ADMIN',
         isClient: user?.role === 'CLIENT' || user?.role === 'SUBMITTER' || user?.role === 'ADMIN',

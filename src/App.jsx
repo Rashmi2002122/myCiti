@@ -11,18 +11,25 @@ import {
   fetchListings,
   fetchListingById,
   fetchActiveAds,
-  fetchNotifications
+  fetchNotifications,
+  fetchSavedListings,
+  saveListing,
+  unsaveListing
 } from './services/api';
 import AddToHomeScreenBanner from './components/AddToHomeScreenBanner';
 import InstallGuideModal from './components/InstallGuideModal';
 import SplashScreen from './components/SplashScreen';
 import { reverseGeocodeCity } from './utils/locationUtils';
 import { registerPushSubscription } from './utils/pushUtils';
+import { isCategoryAllowed } from './utils/notificationPrefs';
 
 const AdminModal = lazy(() => import('./components/AdminModal'));
 const LoginModal = lazy(() => import('./components/LoginModal'));
 const CompleteProfileModal = lazy(() => import('./components/CompleteProfileModal'));
-const AccountMenuModal = lazy(() => import('./components/AccountMenuModal'));
+const AccountDrawer = lazy(() => import('./components/AccountDrawer'));
+const BecomeClientModal = lazy(() => import('./components/BecomeClientModal'));
+const ClientRequestDeclineSheet = lazy(() => import('./components/ClientRequestDeclineSheet'));
+const AccessDeniedModal = lazy(() => import('./components/AccessDeniedModal'));
 const MyPostsDashboard = lazy(() => import('./components/MyPostsDashboard'));
 const PostAdvertisementModal = lazy(() => import('./components/PostAdvertisementModal'));
 const NotificationCenterModal = lazy(() => import('./components/NotificationCenterModal'));
@@ -33,19 +40,38 @@ const CampaignsDashboardModal = lazy(() => import('./components/CampaignsDashboa
 const SAVED_STORAGE_KEY = 'myciti_saved_listings';
 
 export default function App() {
-  const { user, accessToken, isAuthenticated, isAdmin, isClient, canPost, isConsumer, isProfileComplete, handleLogout, syncLocation } = useAuth();
+  const {
+    user,
+    accessToken,
+    isAuthenticated,
+    isAdmin,
+    isClient,
+    canPost,
+    isConsumer,
+    isProfileComplete,
+    handleLogout,
+    syncLocation,
+    roleChangeNotice,
+    clearRoleChangeNotice,
+    refreshUserProfile
+  } = useAuth();
   const [listings, setListings] = useState([]);
   const [selectedListing, setSelectedListing] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('map'); // 'home' | 'map' | 'saved'
   const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [adminInitialSection, setAdminInitialSection] = useState('QUEUE');
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+  const [isBecomeClientOpen, setIsBecomeClientOpen] = useState(false);
+  const [declineSheetRequest, setDeclineSheetRequest] = useState(null);
+  const [accessDeniedInfo, setAccessDeniedInfo] = useState(null); // { isOpen, requiredRole }
   const [isCompleteProfileOpen, setIsCompleteProfileOpen] = useState(false);
   const [isMyPostsOpen, setIsMyPostsOpen] = useState(false);
   const [isPostAdOpen, setIsPostAdOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [notificationsInitialTab, setNotificationsInitialTab] = useState('announcements');
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
   const [activePopupNotification, setActivePopupNotification] = useState(null);
   const [isCreateCampaignOpen, setIsCreateCampaignOpen] = useState(false);
@@ -106,26 +132,96 @@ export default function App() {
     }
   }, [darkMode]);
 
-  // Save/unsave handler
-  const handleToggleSave = useCallback((listingId) => {
-    setSavedIds((prev) => {
-      const exists = prev.includes(listingId);
-      const next = exists ? prev.filter((id) => id !== listingId) : [...prev, listingId];
-      try {
-        localStorage.setItem(SAVED_STORAGE_KEY, JSON.stringify(next));
-      } catch (e) {
-        console.error('Failed to save to localStorage', e);
+  // Swipe right from left edge to open AccountDrawer
+  useEffect(() => {
+    let startX = null;
+    let startY = null;
+
+    const handleTouchStart = (e) => {
+      // Only detect if started within 30px of left screen edge
+      if (e.touches.length === 1 && e.touches[0].clientX <= 30) {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      } else {
+        startX = null;
+        startY = null;
       }
-      return next;
-    });
+    };
+
+    const handleTouchEnd = (e) => {
+      if (startX === null || startY === null) return;
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      const diffX = endX - startX;
+      const diffY = Math.abs(endY - startY);
+
+      // Swiped right more than 50px and horizontally
+      if (diffX > 50 && diffY < 80) {
+        setIsAccountMenuOpen(true);
+      }
+      startX = null;
+      startY = null;
+    };
+
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
   }, []);
+
+  // Sync saved listings from backend when authenticated
+  useEffect(() => {
+    if (!accessToken || !isAuthenticated) return;
+    fetchSavedListings(accessToken)
+      .then((savedListings) => {
+        if (Array.isArray(savedListings)) {
+          const backendIds = savedListings.map((l) => l.id);
+          setSavedIds((localIds) => {
+            const merged = Array.from(new Set([...localIds, ...backendIds]));
+            try {
+              localStorage.setItem(SAVED_STORAGE_KEY, JSON.stringify(merged));
+            } catch {}
+            return merged;
+          });
+        }
+      })
+      .catch((e) => console.warn('Failed to fetch backend saved listings:', e));
+  }, [accessToken, isAuthenticated]);
+
+  // Save/unsave handler with offline local cache + backend sync
+  const handleToggleSave = useCallback(async (listingId) => {
+    const exists = savedIds.includes(listingId);
+    const next = exists ? savedIds.filter((id) => id !== listingId) : [...savedIds, listingId];
+    setSavedIds(next);
+    try {
+      localStorage.setItem(SAVED_STORAGE_KEY, JSON.stringify(next));
+    } catch (e) {
+      console.error('Failed to save to localStorage', e);
+    }
+
+    if (accessToken) {
+      try {
+        if (exists) {
+          await unsaveListing(accessToken, listingId);
+        } else {
+          await saveListing(accessToken, listingId);
+        }
+        if (refreshUserProfile) refreshUserProfile();
+      } catch (err) {
+        console.warn('Backend save listing sync notice:', err);
+      }
+    }
+  }, [savedIds, accessToken, refreshUserProfile]);
 
   // Universal Share Handler (Web Share API + fallback copy link)
   const handleShare = useCallback(async (listing) => {
     const shareUrl = `${window.location.origin}/?listingId=${listing.id}`;
     const shareData = {
       title: `${listing.title} - myCiti`,
-      text: `${listing.title} (${listing.category})\n📍 ${listing.landmark}, ${listing.address}`,
+      text: `${listing.title} (${listing.category})\nÃ°Å¸â€œÂ ${listing.landmark}, ${listing.address}`,
       url: shareUrl,
     };
 
@@ -227,9 +323,12 @@ export default function App() {
         return true;
       });
 
+      // Filter by category preference before alerting
+      const allowedBrandNew = brandNew.filter((n) => isCategoryAllowed(n.category));
+
       // Show in-app visual popup immediately
-      if (brandNew.length > 0) {
-        setActivePopupNotification(brandNew[0]);
+      if (allowedBrandNew.length > 0) {
+        setActivePopupNotification(allowedBrandNew[0]);
       }
 
       // Also trigger native phone notification bar alert if permission is granted
@@ -238,7 +337,7 @@ export default function App() {
         'Notification' in window &&
         Notification.permission === 'granted'
       ) {
-        for (const notif of brandNew) {
+        for (const notif of allowedBrandNew) {
           if ('serviceWorker' in navigator) {
             try {
               const reg = await navigator.serviceWorker.ready;
@@ -296,6 +395,15 @@ export default function App() {
   const handleSelectListing = useCallback((listing) => {
     setSelectedListing(listing);
   }, []);
+
+  const handleOpenNotifications = useCallback((tab = 'announcements') => {
+    if (!isAuthenticated) {
+      setIsLoginOpen(true);
+      return;
+    }
+    setNotificationsInitialTab(tab);
+    setIsNotificationsOpen(true);
+  }, [isAuthenticated]);
 
   const sponsoredListingIds = useMemo(() => {
     return activeAds
@@ -523,13 +631,10 @@ export default function App() {
         selectedCity={selectedCity}
         onSelectCity={handleSelectCity}
         unreadCount={unreadNotificationsCount}
-        onOpenNotifications={() => {
-          if (!isAuthenticated) {
-            setIsLoginOpen(true);
-          } else {
-            setIsNotificationsOpen(true);
-          }
-        }}
+        onOpenNotifications={() => handleOpenNotifications('announcements')}
+        onOpenAccountDrawer={() => setIsAccountMenuOpen(true)}
+        user={user}
+        isAuthenticated={isAuthenticated}
       />
 
       {/* Main Views */}
@@ -623,13 +728,7 @@ export default function App() {
         onTabChange={(tab) => setActiveTab(tab)}
         user={user}
         isAuthenticated={isAuthenticated}
-        onAccountClick={() => {
-          if (!isAuthenticated) {
-            setIsLoginOpen(true);
-          } else {
-            setIsAccountMenuOpen(true);
-          }
-        }}
+        onAccountClick={() => setIsAccountMenuOpen(true)}
       />
 
       {/* Lazy Loaded Modals */}
@@ -640,6 +739,7 @@ export default function App() {
             onClose={() => setIsAdminOpen(false)}
             onListingChanged={loadListings}
             onOpenCreateAnnouncement={() => setIsCreateAnnouncementOpen(true)}
+            initialSection={adminInitialSection}
           />
         )}
 
@@ -651,29 +751,85 @@ export default function App() {
         )}
 
         {isAccountMenuOpen && (
-          <AccountMenuModal
+          <AccountDrawer
             isOpen={isAccountMenuOpen}
             onClose={() => setIsAccountMenuOpen(false)}
+            onNavigate={(tab) => setActiveTab(tab)}
             onOpenCompleteProfile={() => setIsCompleteProfileOpen(true)}
-            onOpenAdminPanel={() => setIsAdminOpen(true)}
             onOpenMyPosts={() => {
               if (!canPost) {
-                setIsCompleteProfileOpen(true);
+                setAccessDeniedInfo({ isOpen: true, requiredRole: 'CLIENT' });
               } else {
                 setIsMyPostsOpen(true);
               }
             }}
             onOpenPostAd={() => {
               if (!canPost) {
-                setIsCompleteProfileOpen(true);
+                setAccessDeniedInfo({ isOpen: true, requiredRole: 'CLIENT' });
               } else {
                 setEditingSubmission(null);
                 setIsPostAdOpen(true);
               }
             }}
-            onOpenCampaigns={() => setIsCampaignsDashboardOpen(true)}
+            onOpenCampaigns={() => {
+              if (!canPost) {
+                setAccessDeniedInfo({ isOpen: true, requiredRole: 'CLIENT' });
+              } else {
+                setIsCampaignsDashboardOpen(true);
+              }
+            }}
+            onOpenAdmin={(section) => {
+              if (!isAdmin) {
+                setAccessDeniedInfo({ isOpen: true, requiredRole: 'ADMIN' });
+              } else {
+                setAdminInitialSection(section || 'QUEUE');
+                setIsAdminOpen(true);
+              }
+            }}
+            onOpenNotifications={(tab) => handleOpenNotifications(tab || 'announcements')}
+            onOpenLogin={() => setIsLoginOpen(true)}
+            onOpenBecomeClient={() => setIsBecomeClientOpen(true)}
+            onOpenDeclineInfo={(req) => setDeclineSheetRequest(req)}
             darkMode={darkMode}
             onToggleDarkMode={() => setDarkMode(!darkMode)}
+          />
+        )}
+
+        {isBecomeClientOpen && (
+          <BecomeClientModal
+            isOpen={isBecomeClientOpen}
+            onClose={() => setIsBecomeClientOpen(false)}
+            onSuccess={() => {
+              if (refreshUserProfile) refreshUserProfile();
+            }}
+          />
+        )}
+
+        {declineSheetRequest && (
+          <ClientRequestDeclineSheet
+            isOpen={!!declineSheetRequest}
+            onClose={() => setDeclineSheetRequest(null)}
+            request={declineSheetRequest}
+            onReapply={() => {
+              setDeclineSheetRequest(null);
+              setIsBecomeClientOpen(true);
+            }}
+          />
+        )}
+
+        {accessDeniedInfo?.isOpen && (
+          <AccessDeniedModal
+            isOpen={accessDeniedInfo.isOpen}
+            onClose={() => setAccessDeniedInfo(null)}
+            requiredRole={accessDeniedInfo.requiredRole}
+            onBecomeClient={() => {
+              setAccessDeniedInfo(null);
+              setIsBecomeClientOpen(true);
+            }}
+            onGoHome={() => {
+              setAccessDeniedInfo(null);
+              setActiveTab('map');
+            }}
           />
         )}
 
@@ -765,6 +921,7 @@ export default function App() {
           <NotificationCenterModal
             isOpen={isNotificationsOpen}
             onClose={() => setIsNotificationsOpen(false)}
+            initialTab={notificationsInitialTab}
             onSelectListingId={async (listingId) => {
               try {
                 const listing = await fetchListingById(listingId);
@@ -820,6 +977,30 @@ export default function App() {
 
       {/* Full-Screen Animated Splash Screen (once per session, force with ?splash=1) */}
       {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
+
+      {/* Role Change Celebration Toast */}
+      {roleChangeNotice && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[4500] max-w-sm w-[92%] bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between gap-3 animate-in slide-in-from-top-4 duration-300 pointer-events-auto">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="text-xl flex-shrink-0">🎉</span>
+            <div className="text-xs min-w-0">
+              <p className="font-black">Role Updated!</p>
+              <p className="text-emerald-100 font-medium leading-tight">
+                {roleChangeNotice.newRole === 'CLIENT'
+                  ? 'Your client application has been approved! You can now publish listings and run ads.'
+                  : `Your role is now ${roleChangeNotice.newRole}.`}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={clearRoleChangeNotice}
+            className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white flex-shrink-0 cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
