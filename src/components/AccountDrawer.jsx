@@ -23,6 +23,7 @@ export default function AccountDrawer({
   onOpenBecomeClient,
   onOpenDeclineInfo,
   onOpenSettings,
+  onOpenBusinessProfile,
   darkMode,
   onToggleDarkMode,
   triggerRef
@@ -223,7 +224,11 @@ export default function AccountDrawer({
       roles: ['CLIENT', 'ADMIN'],
       action: () => {
         onClose();
-        if (onOpenCompleteProfile) onOpenCompleteProfile();
+        if (onOpenBusinessProfile) {
+          onOpenBusinessProfile();
+        } else if (onOpenCompleteProfile) {
+          onOpenCompleteProfile();
+        }
       }
     },
     {

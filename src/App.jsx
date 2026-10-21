@@ -38,6 +38,7 @@ const CreateAnnouncementModal = lazy(() => import('./components/CreateAnnounceme
 const CampaignsDashboardModal = lazy(() => import('./components/CampaignsDashboardModal'));
 const SettingsModal = lazy(() => import('./components/SettingsModal'));
 const ClientPublicProfileView = lazy(() => import('./components/ClientPublicProfileView'));
+const ClientProfileEditModal = lazy(() => import('./components/ClientProfileEditModal'));
 
 const SAVED_STORAGE_KEY = 'myciti_saved_listings';
 
@@ -85,6 +86,7 @@ export default function App() {
   const [activeAds, setActiveAds] = useState([]);
   const [editingSubmission, setEditingSubmission] = useState(null);
   const [viewingClientSlug, setViewingClientSlug] = useState(null);
+  const [isBusinessProfileOpen, setIsBusinessProfileOpen] = useState(false);
   const [selectedCity, setSelectedCity] = useState(() => {
     try {
       return localStorage.getItem('myciti_selected_city') || 'Kolkata';
@@ -423,6 +425,26 @@ export default function App() {
     }
   }, []);
 
+  const handleOpenBusinessProfile = useCallback(() => {
+    if (!isAuthenticated) {
+      setIsLoginOpen(true);
+      return;
+    }
+    if (!canPost) {
+      setAccessDeniedInfo({ isOpen: true, requiredRole: 'CLIENT' });
+      return;
+    }
+    setIsBusinessProfileOpen(true);
+    window.history.pushState({}, '', '/account/business-profile');
+  }, [isAuthenticated, canPost]);
+
+  const handleCloseBusinessProfile = useCallback(() => {
+    setIsBusinessProfileOpen(false);
+    if (window.location.pathname.includes('business-profile')) {
+      window.history.pushState({}, '', '/');
+    }
+  }, []);
+
   const sponsoredListingIds = useMemo(() => {
     return activeAds
       .map((a) => a.listingId)
@@ -510,6 +532,22 @@ export default function App() {
       // Settings route
       else if (path === '/settings' || hash === '#settings') {
         setIsSettingsOpen(true);
+      }
+      // Client business profile edit route
+      else if (
+        path === '/account/business-profile' ||
+        path === '/business-profile' ||
+        hash === '#business-profile' ||
+        hash === '#account-business-profile'
+      ) {
+        if (!isAuthenticated) {
+          setIsLoginOpen(true);
+        } else if (!canPost) {
+          setAccessDeniedInfo({ isOpen: true, requiredRole: 'CLIENT' });
+          window.history.replaceState({}, '', '/');
+        } else {
+          setIsBusinessProfileOpen(true);
+        }
       }
       // Client public profile route (/c/:slug, #c-:slug, or #/c/:slug)
       else if (path.startsWith('/c/') || hash.startsWith('#c-') || hash.startsWith('#/c/')) {
@@ -890,6 +928,7 @@ export default function App() {
             onOpenLogin={() => setIsLoginOpen(true)}
             onOpenBecomeClient={() => setIsBecomeClientOpen(true)}
             onOpenDeclineInfo={(req) => setDeclineSheetRequest(req)}
+            onOpenBusinessProfile={handleOpenBusinessProfile}
             onOpenSettings={() => setIsSettingsOpen(true)}
             darkMode={darkMode}
             onToggleDarkMode={() => setDarkMode(!darkMode)}
@@ -1092,6 +1131,21 @@ export default function App() {
             onToggleSave={handleToggleSave}
             onShareListing={handleShare}
             accessToken={accessToken}
+          />
+        )}
+
+        {isBusinessProfileOpen && (
+          <ClientProfileEditModal
+            isOpen={isBusinessProfileOpen}
+            onClose={handleCloseBusinessProfile}
+            accessToken={accessToken}
+            onViewPublicProfile={(slug) => {
+              handleCloseBusinessProfile();
+              handleOpenClientProfile(slug);
+            }}
+            onProfileUpdated={() => {
+              if (refreshUserProfile) refreshUserProfile();
+            }}
           />
         )}
       </Suspense>
