@@ -228,7 +228,7 @@ export default function App() {
     const shareUrl = `${window.location.origin}/?listingId=${listing.id}`;
     const shareData = {
       title: `${listing.title} - myCiti`,
-      text: `${listing.title} (${listing.category})\nÃ°Å¸â€œÂ ${listing.landmark}, ${listing.address}`,
+      text: `${listing.title} (${listing.category})\n📍 ${listing.landmark}, ${listing.address}`,
       url: shareUrl,
     };
 

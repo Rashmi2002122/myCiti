@@ -14,38 +14,38 @@ export const CATEGORIES = {
     label: 'Pandal',
     color: '#f0592a',
     badgeBg: 'bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-900',
-    icon: 'ðŸª”',
+    icon: '🪔',
     description: 'Durga Puja Pandals & Installations'
   },
   MELA: {
     label: 'Mela',
     color: '#8a4fe0',
     badgeBg: 'bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-900',
-    icon: 'ðŸŽ¡',
+    icon: '🎡',
     description: 'Carnivals, Fairs & Food Streets'
   },
   OFFER: {
     label: 'Offer',
     color: '#17a673',
     badgeBg: 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900',
-    icon: 'ðŸ›ï¸',
+    icon: '🛍️',
     description: 'Festive Discounts & Sales'
   },
   INAUGURATION: {
     label: 'Inauguration',
     color: '#2f7bff',
     badgeBg: 'bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-900',
-    icon: 'ðŸŽ€',
+    icon: '🎀',
     description: 'Store Launches & Openings'
   }
 };
 
 export const FILTER_CHIPS = [
-  { id: 'ALL', label: 'All', icon: 'âœ¨' },
-  { id: 'PANDAL', label: 'Pandal', icon: 'ðŸª”' },
-  { id: 'MELA', label: 'Mela', icon: 'ðŸŽ¡' },
-  { id: 'OFFER', label: 'Offer', icon: 'ðŸ›ï¸' },
-  { id: 'INAUGURATION', label: 'Inauguration', icon: 'ðŸŽ€' }
+  { id: 'ALL', label: 'All', icon: '✨' },
+  { id: 'PANDAL', label: 'Pandal', icon: '🪔' },
+  { id: 'MELA', label: 'Mela', icon: '🎡' },
+  { id: 'OFFER', label: 'Offer', icon: '🛍️' },
+  { id: 'INAUGURATION', label: 'Inauguration', icon: '🎀' }
 ];
 
 export async function fetchListings({ category = null, city = null, lat = null, lng = null, radiusKm = null, q = null } = {}) {

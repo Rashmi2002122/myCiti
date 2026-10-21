@@ -193,7 +193,7 @@ export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCr
         <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-950/60 text-city-blue flex items-center justify-center font-bold">
-              ðŸ› ï¸
+              🛠️
             </div>
             <div>
               <h2 className="text-lg font-black text-slate-900 dark:text-slate-100">
@@ -281,7 +281,7 @@ export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCr
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
-              ðŸ—ºï¸ All Listings Database ({listings.length})
+              🗺️ All Listings Database ({listings.length})
             </button>
             <button
               type="button"
@@ -295,7 +295,7 @@ export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCr
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
-              ðŸ“¢ Ads & Announcements
+              📢 Ads & Announcements
             </button>
           </div>
         )}
@@ -306,7 +306,7 @@ export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCr
             /* Restricted Message - Admin credentials are never shown to users */
             <div className="max-w-sm mx-auto py-12 text-center space-y-4">
               <div className="w-16 h-16 bg-blue-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto text-3xl shadow-sm">
-                ðŸ›¡ï¸
+                🛡️
               </div>
               <h3 className="font-extrabold text-lg text-slate-800 dark:text-slate-100">
                 Administrator Access Restricted
@@ -375,10 +375,10 @@ export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCr
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     className="w-full px-3.5 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100"
                   >
-                    <option value="PANDAL">ðŸª” Pandal</option>
-                    <option value="MELA">ðŸŽ¡ Mela</option>
-                    <option value="OFFER">ðŸ›ï¸ Offer</option>
-                    <option value="INAUGURATION">ðŸŽ€ Inauguration</option>
+                    <option value="PANDAL">🪔 Pandal</option>
+                    <option value="MELA">🎡 Mela</option>
+                    <option value="OFFER">🛍️ Offer</option>
+                    <option value="INAUGURATION">🎀 Inauguration</option>
                   </select>
                 </div>
 
@@ -389,8 +389,8 @@ export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCr
                     onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                     className="w-full px-3.5 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100"
                   >
-                    <option value="PUBLISHED">ðŸŸ¢ Published (Live on Map)</option>
-                    <option value="DRAFT">âšª Draft (Hidden from Public)</option>
+                    <option value="PUBLISHED">🟢 Published (Live on Map)</option>
+                    <option value="DRAFT">⚪ Draft (Hidden from Public)</option>
                   </select>
                 </div>
 
@@ -434,7 +434,7 @@ export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCr
                 <div className="sm:col-span-2 space-y-2">
                   <div className="flex items-center justify-between">
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                      ðŸ“ Pick Location on Map (Click to set Pin)
+                      📍 Pick Location on Map (Click to set Pin)
                     </label>
                     <span className="text-[11px] font-mono text-city-blue">
                       {formData.latitude.toFixed(4)}, {formData.longitude.toFixed(4)}

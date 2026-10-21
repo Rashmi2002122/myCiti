@@ -80,7 +80,7 @@ export default function TopBar({
             onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
             className="flex items-center gap-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-3.5 py-2.5 rounded-full shadow-float border border-white/60 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors"
           >
-            <span className="text-xl">ðŸª”</span>
+            <span className="text-xl">🪔</span>
             <span className="font-extrabold text-base tracking-tight text-slate-800 dark:text-slate-100">
               my<span className="text-city-blue">Citi</span>
             </span>
@@ -111,7 +111,7 @@ export default function TopBar({
                     }`}
                   >
                     <span>{c.name}</span>
-                    {selectedCity === c.id && <span className="text-city-blue text-xs">âœ“</span>}
+                    {selectedCity === c.id && <span className="text-city-blue text-xs">✓</span>}
                   </button>
                 ))}
               </div>
