@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tag, MapPin, Clock, Navigation, Bookmark, Share2 } from 'lucide-react';
+import { Tag, MapPin, Clock, Navigation, Bookmark, Share2, Store } from 'lucide-react';
 import { CATEGORIES } from '../services/api';
 import { getOptimizedImageUrl } from '../utils/imageUtils';
 
@@ -14,6 +14,16 @@ export default function ListingCard({
   const categoryConfig = CATEGORIES[listing.category] || CATEGORIES.PANDAL;
   const rawImageUrl = listing.primaryImageUrl || (listing.images && listing.images[0]?.url);
   const imageUrl = getOptimizedImageUrl(rawImageUrl, 600, 375);
+
+  const handleClientClick = (e) => {
+    e.stopPropagation();
+    if (onOpenClientProfile) {
+      onOpenClientProfile(listing.clientSlug);
+    } else {
+      window.history.pushState({}, '', `/c/${listing.clientSlug}`);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    }
+  };
 
   return (
     <article
@@ -30,42 +40,40 @@ export default function ListingCard({
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-3xl">
+          <div className="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-[#cfe7ff] to-[#eaf4ff] dark:from-slate-800 dark:to-slate-900">
             {categoryConfig.icon}
           </div>
         )}
 
-        {/* Category Pill */}
+        {/* Category badge */}
         <div className="absolute top-2.5 left-2.5">
           <span
-            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold backdrop-blur-md shadow-sm ${categoryConfig.badgeBg}`}
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border backdrop-blur-md shadow-xs ${categoryConfig.badgeBg}`}
           >
             <span>{categoryConfig.icon}</span>
             <span>{categoryConfig.label}</span>
           </span>
         </div>
 
-        {/* Status Badge */}
-        <div className="absolute top-2.5 right-2.5">
+        {/* Distance or Open status pill */}
+        <div className="absolute top-2.5 right-2.5 flex items-center gap-1">
           {listing.openNow ? (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/90 text-white backdrop-blur-md shadow-sm">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/90 text-white backdrop-blur-md shadow-xs">
               <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
               Open
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/90 text-white backdrop-blur-md shadow-sm">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-black/50 text-white backdrop-blur-md">
               Closed
             </span>
           )}
-        </div>
 
-        {/* Distance Badge if available */}
-        {listing.distanceKm !== null && listing.distanceKm !== undefined && (
-          <div className="absolute bottom-2.5 left-2.5 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-            <Navigation className="w-2.5 h-2.5 fill-white" />
-            <span>{listing.distanceKm} km away</span>
-          </div>
-        )}
+          {listing.distanceKm !== undefined && listing.distanceKm !== null && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-black/60 text-white backdrop-blur-md">
+              {listing.distanceKm} km
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Content */}
@@ -75,27 +83,35 @@ export default function ListingCard({
           <div
             role="button"
             tabIndex={0}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (onOpenClientProfile) {
-                onOpenClientProfile(listing.clientSlug);
-              } else {
-                window.history.pushState({}, '', `/c/${listing.clientSlug}`);
-                window.dispatchEvent(new PopStateEvent('popstate'));
+            onClick={handleClientClick}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleClientClick(e);
               }
             }}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-city-blue dark:hover:text-sky-400 active:scale-95 transition-all cursor-pointer w-fit group/client"
+            className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-700 dark:text-slate-300 hover:text-city-blue dark:hover:text-sky-400 active:scale-95 transition-all cursor-pointer w-fit group/client bg-slate-100/90 dark:bg-slate-800/90 px-2.5 py-0.5 rounded-full border border-slate-200/60 dark:border-slate-700/60 shadow-2xs"
           >
-            <span className="truncate group-hover/client:underline">
-              @{listing.clientBusinessName || listing.clientSlug}
+            {listing.clientLogoUrl ? (
+              <img
+                src={listing.clientLogoUrl}
+                alt=""
+                className="w-3.5 h-3.5 rounded-full object-cover flex-shrink-0"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            ) : (
+              <Store className="w-3 h-3 text-city-blue dark:text-sky-400 flex-shrink-0" />
+            )}
+            <span className="truncate max-w-[170px] group-hover/client:underline">
+              {listing.clientBusinessName || listing.clientSlug}
             </span>
             {listing.clientVerified && (
               <span
-                className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-[#1d9bf0] text-white flex-shrink-0 shadow-sm"
+                className="inline-flex items-center justify-center w-3 h-3 rounded-full bg-[#1d9bf0] text-white flex-shrink-0 shadow-xs"
                 title="Verified business"
               >
                 <svg
-                  className="w-2.5 h-2.5 fill-current stroke-current"
+                  className="w-2 h-2 fill-current stroke-current"
                   viewBox="0 0 24 24"
                   strokeWidth="3"
                   stroke="currentColor"

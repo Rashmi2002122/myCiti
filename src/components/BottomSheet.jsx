@@ -1,5 +1,18 @@
 import React, { useState } from 'react';
-import { X, Navigation, Bookmark, Share2, Clock, MapPin, Phone, Tag, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import {
+  X,
+  Navigation,
+  Bookmark,
+  Share2,
+  Clock,
+  MapPin,
+  Phone,
+  Tag,
+  ChevronLeft,
+  ChevronRight,
+  Check,
+  Store
+} from 'lucide-react';
 import { CATEGORIES } from '../services/api';
 
 export default function BottomSheet({ listing, onClose, isSaved, onToggleSave, onOpenClientProfile }) {
@@ -28,41 +41,39 @@ export default function BottomSheet({ listing, onClose, isSaved, onToggleSave, o
 
   const handleShare = async () => {
     const shareData = {
-      title: `${listing.title} - myCiti`,
-      text: `${listing.title} (${categoryConfig.label})\n${listing.landmark}, ${listing.address}`,
-      url: `${window.location.origin}/?listingId=${listing.id}`
+      title: `${listing.title} on myCiti`,
+      text: `${listing.title} - ${listing.landmark}, ${listing.city || 'Kolkata'}`,
+      url: window.location.href,
     };
 
     if (navigator.share) {
       try {
         await navigator.share(shareData);
       } catch (err) {
-        if (err.name !== 'AbortError') {
-          copyFallback(shareData.url);
-        }
+        if (err.name !== 'AbortError') copyToClipboard();
       }
     } else {
-      copyFallback(shareData.url);
+      copyToClipboard();
     }
   };
 
-  const copyFallback = (url) => {
-    navigator.clipboard.writeText(url);
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(window.location.href);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop with higher z-index to overlay over profile views if opened from inside */}
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-[2000] animate-in fade-in duration-200"
+        className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-[3600] animate-in fade-in duration-200"
       />
 
       {/* Sheet Container */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-[2001] max-w-xl mx-auto bg-white dark:bg-slate-900 rounded-t-[30px] shadow-sheet border-t border-slate-200/50 dark:border-slate-800 animate-in slide-in-from-bottom duration-250 max-h-[85dvh] flex flex-col overflow-hidden"
+        className="fixed bottom-0 left-0 right-0 z-[3601] max-w-xl mx-auto bg-white dark:bg-slate-900 rounded-t-[30px] shadow-sheet border-t border-slate-200/50 dark:border-slate-800 animate-in slide-in-from-bottom duration-250 max-h-[85dvh] flex flex-col overflow-hidden"
       >
         {/* Drag handle & close header */}
         <div className="relative pt-3 pb-2 px-6 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
@@ -74,65 +85,67 @@ export default function BottomSheet({ listing, onClose, isSaved, onToggleSave, o
               <span>{categoryConfig.icon}</span>
               <span>{categoryConfig.label}</span>
             </span>
+
             {listing.openNow ? (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Open now
+                Open Now
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-100 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
                 Closed
               </span>
             )}
-            {listing.distanceKm !== null && listing.distanceKm !== undefined && (
-              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                &bull; {listing.distanceKm} km away
-              </span>
-            )}
           </div>
+
           <button
             onClick={onClose}
-            aria-label="Close sheet"
-            className="min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors mt-2"
+            aria-label="Close details"
+            className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 flex items-center justify-center transition-colors mt-2"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Scrollable Content */}
-        <div className="overflow-y-auto px-5 py-4 space-y-4">
-          {/* Photo Carousel */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-5">
+          {/* Image Carousel / Hero Image */}
           {images.length > 0 && (
-            <div className="relative rounded-[22px] overflow-hidden bg-slate-100 dark:bg-slate-800 aspect-[16/10] shadow-sm">
+            <div className="relative aspect-[16/10] w-full rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 shadow-inner">
               <img
-                src={images[activeImageIndex]?.url}
+                src={images[activeImageIndex].url}
                 alt={listing.title}
-                loading="lazy"
-                className="w-full h-full object-cover transition-opacity duration-300"
+                className="w-full h-full object-cover transition-all duration-300"
               />
+
+              {/* Prev / Next buttons for multi-image */}
               {images.length > 1 && (
                 <>
                   <button
                     onClick={() => setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1))}
-                    aria-label="Previous photo"
-                    className="absolute left-2.5 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-xs transition-colors"
+                    aria-label="Previous image"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center backdrop-blur-xs hover:bg-black/70 transition-all"
                   >
-                    <ChevronLeft className="w-5 h-5" />
+                    <ChevronLeft className="w-4 h-4" />
                   </button>
+
                   <button
                     onClick={() => setActiveImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0))}
-                    aria-label="Next photo"
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-xs transition-colors"
+                    aria-label="Next image"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center backdrop-blur-xs hover:bg-black/70 transition-all"
                   >
-                    <ChevronRight className="w-5 h-5" />
+                    <ChevronRight className="w-4 h-4" />
                   </button>
-                  <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex gap-1.5 bg-black/30 backdrop-blur-xs px-2.5 py-1 rounded-full">
-                    {images.map((_, i) => (
-                      <span
-                        key={i}
+
+                  {/* Dot Indicators */}
+                  <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-full backdrop-blur-xs">
+                    {images.map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setActiveImageIndex(idx)}
+                        aria-label={`Go to image ${idx + 1}`}
                         className={`w-1.5 h-1.5 rounded-full transition-all ${
-                          i === activeImageIndex ? 'bg-white w-3' : 'bg-white/50'
+                          idx === activeImageIndex ? 'bg-white w-3' : 'bg-white/60'
                         }`}
                       />
                     ))}
@@ -142,18 +155,29 @@ export default function BottomSheet({ listing, onClose, isSaved, onToggleSave, o
             </div>
           )}
 
-          {/* Title & Offer */}
+          {/* Title & Business Attribution */}
           <div>
             <h2 className="text-xl font-extrabold text-slate-900 dark:text-slate-50 leading-tight">
               {listing.title}
             </h2>
 
-            {/* Client Attribution Link */}
+            {/* Business Profile Attribution Card */}
             {listing.clientSlug && (
-              <div className="mt-1.5 mb-1">
-                <button
-                  type="button"
-                  onClick={() => {
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  onClose();
+                  if (onOpenClientProfile) {
+                    onOpenClientProfile(listing.clientSlug);
+                  } else {
+                    window.history.pushState({}, '', `/c/${listing.clientSlug}`);
+                    window.dispatchEvent(new PopStateEvent('popstate'));
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
                     onClose();
                     if (onOpenClientProfile) {
                       onOpenClientProfile(listing.clientSlug);
@@ -161,29 +185,52 @@ export default function BottomSheet({ listing, onClose, isSaved, onToggleSave, o
                       window.history.pushState({}, '', `/c/${listing.clientSlug}`);
                       window.dispatchEvent(new PopStateEvent('popstate'));
                     }
-                  }}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-city-blue dark:hover:text-sky-400 active:scale-95 transition-all cursor-pointer group"
-                >
-                  <span className="text-slate-400 font-normal">Posted by</span>
-                  <span className="font-bold text-slate-900 dark:text-slate-100 group-hover:underline">
-                    {listing.clientBusinessName || listing.clientSlug}
-                  </span>
-                  {listing.clientVerified && (
-                    <span
-                      className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-[#1d9bf0] text-white flex-shrink-0 shadow-sm"
-                      title="Verified client"
-                    >
-                      <svg
-                        className="w-2.5 h-2.5 fill-current stroke-current"
-                        viewBox="0 0 24 24"
-                        strokeWidth="3"
-                        stroke="currentColor"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                      </svg>
+                  }
+                }}
+                className="mt-3 group relative flex items-center justify-between gap-3 p-3 rounded-2xl bg-gradient-to-r from-sky-50/80 via-white to-blue-50/50 dark:from-slate-800/90 dark:via-slate-800/70 dark:to-sky-950/40 border border-sky-100 dark:border-slate-700/80 hover:border-city-blue/40 dark:hover:border-sky-500/40 shadow-xs hover:shadow-md transition-all cursor-pointer active:scale-[0.99]"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  {/* Business Logo or Avatar */}
+                  <div className="relative w-11 h-11 rounded-xl overflow-hidden flex-shrink-0 bg-white dark:bg-slate-700 shadow-xs border border-slate-200/60 dark:border-slate-600 flex items-center justify-center">
+                    {listing.clientLogoUrl ? (
+                      <img
+                        src={listing.clientLogoUrl}
+                        alt={listing.clientBusinessName || 'Business profile'}
+                        className="w-full h-full object-cover"
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    ) : (
+                      <Store className="w-5 h-5 text-city-blue dark:text-sky-400" />
+                    )}
+                  </div>
+
+                  {/* Business Name & Tag */}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="font-extrabold text-sm text-slate-900 dark:text-white truncate group-hover:text-city-blue dark:group-hover:text-sky-400 transition-colors">
+                        {listing.clientBusinessName || listing.clientSlug}
+                      </span>
+                      {listing.clientVerified && (
+                        <span
+                          className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-[#1d9bf0] text-white flex-shrink-0 shadow-sm"
+                          title="Verified business"
+                        >
+                          <svg className="w-2.5 h-2.5 fill-current stroke-current" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                          </svg>
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[11px] text-city-blue dark:text-sky-400 font-semibold flex items-center gap-1 mt-0.5">
+                      View business profile & all posts
                     </span>
-                  )}
-                </button>
+                  </div>
+                </div>
+
+                {/* Right Arrow Action */}
+                <div className="w-7 h-7 rounded-full bg-white dark:bg-slate-700 shadow-xs flex items-center justify-center flex-shrink-0 text-slate-400 group-hover:text-city-blue dark:group-hover:text-sky-400 group-hover:translate-x-0.5 transition-all">
+                  <ChevronRight className="w-4 h-4" />
+                </div>
               </div>
             )}
 
