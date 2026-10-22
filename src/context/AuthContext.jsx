@@ -48,6 +48,22 @@ function clearSessionStorage() {
   localStorage.removeItem(USER_STORAGE_KEY);
   localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
   localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
+  try {
+    sessionStorage.clear();
+  } catch (_) {}
+
+  // Service Worker & CacheStorage hygiene: purge cached authenticated API and user data
+  if (typeof window !== 'undefined' && 'caches' in window) {
+    try {
+      caches.keys().then((names) => {
+        names.forEach((name) => {
+          if (name.includes('api-') || name.includes('notification') || name.includes('user')) {
+            caches.delete(name);
+          }
+        });
+      }).catch(() => {});
+    } catch (_) {}
+  }
 }
 
 export function AuthProvider({ children }) {
