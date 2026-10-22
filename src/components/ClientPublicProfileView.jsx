@@ -19,13 +19,17 @@ import {
   ExternalLink,
   Store,
   Building2,
-  User as UserIcon
+  User as UserIcon,
+  LayoutGrid,
+  Rows
 } from 'lucide-react';
-import ListingCard from './ListingCard';
+import ClientPostCard from './ClientPostCard';
+import { getOptimizedImageUrl } from '../utils/imageUtils';
 import {
   fetchPublicClientProfile,
   fetchClientListings,
-  reportClientProfile
+  reportClientProfile,
+  CATEGORIES
 } from '../services/api';
 
 const REPORT_REASONS = [
@@ -51,6 +55,7 @@ export default function ClientPublicProfileView({
 
   // Tabs: 'active' | 'upcoming'
   const [currentTab, setCurrentTab] = useState('active');
+  const [viewMode, setViewMode] = useState('card'); // 'card' | 'grid'
   const [activeListings, setActiveListings] = useState([]);
   const [upcomingListings, setUpcomingListings] = useState([]);
   const [listingsLoading, setListingsLoading] = useState(false);
@@ -262,6 +267,91 @@ export default function ClientPublicProfileView({
         <Store className="w-3 h-3" />
         <span>Store</span>
       </span>
+    );
+  };
+
+  const renderListingsList = (listings, isUpcomingTab) => {
+    if (viewMode === 'grid') {
+      return (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+          {listings.map((listing) => {
+            const rawImageUrl = listing.primaryImageUrl || (listing.images && listing.images[0]?.url);
+            const imageUrl = getOptimizedImageUrl(rawImageUrl, 400, 400);
+            const catCfg = CATEGORIES[listing.category] || CATEGORIES.PANDAL;
+
+            return (
+              <article
+                key={listing.id}
+                onClick={() => onSelectListing && onSelectListing(listing)}
+                className="group relative aspect-square rounded-[22px] overflow-hidden bg-slate-100 dark:bg-slate-800 cursor-pointer shadow-soft hover:shadow-float active:scale-[0.98] transition-all border border-slate-100 dark:border-slate-800"
+              >
+                {imageUrl ? (
+                  <img
+                    src={imageUrl}
+                    alt={listing.title}
+                    loading="lazy"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-sky-50 to-blue-100 dark:from-slate-800 dark:to-slate-900 text-3xl">
+                    {catCfg.icon}
+                  </div>
+                )}
+
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
+
+                {/* Top Badges */}
+                <div className="absolute top-2 left-2 flex items-center gap-1 z-10">
+                  <span className="w-6 h-6 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-xs">
+                    {catCfg.icon}
+                  </span>
+                </div>
+
+                <div className="absolute top-2 right-2 flex items-center gap-1 z-10">
+                  {isUpcomingTab ? (
+                    <span className="px-2 py-0.5 rounded-full bg-indigo-600/90 text-white font-bold text-[9px] backdrop-blur-md">
+                      Upcoming
+                    </span>
+                  ) : listing.openNow ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/95 text-white font-bold text-[9px] backdrop-blur-md shadow-xs">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                      Live
+                    </span>
+                  ) : null}
+                </div>
+
+                {/* Bottom Content Overlay */}
+                <div className="absolute bottom-2.5 left-2.5 right-2.5 z-10">
+                  {listing.offerText && (
+                    <span className="inline-block max-w-full truncate px-1.5 py-0.5 rounded-md bg-amber-500 text-white font-extrabold text-[9px] mb-1 shadow-2xs">
+                      🏷️ {listing.offerText}
+                    </span>
+                  )}
+                  <h4 className="text-white text-xs font-black line-clamp-1 leading-tight group-hover:text-sky-300 transition-colors">
+                    {listing.title}
+                  </h4>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {listings.map((listing) => (
+          <ClientPostCard
+            key={listing.id}
+            listing={listing}
+            onSelect={onSelectListing}
+            isSaved={savedListingIds.includes(listing.id)}
+            onToggleSave={onToggleSave}
+            onShare={onShareListing}
+            isUpcoming={isUpcomingTab}
+          />
+        ))}
+      </div>
     );
   };
 
@@ -579,6 +669,47 @@ export default function ClientPublicProfileView({
 
             {/* --- Listings Content --- */}
             <div className="p-4 flex-1">
+              {/* View Mode & Header Bar */}
+              {((currentTab === 'active' && activeListings.length > 0) ||
+                (currentTab === 'upcoming' && upcomingListings.length > 0)) && (
+                <div className="flex items-center justify-between px-1 mb-3.5">
+                  <p className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    {currentTab === 'active'
+                      ? `${activeListings.length} Active Update${activeListings.length > 1 ? 's' : ''}`
+                      : `${upcomingListings.length} Scheduled Event${upcomingListings.length > 1 ? 's' : ''}`}
+                  </p>
+
+                  <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-full border border-slate-200/60 dark:border-slate-700/60">
+                    <button
+                      type="button"
+                      onClick={() => setViewMode('card')}
+                      aria-label="Feed card view"
+                      title="Feed card view"
+                      className={`p-1.5 rounded-full transition-all cursor-pointer ${
+                        viewMode === 'card'
+                          ? 'bg-white dark:bg-slate-700 text-city-blue dark:text-sky-400 shadow-xs'
+                          : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                      }`}
+                    >
+                      <Rows className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setViewMode('grid')}
+                      aria-label="Photo grid view"
+                      title="Photo grid view"
+                      className={`p-1.5 rounded-full transition-all cursor-pointer ${
+                        viewMode === 'grid'
+                          ? 'bg-white dark:bg-slate-700 text-city-blue dark:text-sky-400 shadow-xs'
+                          : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                      }`}
+                    >
+                      <LayoutGrid className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {listingsLoading && (currentTab === 'active' ? activeListings.length === 0 : upcomingListings.length === 0) ? (
                 <div className="py-12 flex flex-col items-center justify-center gap-3 text-slate-400">
                   <div className="w-8 h-8 border-3 border-city-blue border-t-transparent rounded-full animate-spin" />
@@ -586,18 +717,7 @@ export default function ClientPublicProfileView({
                 </div>
               ) : currentTab === 'active' ? (
                 activeListings.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {activeListings.map((listing) => (
-                      <ListingCard
-                        key={listing.id}
-                        listing={listing}
-                        onSelect={onSelectListing}
-                        isSaved={savedListingIds.includes(listing.id)}
-                        onToggleSave={onToggleSave}
-                        onShare={onShareListing}
-                      />
-                    ))}
-                  </div>
+                  renderListingsList(activeListings, false)
                 ) : (
                   /* Empty state for Active */
                   <div className="py-16 px-4 flex flex-col items-center justify-center text-center">
@@ -615,18 +735,7 @@ export default function ClientPublicProfileView({
               ) : (
                 /* Upcoming Tab */
                 upcomingListings.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {upcomingListings.map((listing) => (
-                      <ListingCard
-                        key={listing.id}
-                        listing={listing}
-                        onSelect={onSelectListing}
-                        isSaved={savedListingIds.includes(listing.id)}
-                        onToggleSave={onToggleSave}
-                        onShare={onShareListing}
-                      />
-                    ))}
-                  </div>
+                  renderListingsList(upcomingListings, true)
                 ) : (
                   /* Empty state for Upcoming */
                   <div className="py-16 px-4 flex flex-col items-center justify-center text-center">
