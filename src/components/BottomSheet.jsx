@@ -89,7 +89,7 @@ export default function BottomSheet({ listing, onClose, isSaved, onToggleSave, o
             {listing.openNow ? (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Open Now
+                Live
               </span>
             ) : (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
@@ -222,7 +222,7 @@ export default function BottomSheet({ listing, onClose, isSaved, onToggleSave, o
                       )}
                     </div>
                     <span className="text-[11px] text-city-blue dark:text-sky-400 font-semibold flex items-center gap-1 mt-0.5">
-                      View business profile & all posts
+                      {listing.openNow ? 'Checkout other updates • View business profile' : 'View business profile & all posts'}
                     </span>
                   </div>
                 </div>

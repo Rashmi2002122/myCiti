@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tag, MapPin, Clock, Navigation, Bookmark, Share2, Store } from 'lucide-react';
+import { Tag, MapPin, Clock, Navigation, Bookmark, Share2, Store, Sparkles, ChevronRight } from 'lucide-react';
 import { CATEGORIES } from '../services/api';
 import { getOptimizedImageUrl } from '../utils/imageUtils';
 
@@ -60,7 +60,7 @@ export default function ListingCard({
           {listing.openNow ? (
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/90 text-white backdrop-blur-md shadow-xs">
               <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-              Open
+              Live
             </span>
           ) : (
             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-black/50 text-white backdrop-blur-md">
@@ -142,6 +142,35 @@ export default function ListingCard({
           <div className="mt-1 p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-800 text-[11px] font-semibold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
             <Tag className="w-3.5 h-3.5 flex-shrink-0 text-emerald-600 dark:text-emerald-400" />
             <span className="truncate">{listing.offerText}</span>
+          </div>
+        )}
+
+        {/* Checkout other updates if post is live & from client */}
+        {listing.clientSlug && listing.openNow && (
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={handleClientClick}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleClientClick(e);
+              }
+            }}
+            className="mt-1.5 w-full flex items-center justify-between px-3 py-1.5 rounded-xl bg-gradient-to-r from-sky-50 to-blue-50/80 dark:from-slate-800/90 dark:to-sky-950/40 border border-sky-100/80 dark:border-slate-700/70 text-[11px] font-bold text-city-blue dark:text-sky-400 hover:bg-sky-100/70 dark:hover:bg-slate-700/80 active:scale-[0.99] transition-all cursor-pointer group/updates shadow-2xs"
+          >
+            <span className="flex items-center gap-1.5 truncate">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
+              <span className="truncate text-slate-700 dark:text-slate-200">
+                {listing.otherUpdatesCount && listing.otherUpdatesCount > 0
+                  ? `Checkout ${listing.otherUpdatesCount} other update${listing.otherUpdatesCount > 1 ? 's' : ''}`
+                  : 'Checkout other updates'}
+              </span>
+            </span>
+            <span className="flex items-center gap-0.5 text-[10px] font-black uppercase tracking-wider text-city-blue dark:text-sky-400 group-hover/updates:translate-x-0.5 transition-transform flex-shrink-0 ml-1">
+              <span>View Profile</span>
+              <span aria-hidden="true">&rarr;</span>
+            </span>
           </div>
         )}
       </div>

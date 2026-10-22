@@ -22,6 +22,7 @@ import SplashScreen from './components/SplashScreen';
 import { reverseGeocodeCity } from './utils/locationUtils';
 import { registerPushSubscription } from './utils/pushUtils';
 import { isCategoryAllowed } from './utils/notificationPrefs';
+import { filterUniqueClientListings } from './utils/listingUtils';
 
 const AdminModal = lazy(() => import('./components/AdminModal'));
 const LoginModal = lazy(() => import('./components/LoginModal'));
@@ -118,6 +119,11 @@ export default function App() {
       return [];
     }
   });
+
+  // Deduplicate listings for Map and Explore: only the most recent post per client is shown
+  const cleanListings = useMemo(() => {
+    return filterUniqueClientListings(listings);
+  }, [listings]);
 
   // Full-screen Splash Screen (once per session, force with ?splash=1)
   const [showSplash, setShowSplash] = useState(() => {
@@ -778,7 +784,7 @@ export default function App() {
       <main className="w-full h-full relative">
         <div className={`w-full h-full ${activeTab === 'map' ? 'block' : 'hidden'}`}>
           <MapView
-            listings={listings}
+            listings={cleanListings}
             onSelectListing={handleSelectListing}
             userLocation={userLocation}
             targetCity={mapCenter}
@@ -790,7 +796,7 @@ export default function App() {
 
         {activeTab === 'home' && (
           <HomeView
-            listings={listings}
+            listings={cleanListings}
             onSelectListing={handleSelectListing}
             savedIds={savedIds}
             onToggleSave={handleToggleSave}
