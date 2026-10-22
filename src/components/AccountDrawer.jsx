@@ -335,11 +335,11 @@ export default function AccountDrawer({
         aria-label="Account navigation drawer"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        className="fixed top-0 bottom-0 left-0 z-[3001] w-[82vw] max-w-[380px] sm:w-[360px] bg-gradient-to-b from-[#cfe7ff] via-[#e2efff] to-[#eaf4ff] dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 rounded-r-[32px] sm:rounded-r-[36px] shadow-2xl border-r border-white/60 dark:border-slate-800 flex flex-col h-full overflow-hidden animate-in slide-in-from-left duration-250 ease-out motion-reduce:animate-none"
+        className="fixed top-0 bottom-0 left-0 z-[3001] w-[84vw] max-w-[360px] sm:w-[350px] bg-slate-50/98 dark:bg-slate-950/98 backdrop-blur-2xl rounded-r-[28px] sm:rounded-r-[32px] shadow-2xl border-r border-slate-200/80 dark:border-slate-800/80 flex flex-col h-full overflow-hidden animate-in slide-in-from-left duration-250 ease-out motion-reduce:animate-none font-sans"
       >
         {/* Drawer Header Controls */}
         <div className="pt-[max(1rem,env(safe-area-inset-top))] px-5 pb-3 flex items-center justify-between">
-          <span className="text-xs font-black tracking-wider uppercase text-slate-400 dark:text-slate-500">
+          <span className="text-xs font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500">
             Account Menu
           </span>
           <div className="flex items-center gap-1.5">
@@ -349,7 +349,7 @@ export default function AccountDrawer({
               onClick={onToggleDarkMode}
               title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
               aria-label="Toggle color theme"
-              className="w-10 h-10 rounded-full bg-white/90 dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-700 flex items-center justify-center transition-all shadow-sm border border-white/60 dark:border-slate-700 cursor-pointer active:scale-95"
+              className="w-9 h-9 rounded-full bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition-all shadow-xs border border-slate-200/80 dark:border-slate-800 cursor-pointer active:scale-95"
             >
               {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
             </button>
@@ -359,49 +359,49 @@ export default function AccountDrawer({
               type="button"
               onClick={onClose}
               aria-label="Close drawer"
-              className="w-10 h-10 rounded-full bg-white/90 dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-700 flex items-center justify-center transition-all shadow-sm border border-white/60 dark:border-slate-700 cursor-pointer active:scale-95"
+              className="w-9 h-9 rounded-full bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition-all shadow-xs border border-slate-200/80 dark:border-slate-800 cursor-pointer active:scale-95"
             >
-              <X className="w-4 h-4 stroke-[2.5]" />
+              <X className="w-4 h-4 stroke-[2.2]" />
             </button>
           </div>
         </div>
 
         {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto px-5 py-2 space-y-4 no-scrollbar">
+        <div className="flex-1 overflow-y-auto px-5 py-2 space-y-3.5 no-scrollbar">
           {isAuthenticated && user ? (
             <>
               {/* User Identity Card */}
-              <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md rounded-[26px] p-4 shadow-soft border border-white/70 dark:border-slate-800 space-y-3">
+              <div className="bg-white dark:bg-slate-900 rounded-3xl p-4 shadow-soft border border-slate-200/70 dark:border-slate-800 space-y-3">
                 <div className="flex items-center gap-3">
                   {user.pictureUrl ? (
                     <img
                       src={user.pictureUrl}
                       alt={user.name || 'User'}
-                      className="w-14 h-14 rounded-full object-cover ring-4 ring-white dark:ring-slate-800 shadow-md flex-shrink-0"
+                      className="w-13 h-13 rounded-full object-cover ring-2 ring-slate-100 dark:ring-slate-800 shadow-sm flex-shrink-0"
                     />
                   ) : (
-                    <div className="w-14 h-14 rounded-full bg-city-blue/10 dark:bg-sky-500/20 text-city-blue dark:text-sky-400 flex items-center justify-center text-xl font-black shadow-md flex-shrink-0">
+                    <div className="w-13 h-13 rounded-full bg-city-blue/10 dark:bg-sky-500/20 text-city-blue dark:text-sky-400 flex items-center justify-center text-lg font-bold shadow-sm flex-shrink-0">
                       {user.name ? user.name.charAt(0).toUpperCase() : '👤'}
                     </div>
                   )}
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <h2 className="text-base font-black text-slate-900 dark:text-slate-100 truncate">
+                      <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 truncate">
                         {user.name || 'myCiti Member'}
                       </h2>
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${roleBadge.badgeClass}`}>
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${roleBadge.badgeClass}`}>
                         {roleBadge.label}
                       </span>
                     </div>
 
-                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate mt-0.5">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-normal truncate mt-0.5">
                       {user.email}
                     </p>
 
                     {/* Business Name for CLIENT */}
                     {role === 'CLIENT' && user.businessName && (
-                      <div className="flex items-center gap-1 text-[11px] font-extrabold text-emerald-700 dark:text-emerald-300 mt-1 truncate">
+                      <div className="flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 mt-1 truncate">
                         <Store className="w-3 h-3 flex-shrink-0" />
                         <span className="truncate">{user.businessName}</span>
                       </div>
@@ -409,8 +409,8 @@ export default function AccountDrawer({
                   </div>
                 </div>
 
-                {/* Stats Row (Replaces Twitter Followers/Following) */}
-                <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80">
+                {/* Stats Row */}
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
                   {isLoadingCounts && !counts ? (
                     <div className={`grid ${role === 'CLIENT' ? 'grid-cols-3' : 'grid-cols-2'} gap-2 animate-pulse`}>
                       <div className="h-10 bg-slate-100 dark:bg-slate-800 rounded-xl" />
@@ -427,12 +427,12 @@ export default function AccountDrawer({
                           onClose();
                           if (onNavigate) onNavigate('saved');
                         }}
-                        className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        className="p-2 rounded-2xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                       >
-                        <div className="text-sm font-black text-slate-900 dark:text-slate-100">
+                        <div className="text-sm font-bold text-slate-900 dark:text-slate-100">
                           {counts?.savedCount ?? 0}
                         </div>
-                        <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                        <div className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                           Saved
                         </div>
                       </button>
@@ -443,12 +443,12 @@ export default function AccountDrawer({
                           onClose();
                           if (onOpenNotifications) onOpenNotifications('preferences');
                         }}
-                        className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        className="p-2 rounded-2xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                       >
-                        <div className="text-sm font-black text-city-blue">
+                        <div className="text-sm font-bold text-city-blue">
                           Active
                         </div>
-                        <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                        <div className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                           Alerts
                         </div>
                       </button>
@@ -461,12 +461,12 @@ export default function AccountDrawer({
                           onClose();
                           if (onOpenMyPosts) onOpenMyPosts();
                         }}
-                        className="p-1.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        className="p-1.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                       >
-                        <div className="text-sm font-black text-slate-900 dark:text-slate-100">
+                        <div className="text-sm font-bold text-slate-900 dark:text-slate-100">
                           {(counts?.approvedCount || 0) + (counts?.pendingCount || 0)}
                         </div>
-                        <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                        <div className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                           Posts
                         </div>
                       </button>
@@ -477,12 +477,12 @@ export default function AccountDrawer({
                           onClose();
                           if (onOpenMyPosts) onOpenMyPosts();
                         }}
-                        className="p-1.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        className="p-1.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                       >
-                        <div className="text-sm font-black text-emerald-600">
+                        <div className="text-sm font-bold text-emerald-600">
                           {counts?.approvedCount ?? 0}
                         </div>
-                        <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                        <div className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                           Approved
                         </div>
                       </button>
@@ -493,12 +493,12 @@ export default function AccountDrawer({
                           onClose();
                           if (onOpenMyPosts) onOpenMyPosts();
                         }}
-                        className="p-1.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        className="p-1.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                       >
-                        <div className="text-sm font-black text-amber-500">
+                        <div className="text-sm font-bold text-amber-500">
                           {counts?.pendingCount ?? 0}
                         </div>
-                        <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                        <div className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                           Pending
                         </div>
                       </button>
@@ -512,12 +512,12 @@ export default function AccountDrawer({
                           onClose();
                           if (onOpenAdmin) onOpenAdmin('REVIEW');
                         }}
-                        className="p-2 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 hover:bg-amber-100/70 dark:hover:bg-amber-950/50 transition-colors border border-amber-200/50 dark:border-amber-900/50"
+                        className="p-2 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 hover:bg-amber-100/70 dark:hover:bg-amber-950/50 transition-colors border border-amber-200/50 dark:border-amber-900/50"
                       >
-                        <div className="text-sm font-black text-amber-700 dark:text-amber-300">
+                        <div className="text-sm font-bold text-amber-700 dark:text-amber-300">
                           {counts?.pendingReviewCount ?? 0}
                         </div>
-                        <div className="text-[10px] font-extrabold text-amber-800 dark:text-amber-400 uppercase tracking-wider">
+                        <div className="text-[10px] font-semibold text-amber-800 dark:text-amber-400 uppercase tracking-wider">
                           To Review
                         </div>
                       </button>
@@ -528,12 +528,12 @@ export default function AccountDrawer({
                           onClose();
                           if (onOpenAdmin) onOpenAdmin('CLIENT_REQUESTS');
                         }}
-                        className="p-2 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 hover:bg-blue-100/70 dark:hover:bg-blue-950/50 transition-colors border border-blue-200/50 dark:border-blue-900/50"
+                        className="p-2 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 hover:bg-blue-100/70 dark:hover:bg-blue-950/50 transition-colors border border-blue-200/50 dark:border-blue-900/50"
                       >
-                        <div className="text-sm font-black text-city-blue">
+                        <div className="text-sm font-bold text-city-blue">
                           {counts?.pendingClientRequestCount ?? 0}
                         </div>
-                        <div className="text-[10px] font-extrabold text-blue-800 dark:text-blue-400 uppercase tracking-wider">
+                        <div className="text-[10px] font-semibold text-blue-800 dark:text-blue-400 uppercase tracking-wider">
                           Client Reqs
                         </div>
                       </button>
@@ -543,31 +543,31 @@ export default function AccountDrawer({
               </div>
 
               {/* Navigation Menu List */}
-              <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md rounded-[26px] p-2 shadow-soft border border-white/70 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800/80">
+              <div className="bg-white dark:bg-slate-900 rounded-3xl p-1.5 shadow-soft border border-slate-200/70 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800/80">
                 {visibleMenuItems.map((item) => {
                   const Icon = item.icon;
                   const isSpecial = item.isSpecial;
 
                   return (
-                    <div key={item.id} className="p-1">
+                    <div key={item.id} className="p-0.5">
                       <button
                         type="button"
                         onClick={item.action}
-                        className={`w-full min-h-[52px] px-3.5 rounded-2xl flex items-center justify-between gap-3 text-left transition-all active:scale-[0.99] cursor-pointer ${
+                        className={`w-full min-h-[48px] px-3 rounded-2xl flex items-center justify-between gap-3 text-left transition-all active:scale-[0.99] cursor-pointer ${
                           isSpecial
-                            ? 'bg-gradient-to-r from-blue-50 to-sky-50 dark:from-blue-950/40 dark:to-sky-950/30 text-city-blue font-black hover:from-blue-100 hover:to-sky-100'
-                            : 'text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/50 font-bold'
+                            ? 'bg-blue-50/80 dark:bg-blue-950/40 text-city-blue font-bold hover:bg-blue-100/70 dark:hover:bg-blue-950/60'
+                            : 'text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-semibold'
                         }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
                             isSpecial
                               ? 'bg-city-blue text-white shadow-xs'
                               : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
                           }`}>
                             <Icon className="w-4 h-4" />
                           </div>
-                          <span className="text-xs font-black tracking-tight">
+                          <span className="text-xs font-semibold tracking-tight">
                             {item.label}
                           </span>
                         </div>
@@ -578,7 +578,7 @@ export default function AccountDrawer({
                           {item.id === 'become_client' && (
                             latestClientRequest?.status === 'PENDING' ? (
                               <div className="flex items-center gap-1">
-                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
                                   Under review
                                 </span>
                                 <button
@@ -590,12 +590,12 @@ export default function AccountDrawer({
                                   aria-label="View request details"
                                   className="w-6 h-6 rounded-full bg-amber-50 text-amber-700 dark:bg-amber-950 flex items-center justify-center hover:scale-110 transition-transform"
                                 >
-                                  <Info className="w-3.5 h-3.5 stroke-[2.5]" />
+                                  <Info className="w-3.5 h-3.5 stroke-[2.2]" />
                                 </button>
                               </div>
                             ) : latestClientRequest?.status === 'DECLINED' ? (
                               <div className="flex items-center gap-1">
-                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300">
+                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300">
                                   Declined
                                 </span>
                                 <button
@@ -607,11 +607,11 @@ export default function AccountDrawer({
                                   aria-label="View decline reason"
                                   className="w-6 h-6 rounded-full bg-rose-50 text-rose-600 dark:bg-rose-950 flex items-center justify-center hover:scale-110 transition-transform"
                                 >
-                                  <Info className="w-3.5 h-3.5 stroke-[2.5]" />
+                                  <Info className="w-3.5 h-3.5 stroke-[2.2]" />
                                 </button>
                               </div>
                             ) : (
-                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-city-blue text-white shadow-xs">
+                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-city-blue text-white shadow-xs">
                                 Apply
                               </span>
                             )
@@ -619,7 +619,7 @@ export default function AccountDrawer({
 
                           {/* Numeric Badges */}
                           {item.badgeKey && counts?.[item.badgeKey] > 0 && (
-                            <span className="min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-black bg-rose-500 text-white flex items-center justify-center shadow-xs">
+                            <span className="min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold bg-rose-500 text-white flex items-center justify-center shadow-xs">
                               {counts[item.badgeKey]}
                             </span>
                           )}
@@ -633,11 +633,11 @@ export default function AccountDrawer({
               </div>
 
               {/* Collapsible Help & Support Section */}
-              <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md rounded-[26px] p-2 shadow-soft border border-white/70 dark:border-slate-800">
+              <div className="bg-white dark:bg-slate-900 rounded-3xl p-1.5 shadow-soft border border-slate-200/70 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setIsHelpOpen(!isHelpOpen)}
-                  className="w-full min-h-[48px] px-3.5 rounded-2xl flex items-center justify-between text-left text-xs font-black text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
+                  className="w-full min-h-[46px] px-3.5 rounded-2xl flex items-center justify-between text-left text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
                 >
                   <div className="flex items-center gap-2.5">
                     <HelpCircle className="w-4 h-4 text-slate-500" />
@@ -662,7 +662,7 @@ export default function AccountDrawer({
                     <div className="p-2 rounded-xl text-slate-600 dark:text-slate-300 font-medium">
                       <div className="text-[11px] font-bold text-slate-800 dark:text-slate-200">About myCiti</div>
                       <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
-                        Kolkata's community guide for Durga Puja pandals, artisan melas, and neighborhood offers.
+                        India's community guide for Durga Puja pandals, artisan melas, and neighborhood offers.
                       </p>
                     </div>
                   </div>
@@ -671,16 +671,16 @@ export default function AccountDrawer({
             </>
           ) : (
             /* Signed Out State */
-            <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-[28px] p-6 shadow-soft border border-white/70 dark:border-slate-800 text-center space-y-5 my-auto">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-blue-600 to-sky-400 text-white flex items-center justify-center mx-auto text-3xl shadow-md">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-soft border border-slate-200/70 dark:border-slate-800 text-center space-y-4 my-auto">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-blue-600 to-sky-400 text-white flex items-center justify-center mx-auto text-2xl shadow-md">
                 🪔
               </div>
 
               <div className="space-y-1">
-                <h3 className="text-xl font-black text-slate-900 dark:text-slate-100">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
                   Welcome to my<span className="text-city-blue">Citi</span>
                 </h3>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed max-w-xs mx-auto">
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-xs mx-auto">
                   Sign in to save pandals, get real-time festive announcements, and post advertisements.
                 </p>
               </div>
@@ -691,13 +691,13 @@ export default function AccountDrawer({
                   onClose();
                   if (onOpenLogin) onOpenLogin();
                 }}
-                className="w-full min-h-[48px] rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black text-xs shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full min-h-[46px] rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-xs shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
               >
                 <LogIn className="w-4 h-4" />
                 <span>Continue with Google</span>
               </button>
 
-              <div className="pt-2 text-[11px] text-slate-400 space-y-1">
+              <div className="pt-1 text-[11px] text-slate-400 space-y-1">
                 <p>Free, fast, and works offline as a PWA.</p>
               </div>
             </div>
@@ -705,19 +705,19 @@ export default function AccountDrawer({
         </div>
 
         {/* Pinned Bottom Area (Always visible) */}
-        <div className="p-4 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border-t border-white/60 dark:border-slate-800/80 pb-[max(1rem,env(safe-area-inset-bottom))] space-y-2">
+        <div className="p-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t border-slate-200/70 dark:border-slate-800 pb-[max(1rem,env(safe-area-inset-bottom))] space-y-2">
           {isAuthenticated && (
             <button
               type="button"
               onClick={() => setIsLogoutConfirmOpen(true)}
-              className="w-full min-h-[44px] rounded-full bg-rose-50 hover:bg-rose-100/80 dark:bg-rose-950/40 dark:hover:bg-rose-950/70 text-rose-600 dark:text-rose-400 font-extrabold text-xs transition-colors flex items-center justify-center gap-2 border border-rose-200/60 dark:border-rose-900/40 cursor-pointer active:scale-98"
+              className="w-full min-h-[42px] rounded-full bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-950/70 text-rose-600 dark:text-rose-400 font-bold text-xs transition-colors flex items-center justify-center gap-2 border border-rose-200/60 dark:border-rose-900/40 cursor-pointer active:scale-98"
             >
               <LogOut className="w-4 h-4" />
               <span>Log Out</span>
             </button>
           )}
 
-          <div className="text-center text-[10px] font-bold text-slate-400 dark:text-slate-500">
+          <div className="text-center text-[10px] font-medium text-slate-400 dark:text-slate-500">
             myCiti • v2.0.0 PWA
           </div>
         </div>
@@ -726,13 +726,13 @@ export default function AccountDrawer({
       {/* Logout Confirmation Dialog */}
       {isLogoutConfirmOpen && (
         <div className="fixed inset-0 z-[3600] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-[28px] max-w-xs w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 text-center space-y-4 animate-in zoom-in-95">
-            <div className="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto text-lg font-black">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-xs w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 text-center space-y-4 animate-in zoom-in-95">
+            <div className="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto text-lg font-bold">
               <LogOut className="w-6 h-6" />
             </div>
 
             <div className="space-y-1">
-              <h4 className="text-base font-black text-slate-900 dark:text-slate-100">
+              <h4 className="text-base font-bold text-slate-900 dark:text-slate-100">
                 Log Out?
               </h4>
               <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -744,7 +744,7 @@ export default function AccountDrawer({
               <button
                 type="button"
                 onClick={() => setIsLogoutConfirmOpen(false)}
-                className="flex-1 min-h-[40px] rounded-full text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                className="flex-1 min-h-[40px] rounded-full text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               >
                 Cancel
               </button>
@@ -755,7 +755,7 @@ export default function AccountDrawer({
                   onClose();
                   await handleLogout();
                 }}
-                className="flex-1 min-h-[40px] rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold shadow-md transition-colors"
+                className="flex-1 min-h-[40px] rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md transition-colors"
               >
                 Log Out
               </button>

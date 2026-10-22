@@ -100,7 +100,9 @@ export default function App() {
       const match = CITIES.find((c) => c.name.toLowerCase() === savedCityName.toLowerCase());
       if (match) return { lat: match.lat, lng: match.lng, zoom: match.zoom || 12 };
     } catch {}
-    return { lat: 22.5726, lng: 88.3639, zoom: 12 };
+    const defaultLat = Number(import.meta.env.VITE_DEFAULT_MAP_LAT) || 22.5726;
+    const defaultLng = Number(import.meta.env.VITE_DEFAULT_MAP_LNG) || 88.3639;
+    return { lat: defaultLat, lng: defaultLng, zoom: 12 };
   });
   const [locationToast, setLocationToast] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
@@ -835,17 +837,17 @@ export default function App() {
 
       {/* Loading Overlay */}
       {isLoading && (
-        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[1000] bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-4 py-2 rounded-full shadow-float border border-white/60 dark:border-slate-800 flex items-center gap-2">
-          <div className="w-4 h-4 border-2 border-city-blue border-t-transparent rounded-full animate-spin" />
-          <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">Updating listings...</span>
+        <div className="absolute top-28 sm:top-32 left-1/2 -translate-x-1/2 z-[1000] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-4 py-2 rounded-full shadow-float border border-white/60 dark:border-slate-800 flex items-center gap-2 max-w-[90vw]">
+          <div className="w-4 h-4 border-2 border-city-blue border-t-transparent rounded-full animate-spin flex-shrink-0" />
+          <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">Updating listings...</span>
         </div>
       )}
 
       {/* Error Banner */}
       {error && (
-        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[1000] bg-rose-500 text-white px-4 py-2 rounded-full shadow-float text-xs font-semibold flex items-center gap-2">
-          <span>{error}</span>
-          <button onClick={loadListings} className="underline font-bold ml-1">Retry</button>
+        <div className="absolute top-28 sm:top-32 left-1/2 -translate-x-1/2 z-[1000] bg-rose-500/95 backdrop-blur-md text-white px-4 py-2.5 rounded-2xl sm:rounded-full shadow-float text-xs font-semibold flex items-center justify-center gap-2 max-w-[90vw] border border-rose-400/30">
+          <span className="truncate">{error}</span>
+          <button onClick={loadListings} className="underline font-bold ml-1 flex-shrink-0 hover:text-rose-100">Retry</button>
         </div>
       )}
 

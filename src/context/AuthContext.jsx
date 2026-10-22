@@ -40,10 +40,8 @@ function persistSession(data) {
   if (data?.user) {
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
   }
-  // Store rotated refresh token so cross-origin SPAs / browsers blocking 3rd-party cookies maintain session
-  if (data?.refreshToken) {
-    localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
-  }
+  // Enforce security: refresh token is strictly isolated in HttpOnly cookie; clear any legacy storage
+  localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
 }
 
 function clearSessionStorage() {
@@ -110,10 +108,9 @@ export function AuthProvider({ children }) {
     async function initSession() {
       const storedAccessToken = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
       const storedUser = localStorage.getItem(USER_STORAGE_KEY);
-      const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
 
       // If user is not logged in at all, skip network call
-      if (!storedAccessToken && !storedUser && !storedRefreshToken) {
+      if (!storedAccessToken && !storedUser) {
         if (isMounted) setIsInitializing(false);
         return;
       }
@@ -126,9 +123,9 @@ export function AuthProvider({ children }) {
         return;
       }
 
-      // If access token is expired or missing, refresh via refresh token / cookie
+      // If access token is expired or missing, refresh via HttpOnly cookie
       try {
-        const data = await executeRefresh(storedRefreshToken || null);
+        const data = await executeRefresh(null);
         if (isMounted) {
           setAccessToken(data.accessToken);
           setUser(data.user);
@@ -137,7 +134,7 @@ export function AuthProvider({ children }) {
         }
       } catch (err) {
         // Only warn if the user was expected to have an active session
-        if (storedRefreshToken || (storedAccessToken && isTokenExpired(storedAccessToken))) {
+        if (storedAccessToken && isTokenExpired(storedAccessToken)) {
           console.warn('[Auth] Session validation/refresh notice:', err?.message || err);
         }
         // Only clear storage if backend explicitly rejected credentials (401 or 403)
@@ -166,8 +163,7 @@ export function AuthProvider({ children }) {
   // Proactive session refresh (e.g. on 401 or timer)
   const refreshCurrentToken = useCallback(async () => {
     try {
-      const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
-      const data = await executeRefresh(storedRefreshToken || null);
+      const data = await executeRefresh(null);
       setAccessToken(data.accessToken);
       setUser(data.user);
       persistSession(data);
@@ -236,8 +232,7 @@ export function AuthProvider({ children }) {
   // Logout
   const handleLogout = useCallback(async () => {
     try {
-      const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
-      await logoutSession(storedRefreshToken);
+      await logoutSession();
     } catch (e) {
       console.warn('Logout request warning:', e);
     } finally {
