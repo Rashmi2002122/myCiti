@@ -14,7 +14,8 @@ import {
   fetchNotifications,
   fetchSavedListings,
   saveListing,
-  unsaveListing
+  unsaveListing,
+  fetchMyClientProfile
 } from './services/api';
 import AddToHomeScreenBanner from './components/AddToHomeScreenBanner';
 import InstallGuideModal from './components/InstallGuideModal';
@@ -88,6 +89,8 @@ export default function App() {
   const [editingSubmission, setEditingSubmission] = useState(null);
   const [viewingClientSlug, setViewingClientSlug] = useState(null);
   const [isBusinessProfileOpen, setIsBusinessProfileOpen] = useState(false);
+  const [myClientProfile, setMyClientProfile] = useState(null);
+  const [profileRefreshTrigger, setProfileRefreshTrigger] = useState(0);
   const [selectedCity, setSelectedCity] = useState(() => {
     try {
       return localStorage.getItem('myciti_selected_city') || 'Kolkata';
@@ -464,6 +467,58 @@ export default function App() {
       window.history.pushState({}, '', '/');
     }
   }, []);
+
+  // Pre-fetch my client profile when logged in as CLIENT or ADMIN
+  useEffect(() => {
+    if (!accessToken || !isAuthenticated || (user?.role !== 'CLIENT' && user?.role !== 'ADMIN')) {
+      setMyClientProfile(null);
+      return;
+    }
+    let isCancelled = false;
+    fetchMyClientProfile(accessToken)
+      .then((data) => {
+        if (!isCancelled && data) {
+          setMyClientProfile(data);
+        }
+      })
+      .catch(() => {
+        if (!isCancelled) setMyClientProfile(null);
+      });
+    return () => {
+      isCancelled = true;
+    };
+  }, [accessToken, isAuthenticated, user?.role, profileRefreshTrigger]);
+
+  // Unified Profile handler:
+  // - For CLIENT: shows public view profile directly (/c/:slug)
+  // - For USER: leaves it as it is (opens CompleteProfileModal)
+  const handleOpenProfile = useCallback(async () => {
+    if (!isAuthenticated) {
+      setIsLoginOpen(true);
+      return;
+    }
+
+    if (user?.role === 'CLIENT' || user?.role === 'ADMIN') {
+      if (myClientProfile?.slug) {
+        handleOpenClientProfile(myClientProfile.slug);
+        return;
+      }
+
+      try {
+        const cp = await fetchMyClientProfile(accessToken);
+        if (cp?.slug) {
+          setMyClientProfile(cp);
+          handleOpenClientProfile(cp.slug);
+          return;
+        }
+      } catch (err) {
+        console.warn('Could not load client profile slug:', err);
+      }
+    }
+
+    // Default for USER: leave as it is
+    setIsCompleteProfileOpen(true);
+  }, [isAuthenticated, user?.role, myClientProfile, accessToken, handleOpenClientProfile]);
 
   const sponsoredListingIds = useMemo(() => {
     return activeAds
@@ -914,6 +969,7 @@ export default function App() {
             isOpen={isAccountMenuOpen}
             onClose={() => setIsAccountMenuOpen(false)}
             onNavigate={(tab) => setActiveTab(tab)}
+            onOpenProfile={handleOpenProfile}
             onOpenCompleteProfile={() => setIsCompleteProfileOpen(true)}
             onOpenMyPosts={() => {
               if (!canPost) {
@@ -1138,6 +1194,14 @@ export default function App() {
             darkMode={darkMode}
             onToggleDarkMode={() => setDarkMode(!darkMode)}
             onOpenNotifications={handleOpenNotifications}
+            onOpenEditBusinessProfile={
+              user?.role === 'CLIENT' || user?.role === 'ADMIN'
+                ? () => {
+                    setIsSettingsOpen(false);
+                    setIsBusinessProfileOpen(true);
+                  }
+                : null
+            }
           />
         )}
 
@@ -1152,6 +1216,20 @@ export default function App() {
             onToggleSave={handleToggleSave}
             onShareListing={handleShare}
             accessToken={accessToken}
+            isOwner={Boolean(
+              isAuthenticated &&
+              (user?.role === 'CLIENT' || user?.role === 'ADMIN') &&
+              myClientProfile?.slug &&
+              myClientProfile.slug.toLowerCase() === viewingClientSlug.toLowerCase()
+            )}
+            onOpenEdit={
+              isAuthenticated &&
+              (user?.role === 'CLIENT' || user?.role === 'ADMIN') &&
+              (!myClientProfile || myClientProfile.slug?.toLowerCase() === viewingClientSlug.toLowerCase())
+                ? () => setIsBusinessProfileOpen(true)
+                : null
+            }
+            refreshTrigger={profileRefreshTrigger}
           />
         )}
 
@@ -1165,6 +1243,7 @@ export default function App() {
               handleOpenClientProfile(slug);
             }}
             onProfileUpdated={() => {
+              setProfileRefreshTrigger((prev) => prev + 1);
               if (refreshUserProfile) refreshUserProfile();
             }}
           />

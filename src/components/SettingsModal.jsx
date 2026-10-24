@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   X, Sun, Moon, Globe, Bell, Trash2,
-  Check, ChevronRight, AlertTriangle
+  Check, ChevronRight, AlertTriangle, Store
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -10,7 +10,8 @@ export default function SettingsModal({
   onClose,
   darkMode,
   onToggleDarkMode,
-  onOpenNotifications
+  onOpenNotifications,
+  onOpenEditBusinessProfile
 }) {
   const { user } = useAuth();
   const [selectedLanguage, setSelectedLanguage] = useState('en');
@@ -102,6 +103,38 @@ export default function SettingsModal({
               </button>
             </div>
           </div>
+
+          {/* Business Profile Settings for CLIENT / ADMIN */}
+          {onOpenEditBusinessProfile && (
+            <div className="space-y-2">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+                Business Profile
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onOpenEditBusinessProfile();
+                }}
+                className="w-full p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-center justify-between text-left hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-2xs">
+                    <Store className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                      Edit Business Profile
+                    </div>
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                      Name, hours, cover, logo & contact info
+                    </div>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-400" />
+              </button>
+            </div>
+          )}
 
           {/* Setting Section 2: Language (Placeholder for Odia, Hindi, Bengali) */}
           <div className="space-y-2">

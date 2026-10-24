@@ -13,6 +13,7 @@ export default function AccountDrawer({
   isOpen,
   onClose,
   onNavigate,
+  onOpenProfile,
   onOpenCompleteProfile,
   onOpenMyPosts,
   onOpenPostAd,
@@ -145,7 +146,7 @@ export default function AccountDrawer({
 
   // Single Menu items configuration
   const MENU_CONFIG = [
-    // Everyone signed in
+    // Everyone signed in: Unified Profile
     {
       id: 'profile',
       label: 'Profile',
@@ -153,7 +154,11 @@ export default function AccountDrawer({
       roles: ['USER', 'CLIENT', 'ADMIN'],
       action: () => {
         onClose();
-        if (onOpenCompleteProfile) onOpenCompleteProfile();
+        if (onOpenProfile) {
+          onOpenProfile();
+        } else if (onOpenCompleteProfile) {
+          onOpenCompleteProfile();
+        }
       }
     },
     {
@@ -215,20 +220,6 @@ export default function AccountDrawer({
       action: () => {
         onClose();
         if (onOpenPostAd) onOpenPostAd();
-      }
-    },
-    {
-      id: 'business_profile',
-      label: 'Business profile',
-      icon: Building2,
-      roles: ['CLIENT', 'ADMIN'],
-      action: () => {
-        onClose();
-        if (onOpenBusinessProfile) {
-          onOpenBusinessProfile();
-        } else if (onOpenCompleteProfile) {
-          onOpenCompleteProfile();
-        }
       }
     },
     {
@@ -371,7 +362,24 @@ export default function AccountDrawer({
           {isAuthenticated && user ? (
             <>
               {/* User Identity Card */}
-              <div className="bg-white dark:bg-slate-900 rounded-3xl p-4 shadow-soft border border-slate-200/70 dark:border-slate-800 space-y-3">
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  onClose();
+                  if (onOpenProfile) onOpenProfile();
+                  else if (onOpenCompleteProfile) onOpenCompleteProfile();
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onClose();
+                    if (onOpenProfile) onOpenProfile();
+                    else if (onOpenCompleteProfile) onOpenCompleteProfile();
+                  }
+                }}
+                className="bg-white dark:bg-slate-900 rounded-3xl p-4 shadow-soft border border-slate-200/70 dark:border-slate-800 space-y-3 cursor-pointer hover:border-city-blue/40 transition-colors"
+              >
                 <div className="flex items-center gap-3">
                   {user.pictureUrl ? (
                     <img
@@ -662,7 +670,7 @@ export default function AccountDrawer({
                     <div className="p-2 rounded-xl text-slate-600 dark:text-slate-300 font-medium">
                       <div className="text-[11px] font-bold text-slate-800 dark:text-slate-200">About myCiti</div>
                       <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
-                        India's community guide for Durga Puja pandals, artisan melas, and neighborhood offers.
+                        India's community guide for pandals, artisan melas, and neighborhood offers.
                       </p>
                     </div>
                   </div>
@@ -718,7 +726,7 @@ export default function AccountDrawer({
           )}
 
           <div className="text-center text-[10px] font-medium text-slate-400 dark:text-slate-500">
-            myCiti • v2.0.0 PWA
+            myCiti • v2.0.0
           </div>
         </div>
       </div>

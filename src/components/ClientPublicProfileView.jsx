@@ -21,7 +21,8 @@ import {
   Building2,
   User as UserIcon,
   LayoutGrid,
-  Rows
+  Rows,
+  Settings
 } from 'lucide-react';
 import ClientPostCard from './ClientPostCard';
 import { getOptimizedImageUrl } from '../utils/imageUtils';
@@ -47,7 +48,10 @@ export default function ClientPublicProfileView({
   savedListingIds = [],
   onToggleSave,
   onShareListing,
-  accessToken = null
+  accessToken = null,
+  isOwner = false,
+  onOpenEdit = null,
+  refreshTrigger = 0
 }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -119,7 +123,7 @@ export default function ClientPublicProfileView({
     return () => {
       isCancelled = true;
     };
-  }, [slug]);
+  }, [slug, refreshTrigger]);
 
   // Load listings for current tab
   const loadTabListings = useCallback(
@@ -385,6 +389,18 @@ export default function ClientPublicProfileView({
 
             {/* Top-right Action Buttons */}
             <div className="flex items-center gap-2">
+              {onOpenEdit && (
+                <button
+                  type="button"
+                  onClick={onOpenEdit}
+                  aria-label="Edit Profile Settings"
+                  title="Edit Profile Settings"
+                  className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-black/40 hover:bg-black/60 active:scale-95 text-white backdrop-blur-md flex items-center justify-center transition-all shadow-md cursor-pointer"
+                >
+                  <Settings className="w-5 h-5" />
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={handleShareProfile}
@@ -407,18 +423,32 @@ export default function ClientPublicProfileView({
 
                 {/* Overflow dropdown */}
                 {isOverflowOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 py-1.5 z-30 animate-in fade-in zoom-in-95 duration-150">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsOverflowOpen(false);
-                        setIsReportOpen(true);
-                      }}
-                      className="w-full min-h-[44px] px-4 py-2.5 text-left text-sm font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center gap-2.5 cursor-pointer"
-                    >
-                      <Flag className="w-4 h-4" />
-                      <span>Report profile</span>
-                    </button>
+                  <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 py-1.5 z-30 animate-in fade-in zoom-in-95 duration-150">
+                    {onOpenEdit ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsOverflowOpen(false);
+                          onOpenEdit();
+                        }}
+                        className="w-full min-h-[44px] px-4 py-2.5 text-left text-sm font-semibold text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2.5 cursor-pointer"
+                      >
+                        <Settings className="w-4 h-4 text-city-blue" />
+                        <span>Edit profile settings</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsOverflowOpen(false);
+                          setIsReportOpen(true);
+                        }}
+                        className="w-full min-h-[44px] px-4 py-2.5 text-left text-sm font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center gap-2.5 cursor-pointer"
+                      >
+                        <Flag className="w-4 h-4" />
+                        <span>Report profile</span>
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={handleShareProfile}
@@ -588,6 +618,18 @@ export default function ClientPublicProfileView({
 
               {/* Action Buttons Row (min 44px touch target) */}
               <div className="mt-4 flex items-center gap-2.5 flex-wrap">
+                {/* Setting / Edit Profile button for owner */}
+                {onOpenEdit && (
+                  <button
+                    type="button"
+                    onClick={onOpenEdit}
+                    className="min-h-[44px] px-5 py-2 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 font-bold text-xs flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer"
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span>Edit Profile Settings</span>
+                  </button>
+                )}
+
                 {/* Call button (only shown if showPhone is true and publicPhone is present) */}
                 {profile.showPhone && profile.publicPhone && (
                   <a
