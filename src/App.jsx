@@ -103,7 +103,7 @@ export default function App() {
       const savedCityName = localStorage.getItem('myciti_selected_city') || 'Kolkata';
       const match = CITIES.find((c) => c.name.toLowerCase() === savedCityName.toLowerCase());
       if (match) return { lat: match.lat, lng: match.lng, zoom: match.zoom || 12 };
-    } catch {}
+    } catch (e) { console.warn('[myCiti] Failed to restore map center from localStorage', e); }
     const defaultLat = Number(import.meta.env.VITE_DEFAULT_MAP_LAT) || 22.5726;
     const defaultLng = Number(import.meta.env.VITE_DEFAULT_MAP_LNG) || 88.3639;
     return { lat: defaultLat, lng: defaultLng, zoom: 12 };
@@ -213,7 +213,7 @@ export default function App() {
             const merged = Array.from(new Set([...localIds, ...backendIds]));
             try {
               localStorage.setItem(SAVED_STORAGE_KEY, JSON.stringify(merged));
-            } catch {}
+            } catch (e) { console.warn('[myCiti] Failed to persist saved listings to localStorage', e); }
             return merged;
           });
         }
@@ -389,7 +389,7 @@ export default function App() {
       list.forEach((n) => knownNotificationIdsRef.current.add(n.id));
       try {
         sessionStorage.setItem('myciti_seen_notif_ids', JSON.stringify([...knownNotificationIdsRef.current]));
-      } catch {}
+      } catch (e) { console.warn('[myCiti] Failed to persist notification IDs to sessionStorage', e); }
     } catch (e) {
       console.warn('Failed to check notifications:', e);
     }
@@ -409,7 +409,7 @@ export default function App() {
   // Auto-sync Web Push subscription when user is authenticated and permission is granted
   useEffect(() => {
     if (isAuthenticated && accessToken && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-      registerPushSubscription(accessToken).catch(() => {});
+      registerPushSubscription(accessToken).catch((e) => console.warn('[myCiti] Push subscription registration failed', e));
     }
   }, [isAuthenticated, accessToken]);
 
