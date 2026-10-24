@@ -28,7 +28,7 @@ export default function ListingCard({
   return (
     <article
       onClick={() => onSelect(listing)}
-      className="cursor-pointer bg-white dark:bg-slate-900 rounded-[26px] p-3.5 shadow-soft hover:shadow-float border border-slate-100 dark:border-slate-800 transition-all duration-200 flex flex-col gap-3 group"
+      className="cursor-pointer bg-white dark:bg-slate-900 rounded-[26px] p-3.5 shadow-soft hover:shadow-float border border-slate-100 dark:border-slate-800 transition-all duration-200 flex flex-col gap-3 group active:scale-[0.98]"
     >
       {/* Image container */}
       <div className="relative w-full aspect-[16/10] rounded-[20px] overflow-hidden bg-slate-100 dark:bg-slate-800">
