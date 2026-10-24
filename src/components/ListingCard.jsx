@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigation, Bookmark, Share2, Store, Check } from 'lucide-react';
+import { Tag, MapPin, Clock, Navigation, Bookmark, Share2, Store, Sparkles, ChevronRight } from 'lucide-react';
 import { CATEGORIES } from '../services/api';
 import { getOptimizedImageUrl } from '../utils/imageUtils';
 
@@ -13,7 +13,7 @@ export default function ListingCard({
 }) {
   const categoryConfig = CATEGORIES[listing.category] || CATEGORIES.PANDAL;
   const rawImageUrl = listing.primaryImageUrl || (listing.images && listing.images[0]?.url);
-  const imageUrl = getOptimizedImageUrl(rawImageUrl, 700, 500);
+  const imageUrl = getOptimizedImageUrl(rawImageUrl, 600, 375);
 
   const handleClientClick = (e) => {
     e.stopPropagation();
@@ -25,108 +25,60 @@ export default function ListingCard({
     }
   };
 
-  const handleDirections = (e) => {
-    e.stopPropagation();
-    if (listing.latitude && listing.longitude) {
-      const url = `https://www.google.com/maps/dir/?api=1&destination=${listing.latitude},${listing.longitude}`;
-      window.open(url, '_blank', 'noopener,noreferrer');
-    }
-  };
-
-  // Primary action button label: 'Reserve now' matching mockup, with contextual adaptability for pandals
-  const ctaLabel = listing.category === 'PANDAL' ? 'Explore now' : 'Reserve now';
-
-  // Description fallback to ensure rich text presentation like the mockup
-  const descriptionText = listing.description?.trim()
-    ? listing.description
-    : `${categoryConfig.description || 'Popular city destination'}. Located at ${listing.landmark || listing.address || listing.city || 'Kolkata'}.`;
-
   return (
     <article
       onClick={() => onSelect(listing)}
-      className="group relative cursor-pointer overflow-hidden rounded-[30px] sm:rounded-[34px] bg-[#1c2218] text-white shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between border border-white/10 select-none"
+      className="cursor-pointer bg-white dark:bg-slate-900 rounded-[26px] p-3.5 shadow-soft hover:shadow-float border border-slate-100 dark:border-slate-800 transition-all duration-200 flex flex-col gap-3 group"
     >
-      {/* Top Media Section with smooth gradient fade into card body */}
-      <div className="relative w-full aspect-[4/3] sm:aspect-[16/11] overflow-hidden bg-[#242b1f]">
+      {/* Image container */}
+      <div className="relative w-full aspect-[16/10] rounded-[20px] overflow-hidden bg-slate-100 dark:bg-slate-800">
         {imageUrl ? (
           <img
             src={imageUrl}
             alt={listing.title}
             loading="lazy"
-            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#2a3424] via-[#1f271a] to-[#161a12] text-5xl">
-            <span>{categoryConfig.icon}</span>
+          <div className="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-[#cfe7ff] to-[#eaf4ff] dark:from-slate-800 dark:to-slate-900">
+            {categoryConfig.icon}
           </div>
         )}
 
-        {/* Top-to-bottom subtle shadow for floating badges */}
-        <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/50 via-black/20 to-transparent pointer-events-none" />
-
-        {/* Seamless bottom gradient fade into card background */}
-        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#1c2218] via-[#1c2218]/80 to-transparent pointer-events-none" />
-
-        {/* Floating Top Left Badge: Live Now or Category */}
-        <div className="absolute top-3.5 left-3.5 flex items-center gap-1.5 z-10">
-          {listing.openNow ? (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500/90 text-white backdrop-blur-md border border-emerald-400/30 shadow-md">
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-              Live Now
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-black/45 text-white/95 backdrop-blur-md border border-white/15 shadow-md">
-              <span>{categoryConfig.icon}</span>
-              <span>{categoryConfig.label}</span>
-            </span>
-          )}
+        {/* Category badge */}
+        <div className="absolute top-2.5 left-2.5">
+          <span
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border backdrop-blur-md shadow-xs ${categoryConfig.badgeBg}`}
+          >
+            <span>{categoryConfig.icon}</span>
+            <span>{categoryConfig.label}</span>
+          </span>
         </div>
 
-        {/* Floating Top Right Action Buttons: Directions, Save, Share */}
-        <div className="absolute top-3.5 right-3.5 flex items-center gap-1.5 z-10">
-          {listing.latitude && listing.longitude && (
-            <button
-              type="button"
-              onClick={handleDirections}
-              aria-label="Directions"
-              title="Get directions"
-              className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/65 active:scale-90 backdrop-blur-md border border-white/15 text-white flex items-center justify-center transition-all shadow-md cursor-pointer"
-            >
-              <Navigation className="w-4 h-4 fill-white/80" />
-            </button>
+        {/* Distance or Open status pill */}
+        <div className="absolute top-2.5 right-2.5 flex items-center gap-1">
+          {listing.openNow ? (
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/90 text-white backdrop-blur-md shadow-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              Live
+            </span>
+          ) : (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-black/50 text-white backdrop-blur-md">
+              Closed
+            </span>
           )}
 
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleSave(listing.id);
-            }}
-            aria-label="Save listing"
-            title="Save listing"
-            className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/65 active:scale-90 backdrop-blur-md border border-white/15 text-white flex items-center justify-center transition-all shadow-md cursor-pointer"
-          >
-            <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-amber-400 text-amber-400' : ''}`} />
-          </button>
-
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onShare(listing);
-            }}
-            aria-label="Share listing"
-            title="Share listing"
-            className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/65 active:scale-90 backdrop-blur-md border border-white/15 text-white flex items-center justify-center transition-all shadow-md cursor-pointer"
-          >
-            <Share2 className="w-4 h-4" />
-          </button>
+          {listing.distanceKm !== undefined && listing.distanceKm !== null && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-black/60 text-white backdrop-blur-md">
+              {listing.distanceKm} km
+            </span>
+          )}
         </div>
       </div>
 
-      {/* Card Content Section */}
-      <div className="px-5 pb-5 pt-1 flex flex-col gap-3.5 relative z-10 -mt-6">
-        {/* Client Attribution (if client profile post) */}
+      {/* Content */}
+      <div className="flex flex-col gap-1.5 px-1">
+        {/* Client Attribution / Link */}
         {listing.clientSlug && (
           <div
             role="button"
@@ -138,7 +90,7 @@ export default function ListingCard({
                 handleClientClick(e);
               }
             }}
-            className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 text-[11px] font-semibold text-white/90 active:scale-95 transition-all cursor-pointer w-fit shadow-xs group/client"
+            className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-700 dark:text-slate-300 hover:text-city-blue dark:hover:text-sky-400 active:scale-95 transition-all cursor-pointer w-fit group/client bg-slate-100/90 dark:bg-slate-800/90 px-2.5 py-0.5 rounded-full border border-slate-200/60 dark:border-slate-700/60 shadow-2xs"
           >
             {listing.clientLogoUrl ? (
               <img
@@ -148,91 +100,119 @@ export default function ListingCard({
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
               />
             ) : (
-              <Store className="w-3 h-3 text-sky-400 flex-shrink-0" />
+              <Store className="w-3 h-3 text-city-blue dark:text-sky-400 flex-shrink-0" />
             )}
-            <span className="truncate max-w-[150px] group-hover/client:underline">
+            <span className="truncate max-w-[170px] group-hover/client:underline">
               {listing.clientBusinessName || listing.clientSlug}
             </span>
             {listing.clientVerified && (
               <span
-                className="inline-flex items-center justify-center w-3 h-3 rounded-full bg-[#1d9bf0] text-white flex-shrink-0"
+                className="inline-flex items-center justify-center w-3 h-3 rounded-full bg-[#1d9bf0] text-white flex-shrink-0 shadow-xs"
                 title="Verified business"
               >
-                <Check className="w-2 h-2 stroke-[3]" />
+                <svg
+                  className="w-2 h-2 fill-current stroke-current"
+                  viewBox="0 0 24 24"
+                  strokeWidth="3"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
               </span>
             )}
           </div>
         )}
 
-        {/* Title */}
-        <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug line-clamp-1 group-hover:text-amber-100 transition-colors">
+        <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100 line-clamp-1 group-hover:text-city-blue transition-colors">
           {listing.title}
         </h3>
 
-        {/* Description */}
-        <p className="text-xs sm:text-[13px] text-stone-300/85 leading-relaxed line-clamp-2 sm:line-clamp-3 font-normal">
-          {descriptionText}
-        </p>
-
-        {/* Badges / Chips Row (e.g. 🏆 Guest Favorite, 4 Night Stay / Distance / Hours) */}
-        <div className="flex items-center gap-2 flex-wrap pt-0.5">
-          {/* Pill 1: Guest Favorite / Verified / Category */}
-          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium bg-white/10 text-stone-200 border border-white/10 backdrop-blur-md shadow-xs">
-            <span>{listing.clientVerified ? '🏆' : categoryConfig.icon}</span>
-            <span>{listing.clientVerified ? 'Guest Favorite' : categoryConfig.label}</span>
-          </span>
-
-          {/* Pill 2: Distance or Operating Hours or Landmark */}
-          {listing.distanceKm !== undefined && listing.distanceKm !== null ? (
-            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium bg-white/10 text-stone-200 border border-white/10 backdrop-blur-md shadow-xs">
-              <span>📍</span>
-              <span>{listing.distanceKm} km</span>
-            </span>
-          ) : listing.dailyOpenTime && listing.dailyCloseTime ? (
-            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium bg-white/10 text-stone-200 border border-white/10 backdrop-blur-md shadow-xs">
-              <span>⏰</span>
-              <span>{listing.dailyOpenTime.slice(0, 5)} - {listing.dailyCloseTime.slice(0, 5)}</span>
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium bg-white/10 text-stone-200 border border-white/10 backdrop-blur-md shadow-xs">
-              <span>📍</span>
-              <span className="truncate max-w-[130px]">{listing.landmark || listing.city || 'Kolkata'}</span>
-            </span>
-          )}
-
-          {/* Pill 3: Highlighted Offer if present */}
-          {listing.offerText && (
-            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 backdrop-blur-md shadow-xs">
-              <span>🏷️</span>
-              <span className="truncate max-w-[140px]">{listing.offerText}</span>
-            </span>
-          )}
-
-          {/* Pill 4: Other client updates if applicable */}
-          {listing.otherUpdatesCount && listing.otherUpdatesCount > 0 && (
-            <span
-              role="button"
-              tabIndex={0}
-              onClick={handleClientClick}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium bg-sky-500/20 text-sky-300 border border-sky-500/30 backdrop-blur-md shadow-xs hover:bg-sky-500/30 transition-colors cursor-pointer"
-            >
-              <span>✨</span>
-              <span>+{listing.otherUpdatesCount} updates</span>
-            </span>
-          )}
+        <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+          <MapPin className="w-3.5 h-3.5 text-city-blue flex-shrink-0" />
+          <span className="truncate font-medium">{listing.landmark}</span>
         </div>
 
-        {/* Standout Full-Width White Pill Button */}
-        <div className="pt-2">
+        <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+          <Clock className="w-3.5 h-3.5 text-city-blue flex-shrink-0" />
+          <span>{listing.dailyOpenTime?.slice(0, 5)} - {listing.dailyCloseTime?.slice(0, 5)}</span>
+        </div>
+
+        {/* Highlighted offer if present */}
+        {listing.offerText && (
+          <div className="mt-1 p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-800 text-[11px] font-semibold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+            <Tag className="w-3.5 h-3.5 flex-shrink-0 text-emerald-600 dark:text-emerald-400" />
+            <span className="truncate">{listing.offerText}</span>
+          </div>
+        )}
+
+        {/* Checkout other updates if post is live & from client */}
+        {listing.clientSlug && listing.openNow && (
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={handleClientClick}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleClientClick(e);
+              }
+            }}
+            className="mt-1.5 w-full flex items-center justify-between px-3 py-1.5 rounded-xl bg-gradient-to-r from-sky-50 to-blue-50/80 dark:from-slate-800/90 dark:to-sky-950/40 border border-sky-100/80 dark:border-slate-700/70 text-[11px] font-bold text-city-blue dark:text-sky-400 hover:bg-sky-100/70 dark:hover:bg-slate-700/80 active:scale-[0.99] transition-all cursor-pointer group/updates shadow-2xs"
+          >
+            <span className="flex items-center gap-1.5 truncate">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
+              <span className="truncate text-slate-700 dark:text-slate-200">
+                {listing.otherUpdatesCount && listing.otherUpdatesCount > 0
+                  ? `Checkout ${listing.otherUpdatesCount} other update${listing.otherUpdatesCount > 1 ? 's' : ''}`
+                  : 'Checkout other updates'}
+              </span>
+            </span>
+            <span className="flex items-center gap-0.5 text-[10px] font-black uppercase tracking-wider text-city-blue dark:text-sky-400 group-hover/updates:translate-x-0.5 transition-transform flex-shrink-0 ml-1">
+              <span>View Profile</span>
+              <span aria-hidden="true">&rarr;</span>
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Action buttons footer */}
+      <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            const url = `https://www.google.com/maps/dir/?api=1&destination=${listing.latitude},${listing.longitude}`;
+            window.open(url, '_blank', 'noopener,noreferrer');
+          }}
+          className="text-xs font-bold text-city-blue hover:text-blue-700 flex items-center gap-1 min-h-[44px] px-2.5 py-1"
+        >
+          <Navigation className="w-4 h-4 fill-city-blue" />
+          <span>Directions</span>
+        </button>
+
+        <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              onSelect(listing);
+              onToggleSave(listing.id);
             }}
-            className="w-full py-3.5 px-6 rounded-full bg-white hover:bg-stone-100 active:scale-[0.99] text-stone-900 font-bold text-sm sm:text-base text-center transition-all duration-200 shadow-md cursor-pointer"
+            aria-label="Save listing"
+            className="min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors"
           >
-            {ctaLabel}
+            <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-amber-500 text-amber-500' : ''}`} />
+          </button>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onShare(listing);
+            }}
+            aria-label="Share listing"
+            className="min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors"
+          >
+            <Share2 className="w-4 h-4" />
           </button>
         </div>
       </div>
