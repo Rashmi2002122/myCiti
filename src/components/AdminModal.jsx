@@ -333,8 +333,27 @@ export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCr
                 if (onListingChanged) onListingChanged();
               }}
             />
-          ) : isFormOpen ? (
-            /* Add / Edit Listing Form with Pick Location Step */
+          ) : adminSection === 'CLIENT_REQUESTS' ? (
+            /* Client Upgrade Requests Panel */
+            <AdminClientRequestsQueue
+              token={token}
+              onRequestsChanged={onListingChanged}
+            />
+          ) : adminSection === 'USERS' ? (
+            /* Users Management Panel */
+            <AdminUsersManager
+              token={token}
+              currentUserId={user?.id}
+            />
+          ) : adminSection === 'MARKETING' ? (
+            /* Ads & Announcements Marketing Panel */
+            <AdminAdsManager
+              token={token}
+              onOpenCreateAnnouncement={onOpenCreateAnnouncement}
+            />
+          ) : adminSection === 'LISTINGS' ? (
+            isFormOpen ? (
+              /* Add / Edit Listing Form with Pick Location Step */
             <form onSubmit={handleSaveListing} className="space-y-5 max-w-2xl mx-auto">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                 <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100">
@@ -659,31 +678,7 @@ export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCr
                 </table>
               </div>
             </div>
-          )}
-
-          {/* Section 3: Ads & Announcements Marketing Panel */}
-          {token && adminSection === 'MARKETING' && (
-            <AdminAdsManager
-              token={token}
-              onOpenCreateAnnouncement={onOpenCreateAnnouncement}
-            />
-          )}
-
-          {/* Section 4: Client Upgrade Requests Panel */}
-          {token && adminSection === 'CLIENT_REQUESTS' && (
-            <AdminClientRequestsQueue
-              token={token}
-              onRequestsChanged={onListingChanged}
-            />
-          )}
-
-          {/* Section 5: Users Management Panel */}
-          {token && adminSection === 'USERS' && (
-            <AdminUsersManager
-              token={token}
-              currentUserId={user?.id}
-            />
-          )}
+          )) : null}
         </div>
       </div>
     </div>
