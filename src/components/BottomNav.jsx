@@ -9,7 +9,7 @@ export default function BottomNav({
   isAuthenticated
 }) {
   const tabs = [
-    { id: 'home', label: 'Highlights', icon: Compass },
+    { id: 'home', label: 'Explore', icon: Compass },
     { id: 'map', label: 'Map', icon: MapPin },
     { id: 'saved', label: 'Saved', icon: Bookmark },
   ];

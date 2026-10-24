@@ -22,7 +22,7 @@ import SplashScreen from './components/SplashScreen';
 import { reverseGeocodeCity } from './utils/locationUtils';
 import { registerPushSubscription } from './utils/pushUtils';
 import { isCategoryAllowed } from './utils/notificationPrefs';
-import { filterUniqueClientListings } from './utils/listingUtils';
+import { filterUniqueClientListings, filterExploreListings } from './utils/listingUtils';
 
 const AdminModal = lazy(() => import('./components/AdminModal'));
 const LoginModal = lazy(() => import('./components/LoginModal'));
@@ -120,10 +120,22 @@ export default function App() {
     }
   });
 
-  // Deduplicate listings for Map and Explore: only the most recent post per client is shown
+  // 60-second real-time tick to refresh live/closed statuses across day/operating hour boundaries
+  const [timeTick, setTimeTick] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setTimeTick(Date.now()), 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Deduplicate listings for Map: only the most recent active post per client is shown (over events excluded)
   const cleanListings = useMemo(() => {
     return filterUniqueClientListings(listings);
   }, [listings]);
+
+  // Filter listings for Explore (Highlights/HomeView): only currently LIVE, open events (closed or over events excluded)
+  const exploreListings = useMemo(() => {
+    return filterExploreListings(listings);
+  }, [listings, timeTick]);
 
   // Full-screen Splash Screen (once per session, force with ?splash=1)
   const [showSplash, setShowSplash] = useState(() => {
@@ -796,7 +808,7 @@ export default function App() {
 
         {activeTab === 'home' && (
           <HomeView
-            listings={cleanListings}
+            listings={exploreListings}
             onSelectListing={handleSelectListing}
             savedIds={savedIds}
             onToggleSave={handleToggleSave}
@@ -806,6 +818,7 @@ export default function App() {
             isLocating={isLocating}
             selectedCity={selectedCity}
             onOpenClientProfile={handleOpenClientProfile}
+            onExploreMapClick={() => setActiveTab('map')}
           />
         )}
 
