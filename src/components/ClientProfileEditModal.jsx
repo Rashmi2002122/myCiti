@@ -7,7 +7,6 @@ import {
   Clock,
   Phone,
   MessageCircle,
-  ExternalLink,
   Copy,
   Check,
   AlertCircle,
@@ -369,24 +368,6 @@ export default function ClientProfileEditModal({
               <p className="text-[11px] text-slate-400 font-medium">Manage your client public identity</p>
             </div>
           </div>
-
-          {/* Top-right "View public profile" button */}
-          {slug && (
-            <button
-              type="button"
-              onClick={() => {
-                if (onViewPublicProfile) {
-                  onViewPublicProfile(slug);
-                } else {
-                  window.open(`/c/${slug}`, '_blank', 'noopener,noreferrer');
-                }
-              }}
-              className="min-h-[40px] px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-city-blue dark:text-sky-400 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <span>View public</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </button>
-          )}
         </div>
 
         {/* --- Loading Skeleton --- */}
