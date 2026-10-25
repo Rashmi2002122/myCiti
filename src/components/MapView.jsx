@@ -185,6 +185,22 @@ export default function MapView({
     }
   }, [isVisible]);
 
+  // Dynamically switch vector style when darkMode prop changes
+  useEffect(() => {
+    if (!tileLayerRef.current) return;
+    try {
+      const maplibreMap = tileLayerRef.current.getMaplibreMap?.();
+      if (maplibreMap) {
+        const styleUrl = darkMode
+          ? 'https://tiles.openfreemap.org/styles/positron'
+          : 'https://tiles.openfreemap.org/styles/bright';
+        maplibreMap.setStyle(styleUrl);
+      }
+    } catch (e) {
+      console.warn('Failed to dynamically switch MapLibre style:', e);
+    }
+  }, [darkMode]);
+
   // Update Markers when listings change (batched via addLayers for 60fps smoothness)
   useEffect(() => {
     if (!clusterGroupRef.current) return;

@@ -80,45 +80,45 @@ export default function LoginModal({ isOpen, onClose }) {
   const isSuspended = authError && authError.includes('suspended');
 
   return (
-    <div className="fixed inset-0 z-[3000] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[3000] bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
       {/* Modal Card */}
-      <div className="bg-gradient-to-b from-[#cfe7ff] to-[#eaf4ff] dark:from-slate-900 dark:to-slate-950 p-6 sm:p-8 rounded-[28px] max-w-md w-full shadow-2xl border border-white/60 dark:border-slate-800 relative animate-in zoom-in-95 duration-200">
+      <div className="bg-white dark:bg-[#10141c] p-6 sm:p-7 rounded-[5px] max-w-sm w-full shadow-2xl border border-slate-200 dark:border-[#303139] relative animate-in zoom-in-95 duration-160 text-slate-900 dark:text-[#f4f5f7]">
         {/* Close button */}
         <button
           onClick={onClose}
           aria-label="Close login dialog"
-          className="absolute top-3.5 right-3.5 z-30 w-9 h-9 rounded-full bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-all shadow-md border border-slate-200/80 dark:border-slate-700 cursor-pointer active:scale-95"
+          className="absolute top-3.5 right-3.5 z-30 w-8 h-8 rounded-full bg-slate-100 dark:bg-[#101522] text-slate-700 dark:text-[#f4f5f7] hover:border-[#ff951f]/50 flex items-center justify-center transition-all border border-slate-200 dark:border-[#303139] cursor-pointer active:scale-95"
         >
-          <X className="w-5 h-5 stroke-[2.5]" />
+          <X className="w-4 h-4 stroke-[2.2]" />
         </button>
 
         {/* Content Card */}
-        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-[24px] p-6 text-center shadow-soft border border-white/60 dark:border-slate-800 space-y-4">
+        <div className="text-center space-y-4 pt-1">
           {/* Logo icon */}
-          <div className="w-14 h-14 bg-sky-base dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto text-3xl shadow-sm">
+          <div className="w-13 h-13 bg-slate-100 dark:bg-[#101522] border border-slate-200 dark:border-[#303139] rounded-full flex items-center justify-center mx-auto text-2xl shadow-sm text-amber-600 dark:text-[#edcd8c]">
             🪔
           </div>
 
           <div>
-            <h2 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-              my<span className="text-city-blue">Citi</span>
+            <h2 className="text-xl font-medium tracking-tight text-slate-900 dark:text-[#f4f5f7]">
+              my<span className="text-[#ff951f]">Citi</span>
             </h2>
-            <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 mt-1">
+            <p className="text-xs font-mono text-slate-600 dark:text-[#c9ced8] mt-1">
               Sign in to post your event or offer
             </p>
           </div>
 
           {/* Suspended message state */}
           {isSuspended ? (
-            <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs font-medium space-y-2 text-left">
+            <div className="p-3 rounded-[4px] bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-300 text-xs font-mono space-y-1.5 text-left">
               <div className="flex items-center gap-2 font-bold text-rose-800 dark:text-rose-200">
                 <ShieldAlert className="w-4 h-4 flex-shrink-0" />
                 <span>Account Suspended</span>
               </div>
-              <p>Your account is suspended. Contact <a href="mailto:admin@myciti.com" className="underline font-bold">admin@myciti.com</a></p>
+              <p>Your account is suspended. Contact <a href="mailto:admin@myciti.com" className="underline font-bold text-[#ff951f]">admin@myciti.com</a></p>
             </div>
           ) : authError ? (
-            <div className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 text-rose-700 dark:text-rose-300 text-xs font-medium flex items-center gap-2 text-left">
+            <div className="p-3 rounded-[4px] bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-300 text-xs font-mono flex items-center gap-2 text-left">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span>{authError}</span>
             </div>
@@ -126,14 +126,14 @@ export default function LoginModal({ isOpen, onClose }) {
 
           {/* Popup blocked / fallback message */}
           {popupBlocked && (
-            <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 text-amber-800 dark:text-amber-200 text-xs font-medium flex items-center justify-between gap-2">
+            <div className="p-3 rounded-[4px] bg-amber-50 dark:bg-[#101522] border border-amber-200 dark:border-[#ff951f]/40 text-amber-800 dark:text-[#edcd8c] text-xs font-mono flex items-center justify-between gap-2">
               <span>Google popup was blocked by browser.</span>
               <button
                 onClick={() => {
                   setPopupBlocked(false);
                   window.google?.accounts?.id?.prompt();
                 }}
-                className="font-bold underline text-city-blue flex items-center gap-1"
+                className="font-bold underline text-[#ff951f] flex items-center gap-1 cursor-pointer"
               >
                 <RefreshCw className="w-3 h-3" /> Retry
               </button>
@@ -143,8 +143,8 @@ export default function LoginModal({ isOpen, onClose }) {
           {/* Google Button Container */}
           <div className="py-2 flex flex-col items-center justify-center min-h-[50px]">
             {isLoading ? (
-              <div className="flex items-center gap-2 text-xs font-bold text-city-blue">
-                <div className="w-4 h-4 border-2 border-city-blue border-t-transparent rounded-full animate-spin" />
+              <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#ff951f]">
+                <div className="w-4 h-4 border-2 border-[#ff951f] border-t-transparent rounded-full animate-spin" />
                 <span>Signing in with Google...</span>
               </div>
             ) : (
@@ -153,7 +153,7 @@ export default function LoginModal({ isOpen, onClose }) {
           </div>
 
           {/* Privacy Note */}
-          <p className="text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed pt-2 border-t border-slate-100 dark:border-slate-800">
+          <p className="text-[11px] font-mono text-slate-500 dark:text-[#c9ced8]/60 leading-relaxed pt-3 border-t border-slate-100 dark:border-[#303139]">
             We only use your name and email. Browsing the map never needs login.
           </p>
         </div>

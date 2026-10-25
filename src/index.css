@@ -6,6 +6,53 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Financial Plex Sans';
+  src: local('IBM Plex Sans');
+}
+
+@font-face {
+  font-family: 'Financial Plex Mono';
+  src: local('IBM Plex Mono');
+}
+
+:root {
+  --dp-color-ground: #f8fafc;
+  --dp-color-ground-tint: #f1f5f9;
+  --dp-color-panel: #ffffff;
+  --dp-color-accent: #ff951f;
+  --dp-color-value: #b45309;
+  --dp-color-ink: #07090e;
+  --dp-color-ink-muted: #64748b;
+  --dp-color-line: #e2e8f0;
+  --dp-typography-body-face: "Financial Plex Sans", "IBM Plex Sans", sans-serif;
+  --dp-typography-data-face: "Financial Plex Mono", "IBM Plex Mono", monospace;
+  --dp-typography-body: 16px;
+  --dp-typography-supporting: 14px;
+  --dp-typography-metadata: 13px;
+  --dp-typography-body-leading: 1.6;
+  --dp-typography-reading-leading: 1.65;
+  --dp-spacing-cluster-gap: 24px;
+  --dp-spacing-compact-gap: 12px;
+  --dp-radius-panel: 5px;
+  --dp-radius-editorial: 4px;
+  --dp-radius-control: 40px;
+  --dp-border-hairline: 1px;
+  --dp-motion-interaction: 160ms;
+  --dp-motion-easing: ease;
+}
+
+.dark {
+  --dp-color-ground: #07090e;
+  --dp-color-ground-tint: #101522;
+  --dp-color-panel: #10141c;
+  --dp-color-accent: #ff951f;
+  --dp-color-value: #edcd8c;
+  --dp-color-ink: #f4f5f7;
+  --dp-color-ink-muted: #c9ced8;
+  --dp-color-line: #303139;
+}
+
 @layer base {
   html, body, #root {
     width: 100%;
@@ -18,58 +65,68 @@
   }
 
   body {
-    @apply font-sans antialiased text-slate-900 bg-white dark:bg-slate-950 selection:bg-blue-200;
+    font-family: var(--dp-typography-body-face);
+    font-size: var(--dp-typography-body);
+    line-height: var(--dp-typography-body-leading);
+    @apply antialiased text-slate-900 dark:text-[#f4f5f7] bg-slate-50 dark:bg-[#07090e] selection:bg-[#ff951f]/30 selection:text-slate-900 dark:selection:text-[#f4f5f7];
   }
 }
 
-/* Custom Marker Cluster Styling */
+/* Custom Marker Cluster Styling (Financial System) */
 .marker-cluster-small,
 .marker-cluster-medium,
 .marker-cluster-large {
-  background-color: rgba(47, 123, 255, 0.25) !important;
+  background-color: rgba(255, 149, 31, 0.22) !important;
   border-radius: 9999px !important;
 }
 
 .marker-cluster-small div,
 .marker-cluster-medium div,
 .marker-cluster-large div {
-  background-color: #2f7bff !important;
-  color: white !important;
+  background-color: #ff951f !important;
+  color: #07090e !important;
   font-weight: 700 !important;
-  font-family: inherit !important;
+  font-family: var(--dp-typography-data-face) !important;
   border-radius: 9999px !important;
-  box-shadow: 0 4px 14px rgba(47, 123, 255, 0.45);
+  box-shadow: 0 4px 14px rgba(255, 149, 31, 0.35);
 }
 
 /* Clean attribution watermark */
 .leaflet-control-attribution {
   font-size: 10px !important;
-  background: rgba(255, 255, 255, 0.8) !important;
-  border-radius: 8px !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+  color: #64748b !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: var(--dp-radius-panel) !important;
   margin: 8px !important;
 }
 
-/* Crisp tile rendering and dark mode filter without external API keys */
+.leaflet-control-attribution a {
+  color: #b45309 !important;
+}
+
+/* Crisp tile rendering and dark navy-black ground */
 .leaflet-container {
   background-color: #eaf4ff !important;
   font-family: inherit;
 }
 
 .dark .leaflet-container {
-  background-color: #090d16 !important;
+  background-color: #07090e !important;
 }
 
 .dark .leaflet-tile-pane {
-  filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+  filter: brightness(0.65) invert(1) contrast(2.6) hue-rotate(205deg) saturate(0.25) brightness(0.72);
 }
 
 .dark .leaflet-control-attribution {
-  background: rgba(15, 23, 42, 0.85) !important;
-  color: #94a3b8 !important;
+  background: rgba(16, 20, 28, 0.92) !important;
+  color: #c9ced8 !important;
+  border-color: #303139 !important;
 }
 
 .dark .leaflet-control-attribution a {
-  color: #60a5fa !important;
+  color: #ff951f !important;
 }
 
 /* Ensure smooth bottom sheet animations and respect reduced motion */

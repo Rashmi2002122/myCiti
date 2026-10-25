@@ -113,7 +113,15 @@ export default function App() {
   const [isLocating, setIsLocating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    try {
+      const saved = localStorage.getItem('myciti_theme');
+      if (saved !== null) return saved === 'dark';
+      return false;
+    } catch {
+      return false;
+    }
+  });
   const [savedIds, setSavedIds] = useState(() => {
     try {
       const stored = localStorage.getItem(SAVED_STORAGE_KEY);
@@ -157,8 +165,10 @@ export default function App() {
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark');
+      try { localStorage.setItem('myciti_theme', 'dark'); } catch {}
     } else {
       document.documentElement.classList.remove('dark');
+      try { localStorage.setItem('myciti_theme', 'light'); } catch {}
     }
   }, [darkMode]);
 
@@ -827,7 +837,7 @@ export default function App() {
   }, [locationToast]);
 
   return (
-    <div className="fixed inset-0 w-full h-full h-[100dvh] overflow-hidden bg-transparent dark:bg-slate-950">
+    <div className="fixed inset-0 w-full h-full h-[100dvh] overflow-hidden bg-slate-50 dark:bg-[#07090e] text-slate-900 dark:text-[#f4f5f7]">
       {/* Top Floating Controls */}
       <TopBar
         selectedCategory={selectedCategory}

@@ -96,7 +96,7 @@ export default function BottomSheet({
       {/* Blurred Dark Backdrop */}
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-black/60 backdrop-blur-md z-[3600] animate-in fade-in duration-200"
+        className="fixed inset-0 bg-black/75 backdrop-blur-md z-[3600] animate-in fade-in duration-160"
       />
 
       {/* Floating Modal Card Wrapper */}
@@ -105,31 +105,31 @@ export default function BottomSheet({
           role="dialog"
           aria-modal="true"
           aria-label={listing.title}
-          className="pointer-events-auto w-full max-w-md bg-[#161714] text-white rounded-[32px] sm:rounded-[36px] overflow-hidden shadow-2xl border border-white/10 animate-in slide-in-from-bottom-6 sm:zoom-in-95 duration-250 flex flex-col max-h-[92dvh]"
+          className="pointer-events-auto w-full max-w-md bg-white dark:bg-[#10141c] text-slate-900 dark:text-[#f4f5f7] rounded-[6px] sm:rounded-[8px] overflow-hidden shadow-2xl border border-slate-200 dark:border-[#303139] animate-in slide-in-from-bottom-6 sm:zoom-in-95 duration-160 flex flex-col max-h-[92dvh]"
         >
           {/* Top Hero Image Section with Seamless Gradient Fade */}
-          <div className="relative w-full aspect-[4/3] flex-shrink-0 bg-stone-900 overflow-hidden">
+          <div className="relative w-full aspect-[4/3] flex-shrink-0 bg-slate-100 dark:bg-[#101522] overflow-hidden">
             {images.length > 0 ? (
               <img
                 src={images[activeImageIndex].url}
                 alt={listing.title}
-                className="w-full h-full object-cover transition-opacity duration-300"
+                className="w-full h-full object-cover transition-opacity duration-160"
               />
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-stone-800 via-stone-900 to-[#161714] text-stone-400">
+              <div className="w-full h-full flex flex-col items-center justify-center bg-slate-100 dark:bg-[#101522] text-amber-600 dark:text-[#edcd8c]">
                 <span className="text-5xl mb-2">{categoryConfig.icon}</span>
-                <span className="text-xs uppercase tracking-widest font-bold text-stone-400">
+                <span className="text-xs uppercase tracking-widest font-mono font-medium text-slate-500 dark:text-[#c9ced8]">
                   {categoryConfig.label}
                 </span>
               </div>
             )}
 
-            {/* Smooth Atmospheric Gradient overlay fading seamlessly into #161714 */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#161714] via-[#161714]/60 to-transparent pointer-events-none" />
+            {/* Smooth Atmospheric Gradient overlay fading seamlessly into surface */}
+            <div className="absolute inset-0 bg-gradient-to-t from-white via-white/60 dark:from-[#10141c] dark:via-[#10141c]/60 to-transparent pointer-events-none" />
 
             {/* Top Left: Category Badge */}
             <div className="absolute top-3.5 left-3.5 z-20 flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-black/40 backdrop-blur-md border border-white/15 text-white/95 shadow-sm">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium bg-white/90 dark:bg-[#10141c]/90 backdrop-blur-md border border-slate-200 dark:border-[#303139] text-slate-800 dark:text-[#f4f5f7] shadow-sm">
                 <span>{categoryConfig.icon}</span>
                 <span>{categoryConfig.label}</span>
               </span>
@@ -140,25 +140,25 @@ export default function BottomSheet({
               <button
                 onClick={handleSave}
                 aria-label="Save listing"
-                className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-md border border-white/15 text-white flex items-center justify-center transition-all cursor-pointer active:scale-95"
+                className="w-9 h-9 rounded-full bg-white/90 dark:bg-[#10141c]/90 hover:bg-slate-100 dark:hover:bg-[#101522] backdrop-blur-md border border-slate-200 dark:border-[#303139] hover:border-[#ff951f]/60 text-slate-800 dark:text-[#f4f5f7] flex items-center justify-center transition-all duration-160 cursor-pointer active:scale-95"
               >
-                <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-amber-400 text-amber-400' : 'text-white'}`} />
+                <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-amber-600 text-amber-600 dark:fill-[#edcd8c] dark:text-[#edcd8c]' : 'text-slate-700 dark:text-[#f4f5f7]'}`} />
               </button>
 
               <button
                 onClick={handleShare}
                 aria-label="Share listing"
-                className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-md border border-white/15 text-white flex items-center justify-center transition-all cursor-pointer active:scale-95"
+                className="w-9 h-9 rounded-full bg-white/90 dark:bg-[#10141c]/90 hover:bg-slate-100 dark:hover:bg-[#101522] backdrop-blur-md border border-slate-200 dark:border-[#303139] hover:border-[#ff951f]/60 text-slate-800 dark:text-[#f4f5f7] flex items-center justify-center transition-all duration-160 cursor-pointer active:scale-95"
               >
-                {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4 text-white" />}
+                {copied ? <Check className="w-4 h-4 text-[#ff951f]" /> : <Share2 className="w-4 h-4 text-slate-700 dark:text-[#f4f5f7]" />}
               </button>
 
               <button
                 onClick={onClose}
                 aria-label="Close details"
-                className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-md border border-white/15 text-white flex items-center justify-center transition-all cursor-pointer active:scale-95"
+                className="w-9 h-9 rounded-full bg-white/90 dark:bg-[#10141c]/90 hover:bg-slate-100 dark:hover:bg-[#101522] backdrop-blur-md border border-slate-200 dark:border-[#303139] hover:border-[#ff951f]/60 text-slate-800 dark:text-[#f4f5f7] flex items-center justify-center transition-all duration-160 cursor-pointer active:scale-95"
               >
-                <X className="w-4 h-4 text-white" />
+                <X className="w-4 h-4 text-slate-700 dark:text-[#f4f5f7]" />
               </button>
             </div>
 
@@ -168,7 +168,7 @@ export default function BottomSheet({
                 <button
                   onClick={() => setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1))}
                   aria-label="Previous image"
-                  className="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-md border border-white/10 transition-all cursor-pointer z-10"
+                  className="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 dark:bg-[#10141c]/90 hover:bg-slate-100 dark:hover:bg-[#101522] text-slate-800 dark:text-[#f4f5f7] flex items-center justify-center backdrop-blur-md border border-slate-200 dark:border-[#303139] transition-all duration-160 cursor-pointer z-10"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -176,20 +176,20 @@ export default function BottomSheet({
                 <button
                   onClick={() => setActiveImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0))}
                   aria-label="Next image"
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-md border border-white/10 transition-all cursor-pointer z-10"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 dark:bg-[#10141c]/90 hover:bg-slate-100 dark:hover:bg-[#101522] text-slate-800 dark:text-[#f4f5f7] flex items-center justify-center backdrop-blur-md border border-slate-200 dark:border-[#303139] transition-all duration-160 cursor-pointer z-10"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
 
                 {/* Dot Indicators */}
-                <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-full backdrop-blur-md border border-white/10 z-10">
+                <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-white/90 dark:bg-[#10141c]/90 px-2.5 py-1 rounded-full backdrop-blur-md border border-slate-200 dark:border-[#303139] z-10">
                   {images.map((_, idx) => (
                     <button
                       key={idx}
                       onClick={() => setActiveImageIndex(idx)}
                       aria-label={`Go to image ${idx + 1}`}
-                      className={`h-1.5 rounded-full transition-all ${
-                        idx === activeImageIndex ? 'bg-white w-3.5' : 'bg-white/50 w-1.5'
+                      className={`h-1.5 rounded-full transition-all duration-160 ${
+                        idx === activeImageIndex ? 'bg-[#ff951f] w-3.5' : 'bg-slate-400 dark:bg-[#c9ced8]/50 w-1.5'
                       }`}
                     />
                   ))}
@@ -198,59 +198,59 @@ export default function BottomSheet({
             )}
           </div>
 
-          {/* Content Body (negative margin brings title over the atmospheric gradient fade) */}
+          {/* Content Body */}
           <div className="relative -mt-14 sm:-mt-16 z-10 px-6 pt-1 pb-4 space-y-3.5 overflow-y-auto flex-1">
             {/* Title */}
             <div>
-              <h2 className="text-2xl sm:text-[26px] font-bold text-white tracking-tight leading-tight drop-shadow-sm">
+              <h2 className="text-2xl sm:text-[26px] font-medium text-slate-900 dark:text-[#f4f5f7] tracking-tight leading-tight">
                 {listing.title}
               </h2>
             </div>
 
             {/* Description */}
             {listing.description && (
-              <p className="text-sm text-neutral-300 leading-relaxed font-normal">
+              <p className="text-sm text-slate-600 dark:text-[#c9ced8] leading-relaxed font-normal">
                 {listing.description}
               </p>
             )}
 
-            {/* Pills / Badges Row (Matches reference design) */}
+            {/* Pills / Badges Row */}
             <div className="flex items-center gap-2 flex-wrap pt-1">
               {/* Live Status Pill */}
               {listing.openNow ? (
-                <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#272b22] border border-emerald-500/30 text-emerald-300 text-xs font-semibold backdrop-blur-sm shadow-xs">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium bg-slate-100 dark:bg-[#101522] border border-slate-200 dark:border-[#303139] text-slate-800 dark:text-[#f4f5f7]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#ff951f] animate-pulse" />
                   <span>Live Now</span>
                 </div>
               ) : (
-                <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#2b2d28] border border-white/10 text-neutral-400 text-xs font-medium">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-[#101522] border border-slate-200 dark:border-[#303139] text-slate-600 dark:text-[#c9ced8] text-xs font-mono font-medium">
                   <span>Closed</span>
                 </div>
               )}
 
               {/* Operating Hours Pill */}
               {listing.dailyOpenTime && listing.dailyCloseTime && (
-                <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#2b2d28] border border-white/10 text-neutral-200 text-xs font-medium backdrop-blur-sm">
-                  <Clock className="w-3.5 h-3.5 text-neutral-400" />
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-[#101522] border border-slate-200 dark:border-[#303139] text-amber-700 dark:text-[#edcd8c] text-xs font-mono font-medium">
+                  <Clock className="w-3.5 h-3.5 text-[#ff951f]" />
                   <span>{listing.dailyOpenTime.slice(0, 5)} - {listing.dailyCloseTime.slice(0, 5)}</span>
                 </div>
               )}
 
               {/* Location Landmark & Distance Pill */}
               {(listing.landmark || listing.city) && (
-                <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#2b2d28] border border-white/10 text-neutral-200 text-xs font-medium backdrop-blur-sm">
-                  <MapPin className="w-3.5 h-3.5 text-neutral-400" />
-                  <span className="truncate max-w-[160px]">{listing.landmark || listing.city}</span>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-[#101522] border border-slate-200 dark:border-[#303139] text-slate-600 dark:text-[#c9ced8] text-xs font-mono font-medium">
+                  <MapPin className="w-3.5 h-3.5 text-[#ff951f]" />
+                  <span className="truncate max-w-[160px] text-slate-800 dark:text-[#f4f5f7]">{listing.landmark || listing.city}</span>
                   {listing.distanceKm !== undefined && listing.distanceKm !== null && (
-                    <span className="text-neutral-400 font-bold">• {listing.distanceKm} km</span>
+                    <span className="text-amber-700 dark:text-[#edcd8c] font-bold">• {listing.distanceKm} km</span>
                   )}
                 </div>
               )}
 
               {/* Special Offer Pill */}
               {listing.offerText && (
-                <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#352c1e] border border-amber-500/30 text-amber-200 text-xs font-semibold backdrop-blur-sm">
-                  <Tag className="w-3.5 h-3.5 text-amber-400" />
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 dark:bg-[#101522] border border-amber-200/60 dark:border-[#303139] text-amber-800 dark:text-[#edcd8c] text-xs font-mono font-semibold">
+                  <Tag className="w-3.5 h-3.5 text-[#ff951f]" />
                   <span>{listing.offerText}</span>
                 </div>
               )}
@@ -268,10 +268,10 @@ export default function BottomSheet({
                     handleClientProfileClick();
                   }
                 }}
-                className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.05] hover:bg-white/[0.09] border border-white/10 transition-all cursor-pointer group active:scale-[0.99] mt-2"
+                className="flex items-center justify-between p-3 rounded-[5px] bg-slate-100 dark:bg-[#101522] hover:bg-slate-200/70 dark:hover:bg-[#101522]/80 border border-slate-200 dark:border-[#303139] hover:border-[#ff951f]/50 transition-all duration-160 cursor-pointer group active:scale-[0.99] mt-2"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-xl overflow-hidden bg-white/10 border border-white/15 flex items-center justify-center flex-shrink-0">
+                  <div className="w-9 h-9 rounded-[4px] overflow-hidden bg-white dark:bg-[#10141c] border border-slate-200 dark:border-[#303139] flex items-center justify-center flex-shrink-0">
                     {listing.clientLogoUrl ? (
                       <img
                         src={listing.clientLogoUrl}
@@ -280,50 +280,48 @@ export default function BottomSheet({
                         onError={(e) => { e.currentTarget.style.display = 'none'; }}
                       />
                     ) : (
-                      <Store className="w-4 h-4 text-white/70" />
+                      <Store className="w-4 h-4 text-[#ff951f]" />
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-bold text-white truncate group-hover:text-sky-300 transition-colors">
+                      <span className="text-xs font-medium text-slate-800 dark:text-[#f4f5f7] truncate group-hover:text-[#ff951f] transition-colors duration-160">
                         {listing.clientBusinessName || listing.clientSlug}
                       </span>
                       {listing.clientVerified && (
                         <span
-                          className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-[#1d9bf0] text-white flex-shrink-0"
+                          className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-[#ff951f] text-[#07090e] font-bold text-[8px] flex-shrink-0"
                           title="Verified business"
                         >
-                          <svg className="w-2.5 h-2.5 fill-current stroke-current" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                          </svg>
+                          ✓
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-neutral-400 truncate">
+                    <p className="text-[11px] font-mono text-slate-500 dark:text-[#c9ced8] truncate">
                       {listing.openNow ? 'Checkout other updates & live posts' : 'View business profile'}
                     </p>
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-neutral-400 group-hover:text-white group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-[#c9ced8] group-hover:text-[#ff951f] group-hover:translate-x-0.5 transition-all duration-160 flex-shrink-0" />
               </div>
             )}
 
             {/* Address / Directions Info */}
             {listing.address && listing.address !== listing.landmark && (
-              <div className="flex items-start gap-2 pt-1 text-xs text-neutral-400">
-                <MapPin className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2 pt-1 text-xs text-slate-600 dark:text-[#c9ced8]">
+                <MapPin className="w-3.5 h-3.5 text-[#ff951f] flex-shrink-0 mt-0.5" />
                 <span className="leading-snug">{listing.address}</span>
               </div>
             )}
           </div>
 
-          {/* Sticky Bottom Action Button Section (Dominant Clean Pill Button matching the reference) */}
-          <div className="p-4 sm:p-5 pt-3 bg-gradient-to-t from-[#161714] via-[#161714] to-transparent border-t border-white/5 flex items-center gap-3">
+          {/* Sticky Bottom Action Button Section */}
+          <div className="p-4 sm:p-5 pt-3 bg-white dark:bg-[#10141c] border-t border-slate-100 dark:border-[#303139] flex items-center gap-3">
             <button
               onClick={handleDirections}
-              className="flex-1 py-3.5 sm:py-4 px-6 bg-white hover:bg-neutral-100 active:scale-[0.98] text-[#161714] rounded-full font-bold text-sm sm:text-base shadow-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
+              className="flex-1 py-3.5 sm:py-4 px-6 active:scale-[0.98] rounded-full font-semibold text-sm sm:text-base shadow-xl flex items-center justify-center gap-2 transition-all duration-160 cursor-pointer bg-[#ff951f] hover:bg-[#e68416] text-[#07090e]"
             >
-              <Navigation className="w-4 h-4 fill-[#161714] text-[#161714]" />
+              <Navigation className="w-4 h-4 fill-[#07090e] text-[#07090e]" />
               <span>Get Directions</span>
             </button>
 
@@ -331,9 +329,9 @@ export default function BottomSheet({
               <a
                 href={`tel:${listing.contactPhone}`}
                 aria-label="Call venue"
-                className="w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-white/10 hover:bg-white/15 text-white flex items-center justify-center border border-white/10 transition-colors flex-shrink-0 active:scale-95"
+                className="w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-slate-100 dark:bg-[#101522] hover:bg-slate-200 dark:hover:bg-[#101522]/80 text-slate-800 dark:text-[#f4f5f7] flex items-center justify-center border border-slate-200 dark:border-[#303139] hover:border-[#ff951f]/50 transition-colors duration-160 flex-shrink-0 active:scale-95"
               >
-                <Phone className="w-4 h-4 text-white" />
+                <Phone className="w-4 h-4 text-amber-700 dark:text-[#edcd8c]" />
               </a>
             )}
           </div>

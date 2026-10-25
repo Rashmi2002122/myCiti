@@ -18,40 +18,40 @@ export default function SavedView({
       {/* Header */}
       <div className="flex items-center justify-between px-1">
         <div>
-          <h2 className="text-xl font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <Bookmark className="w-5 h-5 fill-amber-500 text-amber-500" />
+          <h1 className="text-xl font-medium tracking-tight text-slate-900 dark:text-[#f4f5f7] flex items-center gap-2">
+            <Bookmark className="w-5 h-5 fill-amber-600 text-amber-600 dark:fill-[#edcd8c] dark:text-[#edcd8c]" />
             <span>Saved Listings</span>
-          </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          </h1>
+          <p className="text-xs text-slate-500 dark:text-[#c9ced8] mt-0.5">
             Stored locally on your device for quick offline access
           </p>
         </div>
-        <span className="text-xs px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 font-bold border border-amber-200/50">
+        <span className="text-xs px-2.5 py-1 rounded-full bg-white dark:bg-[#10141c] text-amber-700 dark:text-[#edcd8c] font-mono font-medium border border-slate-200 dark:border-[#303139] tabular-nums">
           {savedListings.length} saved
         </span>
       </div>
 
       {savedListings.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900 rounded-[28px] p-8 text-center border border-slate-100 dark:border-slate-800 shadow-soft space-y-3">
-          <div className="w-14 h-14 bg-amber-50 dark:bg-amber-950/30 rounded-full flex items-center justify-center mx-auto text-2xl">
+        <div className="bg-white dark:bg-[#10141c] rounded-[5px] p-8 text-center border border-slate-200 dark:border-[#303139] space-y-3">
+          <div className="w-12 h-12 bg-slate-100 dark:bg-[#101522] border border-slate-200 dark:border-[#303139] rounded-full flex items-center justify-center mx-auto text-xl">
             🔖
           </div>
-          <h3 className="font-extrabold text-base text-slate-800 dark:text-slate-200">
+          <h2 className="font-medium text-base text-slate-900 dark:text-[#f4f5f7]">
             No saved listings yet
-          </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto leading-relaxed">
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-[#c9ced8] max-w-sm mx-auto leading-relaxed">
             Tap the bookmark icon on any pandal, mela, or store offer to save it for your itinerary.
           </p>
           <button
             onClick={onExploreClick}
-            className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-city-blue text-white font-bold text-xs shadow-md active:scale-95 transition-transform"
+            className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#ff951f] hover:bg-[#e68416] text-[#07090e] font-medium text-xs shadow-md active:scale-95 transition-all duration-160 cursor-pointer"
           >
             <Sparkles className="w-3.5 h-3.5" />
             <span>Explore Map</span>
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           {savedListings.map((listing) => (
             <ListingCard
               key={listing.id}
