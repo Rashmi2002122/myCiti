@@ -40,9 +40,8 @@ function persistSession(data) {
   if (data?.user) {
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
   }
-  if (data?.refreshToken) {
-    localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
-  }
+  // Enforce security: refresh token is strictly isolated in HttpOnly cookie; clear any legacy storage
+  localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
 }
 
 function clearSessionStorage() {
@@ -125,10 +124,9 @@ export function AuthProvider({ children }) {
     async function initSession() {
       const storedAccessToken = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
       const storedUser = localStorage.getItem(USER_STORAGE_KEY);
-      const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
 
       // If user is not logged in at all, skip network call
-      if (!storedAccessToken && !storedUser && !storedRefreshToken) {
+      if (!storedAccessToken && !storedUser) {
         if (isMounted) setIsInitializing(false);
         return;
       }
@@ -141,9 +139,9 @@ export function AuthProvider({ children }) {
         return;
       }
 
-      // If access token is expired or missing, refresh via HttpOnly cookie or stored refresh token
+      // If access token is expired or missing, refresh via HttpOnly cookie
       try {
-        const data = await executeRefresh(storedRefreshToken);
+        const data = await executeRefresh(null);
         if (isMounted) {
           setAccessToken(data.accessToken);
           setUser(data.user);
@@ -181,8 +179,7 @@ export function AuthProvider({ children }) {
   // Proactive session refresh (e.g. on 401 or timer)
   const refreshCurrentToken = useCallback(async () => {
     try {
-      const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
-      const data = await executeRefresh(storedRefreshToken);
+      const data = await executeRefresh(null);
       setAccessToken(data.accessToken);
       setUser(data.user);
       persistSession(data);
@@ -250,9 +247,8 @@ export function AuthProvider({ children }) {
 
   // Logout
   const handleLogout = useCallback(async () => {
-    const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
     try {
-      await logoutSession(storedRefreshToken);
+      await logoutSession();
     } catch (e) {
       console.warn('Logout request warning:', e);
     } finally {

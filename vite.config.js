@@ -35,8 +35,8 @@ export default defineConfig({
         clientsClaim: true,
         skipWaiting: true,
         importScripts: ['/push-sw.js'],
-        // Cache app shell assets including index.html so Workbox navigation fallback can resolve it
-        globPatterns: ['**/*.{js,css,html,svg,png,jpg,jpeg,ico,mjs}'],
+        // Cache static app assets (exclude html so users always get fresh bundle links)
+        globPatterns: ['**/*.{js,css,svg,png,jpg,jpeg,ico,mjs}'],
         runtimeCaching: [
           // 1. Cache OpenStreetMap Map Tiles
           {
