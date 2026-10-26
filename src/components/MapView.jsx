@@ -109,6 +109,7 @@ export default function MapView({
       minZoom: 3,
       maxZoom: 19,
       zoomControl: false,
+      attributionControl: false,
       preferCanvas: true,
     });
 

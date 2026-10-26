@@ -91,18 +91,11 @@
   box-shadow: 0 4px 14px rgba(255, 149, 31, 0.35);
 }
 
-/* Clean attribution watermark */
-.leaflet-control-attribution {
-  font-size: 10px !important;
-  background: rgba(255, 255, 255, 0.88) !important;
-  color: #64748b !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: var(--dp-radius-panel) !important;
-  margin: 8px !important;
-}
-
-.leaflet-control-attribution a {
-  color: #b45309 !important;
+/* Completely hide map watermarks, logos and attributions */
+.leaflet-control-attribution,
+.maplibregl-ctrl-attrib,
+.maplibregl-ctrl-logo {
+  display: none !important;
 }
 
 /* Crisp tile rendering and dark navy-black ground */
@@ -119,15 +112,6 @@
   filter: brightness(0.65) invert(1) contrast(2.6) hue-rotate(205deg) saturate(0.25) brightness(0.72);
 }
 
-.dark .leaflet-control-attribution {
-  background: rgba(16, 20, 28, 0.92) !important;
-  color: #c9ced8 !important;
-  border-color: #303139 !important;
-}
-
-.dark .leaflet-control-attribution a {
-  color: #ff951f !important;
-}
 
 /* Ensure smooth bottom sheet animations and respect reduced motion */
 @media (prefers-reduced-motion: reduce) {

@@ -238,6 +238,7 @@ export default function SettingsModal({
           <div className="pt-2 text-center text-[11px] text-slate-400 space-y-0.5 border-t border-slate-100 dark:border-slate-800">
             <div className="font-bold text-slate-500 dark:text-slate-400">myCiti PWA v2.0.0</div>
             <div>Designed for Durga Puja & Year-Round Community Events</div>
+            <div className="text-[10px] text-slate-400 dark:text-slate-500 pt-0.5">Map Data &copy; OpenFreeMap &bull; &copy; OpenStreetMap contributors</div>
           </div>
         </div>
       </div>

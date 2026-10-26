@@ -28,6 +28,7 @@ export default function LocationPickerMap({ lat, lng, onSelectLocation }) {
       minZoom: 3,
       maxZoom: 19,
       zoomControl: false,
+      attributionControl: false,
     });
 
     try {
