@@ -57,16 +57,22 @@ export default function ClientPublicProfileView({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Tabs: 'active' | 'upcoming'
-  const [currentTab, setCurrentTab] = useState('active');
+  // Tabs: 'all' | 'active' | 'expired' | 'upcoming'
+  const [currentTab, setCurrentTab] = useState('all');
   const [viewMode, setViewMode] = useState('card'); // 'card' | 'grid'
+  const [allListings, setAllListings] = useState([]);
   const [activeListings, setActiveListings] = useState([]);
   const [upcomingListings, setUpcomingListings] = useState([]);
+  const [expiredListings, setExpiredListings] = useState([]);
   const [listingsLoading, setListingsLoading] = useState(false);
+  const [allPage, setAllPage] = useState(0);
   const [activePage, setActivePage] = useState(0);
   const [upcomingPage, setUpcomingPage] = useState(0);
+  const [expiredPage, setExpiredPage] = useState(0);
+  const [allHasMore, setAllHasMore] = useState(false);
   const [activeHasMore, setActiveHasMore] = useState(false);
   const [upcomingHasMore, setUpcomingHasMore] = useState(false);
+  const [expiredHasMore, setExpiredHasMore] = useState(false);
 
   // UI state
   const [isHoursExpanded, setIsHoursExpanded] = useState(false);
@@ -135,10 +141,18 @@ export default function ClientPublicProfileView({
         const content = data.content || [];
         const hasMore = !data.last;
 
-        if (tab === 'active') {
+        if (tab === 'all') {
+          setAllListings((prev) => (isInitial || page === 0 ? content : [...prev, ...content]));
+          setAllHasMore(hasMore);
+          setAllPage(page);
+        } else if (tab === 'active' || tab === 'live') {
           setActiveListings((prev) => (isInitial || page === 0 ? content : [...prev, ...content]));
           setActiveHasMore(hasMore);
           setActivePage(page);
+        } else if (tab === 'expired') {
+          setExpiredListings((prev) => (isInitial || page === 0 ? content : [...prev, ...content]));
+          setExpiredHasMore(hasMore);
+          setExpiredPage(page);
         } else {
           setUpcomingListings((prev) => (isInitial || page === 0 ? content : [...prev, ...content]));
           setUpcomingHasMore(hasMore);
@@ -274,7 +288,9 @@ export default function ClientPublicProfileView({
     );
   };
 
-  const renderListingsList = (listings, isUpcomingTab) => {
+  const renderListingsList = (listings) => {
+    const todayStr = new Date().toISOString().split('T')[0];
+
     if (viewMode === 'grid') {
       return (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
@@ -282,19 +298,21 @@ export default function ClientPublicProfileView({
             const rawImageUrl = listing.primaryImageUrl || (listing.images && listing.images[0]?.url);
             const imageUrl = getOptimizedImageUrl(rawImageUrl, 400, 400);
             const catCfg = CATEGORIES[listing.category] || CATEGORIES.PANDAL;
+            const isExpired = listing.isExpired === true || (listing.endDate && listing.endDate < todayStr);
+            const isUpcoming = !isExpired && (listing.startDate && listing.startDate > todayStr);
 
             return (
               <article
                 key={listing.id}
                 onClick={() => onSelectListing && onSelectListing(listing)}
-                className="group relative aspect-square rounded-[22px] overflow-hidden bg-slate-100 dark:bg-slate-800 cursor-pointer shadow-soft hover:shadow-float active:scale-[0.98] transition-all border border-slate-100 dark:border-slate-800"
+                className={`group relative aspect-square rounded-[22px] overflow-hidden bg-slate-100 dark:bg-slate-800 cursor-pointer shadow-soft hover:shadow-float active:scale-[0.98] transition-all border border-slate-100 dark:border-slate-800 ${isExpired ? 'opacity-90' : ''}`}
               >
                 {imageUrl ? (
                   <img
                     src={imageUrl}
                     alt={listing.title}
                     loading="lazy"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ${isExpired ? 'grayscale-[25%]' : ''}`}
                   />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-sky-50 to-blue-100 dark:from-slate-800 dark:to-slate-900 text-3xl">
@@ -312,7 +330,11 @@ export default function ClientPublicProfileView({
                 </div>
 
                 <div className="absolute top-2 right-2 flex items-center gap-1 z-10">
-                  {isUpcomingTab ? (
+                  {isExpired ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-950/85 text-rose-300 border border-rose-800/80 font-bold text-[9px] backdrop-blur-md shadow-2xs">
+                      Expired
+                    </span>
+                  ) : isUpcoming ? (
                     <span className="px-2 py-0.5 rounded-full bg-indigo-600/90 text-white font-bold text-[9px] backdrop-blur-md">
                       Upcoming
                     </span>
@@ -321,7 +343,11 @@ export default function ClientPublicProfileView({
                       <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                       Live
                     </span>
-                  ) : null}
+                  ) : (
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-black/60 text-slate-300 font-semibold text-[9px] backdrop-blur-md">
+                      Closed
+                    </span>
+                  )}
                 </div>
 
                 {/* Bottom Content Overlay */}
@@ -344,17 +370,21 @@ export default function ClientPublicProfileView({
 
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {listings.map((listing) => (
-          <ClientPostCard
-            key={listing.id}
-            listing={listing}
-            onSelect={onSelectListing}
-            isSaved={savedListingIds.includes(listing.id)}
-            onToggleSave={onToggleSave}
-            onShare={onShareListing}
-            isUpcoming={isUpcomingTab}
-          />
-        ))}
+        {listings.map((listing) => {
+          const isExpired = listing.isExpired === true || (listing.endDate && listing.endDate < todayStr);
+          const isUpcoming = !isExpired && (listing.startDate && listing.startDate > todayStr);
+          return (
+            <ClientPostCard
+              key={listing.id}
+              listing={listing}
+              onSelect={onSelectListing}
+              isSaved={savedListingIds.includes(listing.id)}
+              onToggleSave={onToggleSave}
+              onShare={onShareListing}
+              isUpcoming={isUpcoming}
+            />
+          );
+        })}
       </div>
     );
   };
@@ -677,141 +707,213 @@ export default function ClientPublicProfileView({
             </div>
 
             {/* --- Sticky Tabs --- */}
-            <div className="sticky top-0 z-20 bg-white/95 dark:bg-[#10141c]/95 backdrop-blur-md border-b border-slate-200 dark:border-[#303139] flex">
+            <div className="sticky top-0 z-20 bg-white/95 dark:bg-[#10141c]/95 backdrop-blur-md border-b border-slate-200 dark:border-[#303139] flex overflow-x-auto scrollbar-none">
+              {/* Tab: All Posts */}
               <button
                 type="button"
-                onClick={() => setCurrentTab('active')}
-                className={`flex-1 min-h-[48px] py-3 text-center text-sm font-medium transition-all relative cursor-pointer ${
-                  currentTab === 'active'
+                onClick={() => setCurrentTab('all')}
+                className={`flex-1 min-w-[76px] min-h-[48px] py-3 px-2 text-center text-xs sm:text-sm font-semibold transition-all relative cursor-pointer ${
+                  currentTab === 'all'
                     ? 'text-[#ff951f]'
                     : 'text-slate-600 dark:text-[#c9ced8] hover:text-slate-900 dark:hover:text-[#f4f5f7]'
                 }`}
               >
-                <span>Active ({profile.activeListingsCount ?? activeListings.length})</span>
-                {currentTab === 'active' && (
-                  <span className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-[#ff951f] rounded-full" />
+                <span>All ({profile.totalListingsCount ?? allListings.length})</span>
+                {currentTab === 'all' && (
+                  <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-[#ff951f] rounded-full" />
                 )}
               </button>
 
+              {/* Tab: Live / Active */}
               <button
                 type="button"
-                onClick={() => setCurrentTab('upcoming')}
-                className={`flex-1 min-h-[48px] py-3 text-center text-sm font-medium transition-all relative cursor-pointer ${
-                  currentTab === 'upcoming'
-                    ? 'text-[#ff951f]'
+                onClick={() => setCurrentTab('active')}
+                className={`flex-1 min-w-[76px] min-h-[48px] py-3 px-2 text-center text-xs sm:text-sm font-semibold transition-all relative cursor-pointer ${
+                  currentTab === 'active'
+                    ? 'text-emerald-500 dark:text-emerald-400'
                     : 'text-slate-600 dark:text-[#c9ced8] hover:text-slate-900 dark:hover:text-[#f4f5f7]'
                 }`}
               >
-                <span>Upcoming ({profile.upcomingListingsCount ?? upcomingListings.length})</span>
-                {currentTab === 'upcoming' && (
-                  <span className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-[#ff951f] rounded-full" />
+                <span className="inline-flex items-center gap-1.5 justify-center">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Live ({profile.activeListingsCount ?? activeListings.length})
+                </span>
+                {currentTab === 'active' && (
+                  <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-emerald-500 rounded-full" />
                 )}
               </button>
+
+              {/* Tab: Expired */}
+              <button
+                type="button"
+                onClick={() => setCurrentTab('expired')}
+                className={`flex-1 min-w-[76px] min-h-[48px] py-3 px-2 text-center text-xs sm:text-sm font-semibold transition-all relative cursor-pointer ${
+                  currentTab === 'expired'
+                    ? 'text-rose-500 dark:text-rose-400'
+                    : 'text-slate-600 dark:text-[#c9ced8] hover:text-slate-900 dark:hover:text-[#f4f5f7]'
+                }`}
+              >
+                <span>Expired ({profile.expiredListingsCount ?? expiredListings.length})</span>
+                {currentTab === 'expired' && (
+                  <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-rose-500 rounded-full" />
+                )}
+              </button>
+
+              {/* Tab: Upcoming */}
+              {(profile.upcomingListingsCount > 0 || upcomingListings.length > 0) && (
+                <button
+                  type="button"
+                  onClick={() => setCurrentTab('upcoming')}
+                  className={`flex-1 min-w-[76px] min-h-[48px] py-3 px-2 text-center text-xs sm:text-sm font-semibold transition-all relative cursor-pointer ${
+                    currentTab === 'upcoming'
+                      ? 'text-indigo-500 dark:text-indigo-400'
+                      : 'text-slate-600 dark:text-[#c9ced8] hover:text-slate-900 dark:hover:text-[#f4f5f7]'
+                  }`}
+                >
+                  <span>Upcoming ({profile.upcomingListingsCount ?? upcomingListings.length})</span>
+                  {currentTab === 'upcoming' && (
+                    <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-indigo-500 rounded-full" />
+                  )}
+                </button>
+              )}
             </div>
 
             {/* --- Listings Content --- */}
             <div className="p-4 flex-1">
-              {/* View Mode & Header Bar */}
-              {((currentTab === 'active' && activeListings.length > 0) ||
-                (currentTab === 'upcoming' && upcomingListings.length > 0)) && (
-                <div className="flex items-center justify-between px-1 mb-3.5">
-                  <p className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    {currentTab === 'active'
-                      ? `${activeListings.length} Active Update${activeListings.length > 1 ? 's' : ''}`
-                      : `${upcomingListings.length} Scheduled Event${upcomingListings.length > 1 ? 's' : ''}`}
-                  </p>
+              {(() => {
+                const currentListings =
+                  currentTab === 'all'
+                    ? allListings
+                    : currentTab === 'active'
+                    ? activeListings
+                    : currentTab === 'expired'
+                    ? expiredListings
+                    : upcomingListings;
 
-                  <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-full border border-slate-200/60 dark:border-slate-700/60">
-                    <button
-                      type="button"
-                      onClick={() => setViewMode('card')}
-                      aria-label="Feed card view"
-                      title="Feed card view"
-                      className={`p-1.5 rounded-full transition-all cursor-pointer ${
-                        viewMode === 'card'
-                          ? 'bg-white dark:bg-slate-700 text-city-blue dark:text-sky-400 shadow-xs'
-                          : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                      }`}
-                    >
-                      <Rows className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setViewMode('grid')}
-                      aria-label="Photo grid view"
-                      title="Photo grid view"
-                      className={`p-1.5 rounded-full transition-all cursor-pointer ${
-                        viewMode === 'grid'
-                          ? 'bg-white dark:bg-slate-700 text-city-blue dark:text-sky-400 shadow-xs'
-                          : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                      }`}
-                    >
-                      <LayoutGrid className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              )}
+                const currentHasMore =
+                  currentTab === 'all'
+                    ? allHasMore
+                    : currentTab === 'active'
+                    ? activeHasMore
+                    : currentTab === 'expired'
+                    ? expiredHasMore
+                    : upcomingHasMore;
 
-              {listingsLoading && (currentTab === 'active' ? activeListings.length === 0 : upcomingListings.length === 0) ? (
-                <div className="py-12 flex flex-col items-center justify-center gap-3 text-slate-400">
-                  <div className="w-8 h-8 border-3 border-city-blue border-t-transparent rounded-full animate-spin" />
-                  <p className="text-xs font-semibold">Loading offers & listings...</p>
-                </div>
-              ) : currentTab === 'active' ? (
-                activeListings.length > 0 ? (
-                  renderListingsList(activeListings, false)
-                ) : (
-                  /* Empty state for Active */
-                  <div className="py-16 px-4 flex flex-col items-center justify-center text-center">
-                    <div className="w-16 h-16 rounded-full bg-sky-50 dark:bg-sky-950/40 text-city-blue dark:text-sky-400 flex items-center justify-center mb-3">
-                      <Sparkles className="w-8 h-8" />
-                    </div>
-                    <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
-                      No active offers right now
-                    </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs leading-relaxed">
-                      Check back soon for festive pandal timings, store discounts, and announcements.
-                    </p>
-                  </div>
-                )
-              ) : (
-                /* Upcoming Tab */
-                upcomingListings.length > 0 ? (
-                  renderListingsList(upcomingListings, true)
-                ) : (
-                  /* Empty state for Upcoming */
-                  <div className="py-16 px-4 flex flex-col items-center justify-center text-center">
-                    <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex items-center justify-center mb-3">
-                      <Calendar className="w-8 h-8" />
-                    </div>
-                    <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
-                      No upcoming events scheduled
-                    </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs leading-relaxed">
-                      This business hasn't scheduled any upcoming events or offers yet.
-                    </p>
-                  </div>
-                )
-              )}
+                const currentPage =
+                  currentTab === 'all'
+                    ? allPage
+                    : currentTab === 'active'
+                    ? activePage
+                    : currentTab === 'expired'
+                    ? expiredPage
+                    : upcomingPage;
 
-              {/* Load More Button if pagination available */}
-              {((currentTab === 'active' && activeHasMore) || (currentTab === 'upcoming' && upcomingHasMore)) && (
-                <div className="mt-6 flex justify-center">
-                  <button
-                    type="button"
-                    disabled={listingsLoading}
-                    onClick={() =>
-                      loadTabListings(
-                        currentTab,
-                        currentTab === 'active' ? activePage + 1 : upcomingPage + 1
-                      )
-                    }
-                    className="min-h-[44px] px-6 py-2.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
-                  >
-                    {listingsLoading ? 'Loading more...' : 'Load more listings'}
-                  </button>
-                </div>
-              )}
+                const isCurrentTabLoading = listingsLoading && currentListings.length === 0;
+
+                return (
+                  <>
+                    {/* View Mode & Header Bar */}
+                    {currentListings.length > 0 && (
+                      <div className="flex items-center justify-between px-1 mb-3.5">
+                        <p className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                          {currentTab === 'all'
+                            ? `${currentListings.length} Post${currentListings.length > 1 ? 's' : ''}`
+                            : currentTab === 'active'
+                            ? `${currentListings.length} Live Update${currentListings.length > 1 ? 's' : ''}`
+                            : currentTab === 'expired'
+                            ? `${currentListings.length} Expired Post${currentListings.length > 1 ? 's' : ''}`
+                            : `${currentListings.length} Scheduled Event${currentListings.length > 1 ? 's' : ''}`}
+                        </p>
+
+                        <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-full border border-slate-200/60 dark:border-slate-700/60">
+                          <button
+                            type="button"
+                            onClick={() => setViewMode('card')}
+                            aria-label="Feed card view"
+                            title="Feed card view"
+                            className={`p-1.5 rounded-full transition-all cursor-pointer ${
+                              viewMode === 'card'
+                                ? 'bg-white dark:bg-slate-700 text-city-blue dark:text-sky-400 shadow-xs'
+                                : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                            }`}
+                          >
+                            <Rows className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setViewMode('grid')}
+                            aria-label="Photo grid view"
+                            title="Photo grid view"
+                            className={`p-1.5 rounded-full transition-all cursor-pointer ${
+                              viewMode === 'grid'
+                                ? 'bg-white dark:bg-slate-700 text-city-blue dark:text-sky-400 shadow-xs'
+                                : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                            }`}
+                          >
+                            <LayoutGrid className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {isCurrentTabLoading ? (
+                      <div className="py-12 flex flex-col items-center justify-center gap-3 text-slate-400">
+                        <div className="w-8 h-8 border-3 border-city-blue border-t-transparent rounded-full animate-spin" />
+                        <p className="text-xs font-semibold">Loading posts & updates...</p>
+                      </div>
+                    ) : currentListings.length > 0 ? (
+                      renderListingsList(currentListings)
+                    ) : (
+                      /* Empty state depending on currentTab */
+                      <div className="py-16 px-4 flex flex-col items-center justify-center text-center">
+                        <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex items-center justify-center mb-3">
+                          {currentTab === 'active' ? (
+                            <Sparkles className="w-8 h-8 text-emerald-500" />
+                          ) : currentTab === 'expired' ? (
+                            <AlertCircle className="w-8 h-8 text-rose-400" />
+                          ) : currentTab === 'upcoming' ? (
+                            <Calendar className="w-8 h-8 text-indigo-400" />
+                          ) : (
+                            <Sparkles className="w-8 h-8 text-city-blue" />
+                          )}
+                        </div>
+                        <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
+                          {currentTab === 'active'
+                            ? 'No live offers right now'
+                            : currentTab === 'expired'
+                            ? 'No expired posts'
+                            : currentTab === 'upcoming'
+                            ? 'No upcoming events scheduled'
+                            : 'No posts published yet'}
+                        </h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs leading-relaxed">
+                          {currentTab === 'active'
+                            ? 'Check back soon for festive pandal timings, store discounts, and announcements.'
+                            : currentTab === 'expired'
+                            ? 'There are no expired posts for this business.'
+                            : currentTab === 'upcoming'
+                            ? "This business hasn't scheduled any upcoming events or offers yet."
+                            : 'Check back soon for latest events, announcements, and discounts.'}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Load More Button */}
+                    {currentHasMore && (
+                      <div className="mt-6 flex justify-center">
+                        <button
+                          type="button"
+                          disabled={listingsLoading}
+                          onClick={() => loadTabListings(currentTab, currentPage + 1)}
+                          className="min-h-[44px] px-6 py-2.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                        >
+                          {listingsLoading ? 'Loading more...' : 'Load more listings'}
+                        </button>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </>
         )}

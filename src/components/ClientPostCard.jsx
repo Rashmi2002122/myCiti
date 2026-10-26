@@ -10,7 +10,8 @@ import {
   Calendar,
   Sparkles,
   ChevronRight,
-  Layers
+  Layers,
+  AlertCircle
 } from 'lucide-react';
 import { CATEGORIES } from '../services/api';
 import { getOptimizedImageUrl } from '../utils/imageUtils';
@@ -63,6 +64,10 @@ export default function ClientPostCard({
   const imageCount = listing.images ? listing.images.length : (listing.primaryImageUrl ? 1 : 0);
   const dateRangeStr = formatDateRange(listing.startDate, listing.endDate);
 
+  const todayStr = new Date().toISOString().split('T')[0];
+  const isExpired = listing.isExpired === true || (listing.endDate && listing.endDate < todayStr);
+  const isActuallyUpcoming = !isExpired && (isUpcoming || (listing.startDate && listing.startDate > todayStr));
+
   const handleDirections = (e) => {
     e.stopPropagation();
     const url = `https://www.google.com/maps/dir/?api=1&destination=${listing.latitude},${listing.longitude}`;
@@ -95,7 +100,7 @@ export default function ClientPostCard({
             src={imageUrl}
             alt={listing.title}
             loading="lazy"
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+            className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out ${isExpired ? 'grayscale-[25%] opacity-90' : ''}`}
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-100 dark:from-slate-800 dark:to-slate-900 text-slate-400">
@@ -119,9 +124,14 @@ export default function ClientPostCard({
           </span>
         </div>
 
-        {/* Live / Upcoming Status & Save Button - Top Right */}
+        {/* Live / Expired / Upcoming Status & Save Button - Top Right */}
         <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
-          {isUpcoming ? (
+          {isExpired ? (
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-950/85 text-rose-300 border border-rose-800/80 backdrop-blur-md shadow-xs">
+              <AlertCircle className="w-3 h-3 text-rose-400" />
+              <span>Expired</span>
+            </span>
+          ) : isActuallyUpcoming ? (
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-indigo-600/90 text-white backdrop-blur-md shadow-xs">
               <Calendar className="w-3 h-3" />
               <span>Upcoming</span>
@@ -157,8 +167,12 @@ export default function ClientPostCard({
 
         {/* Date Range Chip - Bottom Left */}
         {dateRangeStr && (
-          <div className="absolute bottom-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[11px] font-semibold text-white/95 flex items-center gap-1.5 z-10">
-            <Calendar className="w-3 h-3 text-sky-300" />
+          <div
+            className={`absolute bottom-2.5 left-2.5 px-2.5 py-0.5 rounded-full backdrop-blur-md text-[11px] font-semibold flex items-center gap-1.5 z-10 ${
+              isExpired ? 'bg-black/75 text-rose-200/90' : 'bg-black/60 text-white/95'
+            }`}
+          >
+            <Calendar className={`w-3 h-3 ${isExpired ? 'text-rose-400' : 'text-sky-300'}`} />
             <span>{dateRangeStr}</span>
           </div>
         )}

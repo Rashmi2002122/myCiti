@@ -937,7 +937,7 @@ export async function fetchPublicClientProfile(slug) {
   return res.json();
 }
 
-export async function fetchClientListings(slug, tab = 'active', page = 0, size = 10) {
+export async function fetchClientListings(slug, tab = 'all', page = 0, size = 10) {
   const res = await fetch(api(`/api/clients/${encodeURIComponent(slug)}/listings?tab=${tab}&page=${page}&size=${size}`));
   if (!res.ok) {
     const err = await res.json().catch(() => null);
