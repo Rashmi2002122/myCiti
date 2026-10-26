@@ -117,9 +117,9 @@ export default function App() {
     try {
       const saved = localStorage.getItem('myciti_theme');
       if (saved !== null) return saved === 'dark';
-      return false;
+      return true;
     } catch {
-      return false;
+      return true;
     }
   });
   const [savedIds, setSavedIds] = useState(() => {
@@ -163,8 +163,14 @@ export default function App() {
 
   // Sync dark mode class on document and update theme-color meta tag
   useEffect(() => {
-    const color = darkMode ? '#07090e' : '#f8fafc';
-    document.querySelectorAll('meta[name="theme-color"]').forEach((el) => el.setAttribute('content', color));
+    const color = darkMode ? '#07090e' : '#07090e';
+    document.querySelectorAll('meta[name="theme-color"]').forEach((el) => {
+      el.removeAttribute('media');
+      el.setAttribute('content', color);
+    });
+    const scheme = document.querySelector('meta[name="color-scheme"]');
+    if (scheme) scheme.setAttribute('content', darkMode ? 'dark' : 'light');
+
     if (darkMode) {
       document.documentElement.classList.add('dark');
       try { localStorage.setItem('myciti_theme', 'dark'); } catch {}
