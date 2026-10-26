@@ -7,23 +7,10 @@ const USER_STORAGE_KEY = 'myciti_user';
 const ACCESS_TOKEN_STORAGE_KEY = 'myciti_access_token';
 const REFRESH_TOKEN_STORAGE_KEY = 'myciti_refresh_token';
 
-// Check if JWT access token has expired (or is close to expiring within 30s)
-function isTokenExpired(token) {
-  if (!token) return true;
-  try {
-    const parts = token.split('.');
-    if (parts.length !== 3) return true;
-    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-    return !payload.exp || (payload.exp * 1000) < (Date.now() + 30000);
-  } catch {
-    return true;
-  }
-}
-
 // Singleton in-flight promise to avoid multiple simultaneous refresh requests
 let inFlightRefresh = null;
 
-async function executeRefresh(token) {
+async function executeRefresh(token = null) {
   if (inFlightRefresh) {
     return inFlightRefresh;
   }
@@ -34,13 +21,11 @@ async function executeRefresh(token) {
 }
 
 function persistSession(data) {
-  if (data?.accessToken) {
-    localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, data.accessToken);
-  }
   if (data?.user) {
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
   }
-  // Enforce security: refresh token is strictly isolated in HttpOnly cookie; clear any legacy storage
+  // Enforce security: Access token is kept strictly in memory; refresh token isolated in HttpOnly cookie
+  localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
   localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
 }
 
@@ -67,15 +52,10 @@ function clearSessionStorage() {
 }
 
 export function AuthProvider({ children }) {
-  // Synchronously restore user and accessToken from localStorage so refresh never flickers logged-out
-  const [accessToken, setAccessToken] = useState(() => {
-    try {
-      return localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY) || null;
-    } catch {
-      return null;
-    }
-  });
+  // Access token kept in memory only (never written to localStorage)
+  const [accessToken, setAccessToken] = useState(null);
 
+  // Synchronously restore user profile for non-flicker UI render on reload
   const [user, setUser] = useState(() => {
     try {
       const stored = localStorage.getItem(USER_STORAGE_KEY);
@@ -104,12 +84,23 @@ export function AuthProvider({ children }) {
   }, [user?.role]);
 
   const refreshUserProfile = useCallback(async () => {
-    const token = accessToken || localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
+    let token = accessToken;
+    if (!token) {
+      try {
+        const refreshed = await executeRefresh(null);
+        token = refreshed.accessToken;
+        setAccessToken(token);
+        setUser(refreshed.user);
+        persistSession(refreshed);
+      } catch {
+        return null;
+      }
+    }
     if (!token) return null;
     try {
       const profile = await getMyProfile(token);
       setUser(profile);
-      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(profile));
+      if (profile) localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(profile));
       return profile;
     } catch (err) {
       console.warn('Failed to refresh user profile:', err);
@@ -117,29 +108,20 @@ export function AuthProvider({ children }) {
     }
   }, [accessToken]);
 
-  // Restore and validate session in background on mount
+  // Restore and validate session in background on mount via HttpOnly cookie
   useEffect(() => {
     let isMounted = true;
 
     async function initSession() {
-      const storedAccessToken = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
       const storedUser = localStorage.getItem(USER_STORAGE_KEY);
 
       // If user is not logged in at all, skip network call
-      if (!storedAccessToken && !storedUser) {
+      if (!storedUser) {
         if (isMounted) setIsInitializing(false);
         return;
       }
 
-      // If the cached access token is still completely valid, user is authenticated immediately
-      if (storedAccessToken && !isTokenExpired(storedAccessToken) && storedUser) {
-        if (isMounted) {
-          setIsInitializing(false);
-        }
-        return;
-      }
-
-      // If access token is expired or missing, refresh via HttpOnly cookie
+      // Refresh via HttpOnly cookie
       try {
         const data = await executeRefresh(null);
         if (isMounted) {
@@ -149,12 +131,8 @@ export function AuthProvider({ children }) {
           setAuthError(null);
         }
       } catch (err) {
-        // Only warn if the user was expected to have an active session
-        if (storedAccessToken && isTokenExpired(storedAccessToken)) {
-          console.warn('[Auth] Session validation/refresh notice:', err?.message || err);
-        }
         // Only clear storage if backend explicitly rejected credentials (401 or 403)
-        // If it's a network glitch or Render free-tier cold-start (502/503/504), KEEP cached user
+        // If it's a network glitch or cold-start (502/503/504), keep cached user
         if (err.status === 401 || err.status === 403) {
           clearSessionStorage();
           if (isMounted) {
@@ -237,7 +215,7 @@ export function AuthProvider({ children }) {
     try {
       const updatedUser = await updateMyCoarseLocation(accessToken, locationData);
       setUser(updatedUser);
-      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(updatedUser));
+      if (updatedUser) localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(updatedUser));
       return updatedUser;
     } catch (err) {
       console.warn('Failed to sync location to backend:', err);

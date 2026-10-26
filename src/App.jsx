@@ -284,8 +284,18 @@ export default function App() {
     }
   }, []);
 
+  const listingsAbortControllerRef = useRef(null);
+
   // Load listings from API with active filters & distance
-  const loadListings = useCallback(async () => {
+  const loadListings = useCallback(async (customSignal = null) => {
+    if (!customSignal) {
+      if (listingsAbortControllerRef.current) {
+        listingsAbortControllerRef.current.abort();
+      }
+      listingsAbortControllerRef.current = new AbortController();
+    }
+    const signal = customSignal || listingsAbortControllerRef.current?.signal;
+
     try {
       setIsLoading(true);
       setError(null);
@@ -295,18 +305,26 @@ export default function App() {
         q: searchQuery,
         lat: userLocation ? userLocation.lat : null,
         lng: userLocation ? userLocation.lng : null,
+        signal
       });
       setListings(data);
     } catch (err) {
+      if (err.name === 'AbortError') return;
       console.error(err);
       setError('Unable to load listings. Please check your connection.');
     } finally {
-      setIsLoading(false);
+      if (!signal || !signal.aborted) {
+        setIsLoading(false);
+      }
     }
   }, [selectedCategory, selectedCity, searchQuery, userLocation]);
 
   useEffect(() => {
-    loadListings();
+    const controller = new AbortController();
+    loadListings(controller.signal);
+    return () => {
+      controller.abort();
+    };
   }, [loadListings]);
 
   // Load active geo-targeted ads

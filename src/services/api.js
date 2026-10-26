@@ -48,7 +48,7 @@ export const FILTER_CHIPS = [
   { id: 'INAUGURATION', label: 'Inauguration', icon: '🎀' }
 ];
 
-export async function fetchListings({ category = null, city = null, lat = null, lng = null, radiusKm = null, q = null } = {}) {
+export async function fetchListings({ category = null, city = null, lat = null, lng = null, radiusKm = null, q = null, signal = null } = {}) {
   const params = new URLSearchParams();
   if (category && category !== 'ALL') params.append('category', category);
   if (city && city !== 'ALL') params.append('city', city);
@@ -57,7 +57,7 @@ export async function fetchListings({ category = null, city = null, lat = null, 
   if (radiusKm) params.append('radiusKm', radiusKm);
   if (q && q.trim()) params.append('q', q.trim());
 
-  const res = await fetch(api(`/api/listings?${params.toString()}`));
+  const res = await fetch(api(`/api/listings?${params.toString()}`), { signal });
   if (!res.ok) {
     throw new Error(`Failed to fetch listings (${res.status})`);
   }
