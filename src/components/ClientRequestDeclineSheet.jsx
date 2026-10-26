@@ -28,7 +28,7 @@ export default function ClientRequestDeclineSheet({ isOpen, onClose, request, on
       aria-label="Client Request Status"
       className="fixed inset-0 z-[3600] bg-slate-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200"
     >
-      <div className="bg-gradient-to-b from-[#cfe7ff] to-[#eaf4ff] dark:from-slate-900 dark:to-slate-950 p-5 sm:p-6 rounded-t-[32px] sm:rounded-[32px] max-w-md w-full shadow-2xl border border-white/60 dark:border-slate-800 animate-in slide-in-from-bottom-6 sm:zoom-in-95 duration-200 relative max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-[#10141c] p-5 sm:p-6 rounded-t-[32px] sm:rounded-[32px] max-w-md w-full shadow-2xl border border-slate-200 dark:border-[#303139] animate-in slide-in-from-bottom-6 sm:zoom-in-95 duration-200 relative max-h-[90vh] overflow-y-auto">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -38,7 +38,7 @@ export default function ClientRequestDeclineSheet({ isOpen, onClose, request, on
           <X className="w-4 h-4 stroke-[2.5]" />
         </button>
 
-        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-[24px] p-5 sm:p-6 shadow-soft border border-white/60 dark:border-slate-800 space-y-4">
+        <div className="bg-white dark:bg-[#10141c] rounded-[24px] p-5 sm:p-6 shadow-soft border border-slate-200 dark:border-[#303139] space-y-4">
           {/* Header */}
           <div className="flex items-center gap-3">
             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 text-xl font-black ${

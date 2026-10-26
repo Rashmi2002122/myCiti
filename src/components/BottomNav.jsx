@@ -17,9 +17,9 @@ export default function BottomNav({
   return (
     <nav
       aria-label="Bottom Navigation"
-      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[1500] pointer-events-auto"
+      className="fixed bottom-[max(1rem,calc(env(safe-area-inset-bottom)+0.5rem))] left-1/2 -translate-x-1/2 z-[1500] pointer-events-auto"
     >
-      <div className="flex items-center gap-1.5 p-1.5 bg-white/95 dark:bg-[#10141c] backdrop-blur-md rounded-full shadow-2xl border border-slate-200/80 dark:border-[#303139]">
+      <div className="flex items-center gap-1.5 p-1.5 bg-white dark:bg-[#10141c] rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.6)] border border-slate-200 dark:border-[#303139]">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;

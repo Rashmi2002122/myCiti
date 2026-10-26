@@ -187,10 +187,10 @@ export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCr
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[3000] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-      <div className="bg-white dark:bg-slate-900 rounded-[28px] shadow-2xl border border-slate-100 dark:border-slate-800 w-full max-w-4xl max-h-[92dvh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-[3000] bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+      <div className="bg-white dark:bg-[#10141c] rounded-[24px] shadow-2xl border border-slate-200 dark:border-[#303139] w-full max-w-4xl max-h-[92dvh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-160 text-slate-900 dark:text-[#f4f5f7]">
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <div className="px-6 py-3.5 border-b border-slate-200 dark:border-[#303139] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-950/60 text-city-blue flex items-center justify-center font-bold">
               🛠️
@@ -218,7 +218,7 @@ export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCr
             <button
               onClick={onClose}
               aria-label="Close admin modal"
-              className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors"
+              className="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#101522] text-slate-700 dark:text-[#f4f5f7] hover:border-[#ff951f]/50 flex items-center justify-center transition-all border border-slate-200 dark:border-[#303139] cursor-pointer active:scale-95"
             >
               <X className="w-4 h-4" />
             </button>
@@ -227,7 +227,7 @@ export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCr
 
         {/* Section Navigation Tabs (Review Queue vs Listings) */}
         {token && (
-          <div className="px-6 pt-3 pb-1 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex items-center gap-2">
+          <div className="px-6 pt-3 pb-2 border-b border-slate-200 dark:border-[#303139] bg-slate-100/60 dark:bg-[#101522] flex items-center gap-1.5 overflow-x-auto">
             <button
               type="button"
               onClick={() => {
@@ -236,7 +236,7 @@ export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCr
               }}
               className={`min-h-[40px] px-4 py-1.5 rounded-full text-xs font-black transition-all ${
                 adminSection === 'QUEUE'
-                  ? 'bg-city-blue text-white shadow-sm'
+                  ? 'bg-white dark:bg-[#10141c] text-[#ff951f] border border-slate-200 dark:border-[#ff951f]/40 font-mono shadow-xs'
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
@@ -250,7 +250,7 @@ export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCr
               }}
               className={`min-h-[40px] px-4 py-1.5 rounded-full text-xs font-black transition-all ${
                 adminSection === 'CLIENT_REQUESTS'
-                  ? 'bg-city-blue text-white shadow-sm'
+                  ? 'bg-white dark:bg-[#10141c] text-[#ff951f] border border-slate-200 dark:border-[#ff951f]/40 font-mono shadow-xs'
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
@@ -264,7 +264,7 @@ export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCr
               }}
               className={`min-h-[40px] px-4 py-1.5 rounded-full text-xs font-black transition-all ${
                 adminSection === 'USERS'
-                  ? 'bg-city-blue text-white shadow-sm'
+                  ? 'bg-white dark:bg-[#10141c] text-[#ff951f] border border-slate-200 dark:border-[#ff951f]/40 font-mono shadow-xs'
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
@@ -277,7 +277,7 @@ export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCr
               }}
               className={`min-h-[40px] px-4 py-1.5 rounded-full text-xs font-black transition-all ${
                 adminSection === 'LISTINGS'
-                  ? 'bg-city-blue text-white shadow-sm'
+                  ? 'bg-white dark:bg-[#10141c] text-[#ff951f] border border-slate-200 dark:border-[#ff951f]/40 font-mono shadow-xs'
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
@@ -291,7 +291,7 @@ export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCr
               }}
               className={`min-h-[40px] px-4 py-1.5 rounded-full text-xs font-black transition-all ${
                 adminSection === 'MARKETING'
-                  ? 'bg-city-blue text-white shadow-sm'
+                  ? 'bg-white dark:bg-[#10141c] text-[#ff951f] border border-slate-200 dark:border-[#ff951f]/40 font-mono shadow-xs'
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >

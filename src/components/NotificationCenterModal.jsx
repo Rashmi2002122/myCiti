@@ -239,13 +239,13 @@ export default function NotificationCenterModal({
       role="dialog"
       aria-modal="true"
       aria-label="Notification Center and Preferences"
-      className="fixed inset-0 z-[3000] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
+      className="fixed inset-0 z-[3000] bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
     >
-      <div className="bg-white dark:bg-slate-900 rounded-[28px] max-w-md w-full shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 duration-200 relative my-6 flex flex-col max-h-[85vh]">
+      <div className="bg-white dark:bg-[#10141c] rounded-[24px] max-w-md w-full shadow-2xl border border-slate-200 dark:border-[#303139] animate-in zoom-in-95 duration-160 relative my-6 flex flex-col max-h-[85vh] text-slate-900 dark:text-[#f4f5f7]">
         {/* Header */}
-        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <div className="p-4 border-b border-slate-200 dark:border-[#303139] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-city-blue/10 text-city-blue flex items-center justify-center relative">
+            <div className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-[#101522] border border-slate-200 dark:border-[#303139] text-[#ff951f] flex items-center justify-center relative">
               <Bell className="w-5 h-5" />
               {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white rounded-full text-[10px] font-black flex items-center justify-center shadow-xs">
@@ -254,10 +254,10 @@ export default function NotificationCenterModal({
               )}
             </div>
             <div>
-              <h2 className="text-base font-black text-slate-900 dark:text-white">
+              <h2 className="text-base font-medium tracking-tight text-slate-900 dark:text-[#f4f5f7]">
                 Notifications
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs font-mono text-slate-500 dark:text-[#c9ced8]">
                 Announcements & Category Preferences
               </p>
             </div>
@@ -266,21 +266,21 @@ export default function NotificationCenterModal({
           <button
             onClick={onClose}
             aria-label="Close"
-            className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 flex items-center justify-center transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#101522] text-slate-700 dark:text-[#f4f5f7] hover:border-[#ff951f]/50 flex items-center justify-center transition-all border border-slate-200 dark:border-[#303139] cursor-pointer active:scale-95"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Tab Switcher */}
-        <div className="px-4 pt-3 pb-2 bg-slate-50/70 dark:bg-slate-800/40 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+        <div className="px-4 pt-3 pb-2 bg-slate-100/60 dark:bg-[#101522] border-b border-slate-200 dark:border-[#303139] flex items-center gap-1.5">
           <button
             type="button"
             onClick={() => setActiveTab('announcements')}
             className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               activeTab === 'announcements'
-                ? 'bg-white dark:bg-slate-900 text-city-blue shadow-xs font-black'
-                : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                ? 'bg-white dark:bg-[#10141c] text-[#ff951f] border border-slate-200 dark:border-[#ff951f]/40 font-mono shadow-xs'
+                : 'text-slate-600 dark:text-[#c9ced8] hover:text-slate-900 dark:hover:text-[#f4f5f7] font-mono'
             }`}
           >
             <Bell className="w-3.5 h-3.5" />
@@ -297,8 +297,8 @@ export default function NotificationCenterModal({
             onClick={() => setActiveTab('preferences')}
             className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               activeTab === 'preferences'
-                ? 'bg-white dark:bg-slate-900 text-city-blue shadow-xs font-black'
-                : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                ? 'bg-white dark:bg-[#10141c] text-[#ff951f] border border-slate-200 dark:border-[#ff951f]/40 font-mono shadow-xs'
+                : 'text-slate-600 dark:text-[#c9ced8] hover:text-slate-900 dark:hover:text-[#f4f5f7] font-mono'
             }`}
           >
             <Sliders className="w-3.5 h-3.5" />
@@ -359,7 +359,7 @@ export default function NotificationCenterModal({
                     type="button"
                     onClick={handleTogglePush}
                     disabled={isPushToggling}
-                    className="px-3 py-1.5 rounded-full bg-city-blue hover:bg-blue-600 text-white font-extrabold text-xs shadow-xs transition-transform active:scale-95 flex-shrink-0 disabled:opacity-50 cursor-pointer"
+                    className="px-3 py-1.5 rounded-full bg-[#ff951f] hover:bg-[#e07f12] text-black font-bold text-xs shadow-xs transition-transform active:scale-95 flex-shrink-0 disabled:opacity-50 cursor-pointer"
                   >
                     {isPushToggling ? 'Enabling...' : 'Enable'}
                   </button>
@@ -497,7 +497,7 @@ export default function NotificationCenterModal({
                   onClick={handleTogglePush}
                   className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-200 cursor-pointer flex-shrink-0 disabled:opacity-50 ${
                     isPushActive
-                      ? 'bg-city-blue justify-end'
+                      ? 'bg-[#ff951f] justify-end'
                       : 'bg-slate-300 dark:bg-slate-700 justify-start'
                   }`}
                 >
@@ -587,7 +587,7 @@ export default function NotificationCenterModal({
                         }}
                         className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 cursor-pointer flex-shrink-0 ${
                           isChecked
-                            ? 'bg-city-blue justify-end'
+                            ? 'bg-[#ff951f] justify-end'
                             : 'bg-slate-300 dark:bg-slate-700 justify-start'
                         }`}
                       >

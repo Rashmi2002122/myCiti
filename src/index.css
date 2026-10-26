@@ -62,6 +62,7 @@
     padding: 0;
     overflow: hidden;
     -webkit-tap-highlight-color: transparent;
+    @apply bg-slate-50 dark:bg-[#07090e];
   }
 
   body {

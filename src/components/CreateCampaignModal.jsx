@@ -165,13 +165,13 @@ export default function CreateCampaignModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[3100] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white dark:bg-slate-900 rounded-[28px] max-w-lg w-full p-6 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 duration-200 relative my-6 max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-[3100] bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+      <div className="bg-white dark:bg-[#10141c] rounded-[24px] max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-[#303139] animate-in zoom-in-95 duration-160 relative my-6 max-h-[90vh] flex flex-col text-slate-900 dark:text-[#f4f5f7]">
         {/* Header Close */}
         <button
           onClick={onClose}
           aria-label="Close"
-          className="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 flex items-center justify-center transition-colors"
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 dark:bg-[#101522] text-slate-700 dark:text-[#f4f5f7] hover:border-[#ff951f]/50 flex items-center justify-center transition-all border border-slate-200 dark:border-[#303139] cursor-pointer active:scale-95"
         >
           <X className="w-5 h-5" />
         </button>
@@ -181,10 +181,10 @@ export default function CreateCampaignModal({
             <Sparkles className="w-6 h-6 fill-amber-500" />
           </div>
           <div>
-            <h2 className="text-base font-black text-slate-900 dark:text-white">
+            <h2 className="text-base font-medium tracking-tight text-slate-900 dark:text-[#f4f5f7]">
               Create Geo-Targeted Ad Campaign
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs font-mono text-slate-500 dark:text-[#c9ced8]">
               Promote your approved listing to people in your area
             </p>
           </div>
@@ -235,7 +235,7 @@ export default function CreateCampaignModal({
                       setHeadline(`Special Highlight: ${l.title}`);
                     }
                   }}
-                  className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 font-bold focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+                  className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-[#303139] bg-slate-50 dark:bg-[#07090e] text-xs text-slate-900 dark:text-[#f4f5f7] font-medium focus:outline-none focus:border-[#ff951f] focus:ring-1 focus:ring-[#ff951f]"
                 >
                   {approvedListings.map((l) => (
                     <option key={l.listingId} value={l.listingId}>
@@ -256,7 +256,7 @@ export default function CreateCampaignModal({
                 value={campaignTitle}
                 onChange={(e) => setCampaignTitle(e.target.value.slice(0, 150))}
                 placeholder="e.g. Diwali Special Promo"
-                className="w-full px-3.5 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 font-bold focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+                className="w-full px-3.5 py-2 rounded-2xl border border-slate-200 dark:border-[#303139] bg-slate-50 dark:bg-[#07090e] text-xs text-slate-900 dark:text-[#f4f5f7] font-medium focus:outline-none focus:border-[#ff951f] focus:ring-1 focus:ring-[#ff951f]"
               />
             </div>
 
@@ -271,7 +271,7 @@ export default function CreateCampaignModal({
                 onChange={(e) => setHeadline(e.target.value.slice(0, 80))}
                 required
                 placeholder="e.g. 50% Off Festive Collection at Park Street!"
-                className="w-full px-3.5 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 font-bold focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+                className="w-full px-3.5 py-2 rounded-2xl border border-slate-200 dark:border-[#303139] bg-slate-50 dark:bg-[#07090e] text-xs text-slate-900 dark:text-[#f4f5f7] font-medium focus:outline-none focus:border-[#ff951f] focus:ring-1 focus:ring-[#ff951f]"
               />
             </div>
 

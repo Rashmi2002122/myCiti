@@ -163,14 +163,13 @@ export default function App() {
 
   // Sync dark mode class on document and update theme-color meta tag
   useEffect(() => {
-    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    const color = darkMode ? '#07090e' : '#f8fafc';
+    document.querySelectorAll('meta[name="theme-color"]').forEach((el) => el.setAttribute('content', color));
     if (darkMode) {
       document.documentElement.classList.add('dark');
-      if (metaThemeColor) metaThemeColor.setAttribute('content', '#07090e');
       try { localStorage.setItem('myciti_theme', 'dark'); } catch {}
     } else {
       document.documentElement.classList.remove('dark');
-      if (metaThemeColor) metaThemeColor.setAttribute('content', '#f8fafc');
       try { localStorage.setItem('myciti_theme', 'light'); } catch {}
     }
   }, [darkMode]);

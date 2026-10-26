@@ -123,25 +123,25 @@ export default function CampaignsDashboardModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[3000] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white dark:bg-slate-900 rounded-[28px] max-w-2xl w-full p-6 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 duration-200 relative my-6 max-h-[88vh] flex flex-col">
+    <div className="fixed inset-0 z-[3000] bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+      <div className="bg-white dark:bg-[#10141c] rounded-[24px] max-w-2xl w-full p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-[#303139] animate-in zoom-in-95 duration-160 relative my-6 max-h-[88vh] flex flex-col text-slate-900 dark:text-[#f4f5f7]">
         {/* Close Button */}
         <button
           onClick={onClose}
           aria-label="Close"
-          className="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 flex items-center justify-center transition-colors"
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 dark:bg-[#101522] text-slate-700 dark:text-[#f4f5f7] hover:border-[#ff951f]/50 flex items-center justify-center transition-all border border-slate-200 dark:border-[#303139] cursor-pointer active:scale-95"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3.5 border-b border-slate-200 dark:border-[#303139]">
           <div>
-            <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <h2 className="text-base sm:text-lg font-medium tracking-tight text-slate-900 dark:text-[#f4f5f7] flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-amber-500" />
               <span>Marketing & Announcements</span>
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs font-mono text-slate-500 dark:text-[#c9ced8]">
               Manage your local ad campaigns, target radius, and neighborhood alerts
             </p>
           </div>
@@ -153,7 +153,7 @@ export default function CampaignsDashboardModal({
                 onClose();
                 if (onOpenCreateCampaign) onOpenCreateCampaign();
               }}
-              className="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-soft transition-all"
+              className="px-3.5 py-1.5 rounded-full bg-[#ff951f] hover:bg-[#e07f12] text-black font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>New Ad</span>
@@ -164,7 +164,7 @@ export default function CampaignsDashboardModal({
                 onClose();
                 if (onOpenCreateAnnouncement) onOpenCreateAnnouncement();
               }}
-              className="px-3.5 py-1.5 rounded-full bg-city-blue hover:bg-blue-600 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-soft transition-all"
+              className="px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-[#101522] border border-slate-200 dark:border-[#303139] text-slate-700 dark:text-[#f4f5f7] hover:border-[#ff951f]/50 font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
             >
               <Bell className="w-3.5 h-3.5" />
               <span>Alert</span>
@@ -173,14 +173,14 @@ export default function CampaignsDashboardModal({
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex items-center gap-2 mb-4 bg-slate-100 dark:bg-slate-800/60 p-1 rounded-2xl w-fit">
+        <div className="flex items-center gap-1.5 mb-4 bg-slate-100 dark:bg-[#101522] border border-slate-200 dark:border-[#303139] p-1 rounded-xl w-fit">
           <button
             type="button"
             onClick={() => setActiveTab('CAMPAIGNS')}
-            className={`px-4 py-1.5 rounded-xl text-xs font-black transition-all ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
               activeTab === 'CAMPAIGNS'
-                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900'
+                ? 'bg-white dark:bg-[#10141c] text-[#ff951f] border border-slate-200 dark:border-[#ff951f]/40 shadow-xs'
+                : 'text-slate-600 dark:text-[#c9ced8] hover:text-slate-900 dark:hover:text-[#f4f5f7]'
             }`}
           >
             Ad Campaigns ({campaigns.length})
@@ -188,10 +188,10 @@ export default function CampaignsDashboardModal({
           <button
             type="button"
             onClick={() => setActiveTab('ANNOUNCEMENTS')}
-            className={`px-4 py-1.5 rounded-xl text-xs font-black transition-all ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
               activeTab === 'ANNOUNCEMENTS'
-                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900'
+                ? 'bg-white dark:bg-[#10141c] text-[#ff951f] border border-slate-200 dark:border-[#ff951f]/40 shadow-xs'
+                : 'text-slate-600 dark:text-[#c9ced8] hover:text-slate-900 dark:hover:text-[#f4f5f7]'
             }`}
           >
             Announcements ({announcements.length})
@@ -246,7 +246,7 @@ export default function CampaignsDashboardModal({
             return (
               <div
                 key={camp.id}
-                className="p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800/40 space-y-3 shadow-2xs"
+                className="p-4 rounded-xl border border-slate-200 dark:border-[#303139] bg-slate-50/60 dark:bg-[#101522] space-y-3 shadow-xs hover:border-[#ff951f]/50 transition-colors"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
@@ -303,8 +303,8 @@ export default function CampaignsDashboardModal({
                 </div>
 
                 {/* Metrics Bar */}
-                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                  <div className="bg-slate-50 dark:bg-slate-800/60 p-2 rounded-xl text-center">
+                <div className="grid grid-cols-3 gap-2 pt-2.5 border-t border-slate-200/80 dark:border-[#303139]">
+                  <div className="bg-white dark:bg-[#07090e] border border-slate-200 dark:border-[#303139] p-2 rounded-lg text-center">
                     <div className="text-[10px] text-slate-400 font-bold uppercase flex items-center justify-center gap-1">
                       <Eye className="w-3 h-3" />
                       <span>Views</span>
@@ -314,7 +314,7 @@ export default function CampaignsDashboardModal({
                     </div>
                   </div>
 
-                  <div className="bg-slate-50 dark:bg-slate-800/60 p-2 rounded-xl text-center">
+                  <div className="bg-white dark:bg-[#07090e] border border-slate-200 dark:border-[#303139] p-2 rounded-lg text-center">
                     <div className="text-[10px] text-slate-400 font-bold uppercase flex items-center justify-center gap-1">
                       <MousePointerClick className="w-3 h-3" />
                       <span>Clicks</span>
@@ -324,7 +324,7 @@ export default function CampaignsDashboardModal({
                     </div>
                   </div>
 
-                  <div className="bg-slate-50 dark:bg-slate-800/60 p-2 rounded-xl text-center">
+                  <div className="bg-white dark:bg-[#07090e] border border-slate-200 dark:border-[#303139] p-2 rounded-lg text-center">
                     <div className="text-[10px] text-slate-400 font-bold uppercase flex items-center justify-center gap-1">
                       <TrendingUp className="w-3 h-3" />
                       <span>CTR</span>

@@ -12,7 +12,7 @@ export default function AccessDeniedModal({
 
   return (
     <div className="fixed inset-0 z-[3700] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-      <div className="bg-gradient-to-b from-[#cfe7ff] to-[#eaf4ff] dark:from-slate-900 dark:to-slate-950 p-5 sm:p-6 rounded-[30px] max-w-sm w-full shadow-2xl border border-white/60 dark:border-slate-800 animate-in zoom-in-95 duration-200 relative my-auto">
+      <div className="bg-white dark:bg-[#10141c] p-5 sm:p-6 rounded-[30px] max-w-sm w-full shadow-2xl border border-slate-200 dark:border-[#303139] animate-in zoom-in-95 duration-200 relative my-auto">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -22,7 +22,7 @@ export default function AccessDeniedModal({
           <X className="w-4 h-4 stroke-[2.5]" />
         </button>
 
-        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-[24px] p-6 shadow-soft border border-white/60 dark:border-slate-800 text-center space-y-4">
+        <div className="bg-white dark:bg-[#10141c] rounded-[24px] p-6 shadow-soft border border-slate-200 dark:border-[#303139] text-center space-y-4">
           <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto shadow-md">
             <ShieldAlert className="w-8 h-8 stroke-[2.2]" />
           </div>

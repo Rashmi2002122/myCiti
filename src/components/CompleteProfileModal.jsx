@@ -119,18 +119,18 @@ export default function CompleteProfileModal({ isOpen, onClose }) {
   ];
 
   return (
-    <div className="fixed inset-0 z-[3500] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-      <div className="bg-gradient-to-b from-[#cfe7ff] to-[#eaf4ff] dark:from-slate-900 dark:to-slate-950 p-5 sm:p-6 rounded-[30px] max-w-md w-full shadow-2xl border border-white/60 dark:border-slate-800 animate-in zoom-in-95 duration-200 relative my-auto">
+    <div className="fixed inset-0 z-[3500] bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-160">
+      <div className="bg-white dark:bg-[#10141c] p-5 sm:p-6 rounded-[24px] max-w-md w-full shadow-2xl border border-slate-200 dark:border-[#303139] animate-in zoom-in-95 duration-160 relative my-auto text-slate-900 dark:text-[#f4f5f7]">
         {/* Close Button */}
         <button
           onClick={onClose}
           aria-label="Close profile modal"
-          className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-all shadow-md border border-slate-200/80 dark:border-slate-700 active:scale-95 cursor-pointer"
+          className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-slate-100 dark:bg-[#101522] text-slate-700 dark:text-[#f4f5f7] hover:border-[#ff951f]/50 flex items-center justify-center transition-all border border-slate-200 dark:border-[#303139] active:scale-95 cursor-pointer"
         >
           <X className="w-4 h-4 stroke-[2.5]" />
         </button>
 
-        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-[24px] p-5 sm:p-6 shadow-soft border border-white/60 dark:border-slate-800 space-y-4">
+        <div className="space-y-4 pt-1">
           {/* Header */}
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-city-blue/10 dark:bg-sky-500/20 text-city-blue dark:text-sky-400 flex items-center justify-center flex-shrink-0">

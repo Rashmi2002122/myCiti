@@ -347,25 +347,25 @@ export default function ClientProfileEditModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[3600] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-0 sm:p-4 overflow-y-auto overscroll-contain animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 w-full max-w-2xl min-h-screen sm:min-h-0 sm:rounded-[32px] shadow-2xl border border-slate-100 dark:border-slate-800 flex flex-col relative my-auto">
+    <div className="fixed inset-0 z-[3600] bg-black/70 backdrop-blur-xs flex items-center justify-center p-0 sm:p-4 overflow-y-auto overscroll-contain animate-in fade-in duration-160">
+      <div className="bg-white dark:bg-[#10141c] w-full max-w-2xl min-h-screen sm:min-h-0 sm:rounded-[24px] shadow-2xl border border-slate-200 dark:border-[#303139] flex flex-col relative my-auto text-slate-900 dark:text-[#f4f5f7]">
 
         {/* --- Top Sticky Header --- */}
-        <div className="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <div className="sticky top-0 z-30 bg-white/95 dark:bg-[#10141c]/95 backdrop-blur-md px-5 py-3.5 border-b border-slate-200 dark:border-[#303139] flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={onClose}
               aria-label="Close"
-              className="w-10 h-10 min-w-[40px] rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#101522] text-slate-700 dark:text-[#f4f5f7] hover:border-[#ff951f]/50 flex items-center justify-center transition-all border border-slate-200 dark:border-[#303139] cursor-pointer active:scale-95"
             >
               <X className="w-5 h-5 stroke-[2.5]" />
             </button>
             <div>
-              <h2 className="text-base font-black text-slate-900 dark:text-slate-100 leading-tight">
+              <h2 className="text-base font-medium tracking-tight text-slate-900 dark:text-[#f4f5f7] leading-tight">
                 Business Profile
               </h2>
-              <p className="text-[11px] text-slate-400 font-medium">Manage your client public identity</p>
+              <p className="text-[11px] font-mono text-slate-500 dark:text-[#c9ced8]">Manage your client public identity</p>
             </div>
           </div>
         </div>

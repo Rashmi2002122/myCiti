@@ -380,32 +380,32 @@ export default function PostAdvertisementModal({
   const selectedCategoryConfig = CATEGORIES[category] || CATEGORIES.PANDAL;
 
   return (
-    <div className="fixed inset-0 z-[3200] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
-      <div className="bg-gradient-to-b from-[#cfe7ff] to-[#eaf4ff] dark:from-slate-900 dark:to-slate-950 p-4 sm:p-6 rounded-[30px] max-w-2xl w-full shadow-2xl border border-white/60 dark:border-slate-800 flex flex-col max-h-[94dvh] animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-[3200] bg-black/70 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+      <div className="bg-white dark:bg-[#10141c] p-4 sm:p-6 rounded-[24px] max-w-2xl w-full shadow-2xl border border-slate-200 dark:border-[#303139] flex flex-col max-h-[94dvh] animate-in zoom-in-95 duration-160 text-slate-900 dark:text-[#f4f5f7]">
         
         {/* Header & Close */}
-        <div className="flex items-center justify-between pb-3 border-b border-white/60 dark:border-slate-800">
+        <div className="flex items-center justify-between pb-3.5 border-b border-slate-200 dark:border-[#303139]">
           <div>
-            <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-slate-100 tracking-tight">
+            <h2 className="text-base sm:text-lg font-medium tracking-tight text-slate-900 dark:text-[#f4f5f7]">
               {editingSubmission ? `Edit Advertisement #${editingSubmission.id}` : 'Post an Advertisement'}
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs font-mono text-slate-500 dark:text-[#c9ced8]">
               Step {currentStep} of 6 &bull; {STEPS[currentStep - 1].title} ({STEPS[currentStep - 1].subtitle})
             </p>
           </div>
           <button
             onClick={onClose}
             aria-label="Close modal"
-            className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-white/80 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center shadow-soft transition-colors"
+            className="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#101522] text-slate-700 dark:text-[#f4f5f7] hover:border-[#ff951f]/50 flex items-center justify-center transition-all border border-slate-200 dark:border-[#303139] cursor-pointer active:scale-95"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Stepper Progress Bar */}
-        <div className="w-full bg-white/80 dark:bg-slate-800/80 h-2 rounded-full overflow-hidden my-3 shadow-inner">
+        <div className="w-full bg-slate-100 dark:bg-[#101522] border border-slate-200 dark:border-[#303139] h-2 rounded-full overflow-hidden my-3">
           <div
-            className="bg-city-blue h-full transition-all duration-300 rounded-full"
+            className="bg-[#ff951f] h-full transition-all duration-300 rounded-full"
             style={{ width: `${(currentStep / 6) * 100}%` }}
           />
         </div>
@@ -425,7 +425,7 @@ export default function PostAdvertisementModal({
             <div className="pt-3">
               <button
                 onClick={onClose}
-                className="min-h-[44px] px-6 py-2.5 rounded-full bg-city-blue hover:bg-blue-600 text-white font-bold text-xs shadow-md transition-transform active:scale-95"
+                className="min-h-[38px] px-6 py-2 rounded-full bg-[#ff951f] hover:bg-[#e07f12] text-black font-bold text-xs shadow-md transition-transform active:scale-95 cursor-pointer"
               >
                 Back to My Advertisements
               </button>
@@ -447,7 +447,7 @@ export default function PostAdvertisementModal({
             {currentStep === 1 && (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-2">
+                  <label className="block text-xs font-medium text-slate-800 dark:text-[#f4f5f7] mb-2">
                     Select Advertisement Category *
                   </label>
                   <div className="grid grid-cols-2 gap-2.5">
@@ -458,15 +458,15 @@ export default function PostAdvertisementModal({
                           key={catKey}
                           type="button"
                           onClick={() => setCategory(catKey)}
-                          className={`p-3.5 rounded-2xl text-left border transition-all flex items-start gap-3 ${
+                          className={`p-3.5 rounded-xl text-left border transition-all flex items-start gap-3 cursor-pointer ${
                             isSelected
-                              ? 'bg-white dark:bg-slate-800 border-city-blue ring-2 ring-city-blue/30 shadow-soft'
-                              : 'bg-white/60 dark:bg-slate-900/60 border-white/80 dark:border-slate-800 hover:bg-white dark:hover:bg-slate-800'
+                              ? 'bg-slate-100 dark:bg-[#101522] border-[#ff951f] ring-2 ring-[#ff951f]/25 text-[#ff951f] shadow-xs'
+                              : 'bg-white dark:bg-[#10141c] border-slate-200 dark:border-[#303139] text-slate-700 dark:text-[#c9ced8] hover:border-[#ff951f]/40'
                           }`}
                         >
                           <span className="text-2xl">{cat.icon}</span>
                           <div>
-                            <div className="text-xs font-black text-slate-900 dark:text-slate-100">
+                            <div className="text-xs font-bold text-slate-900 dark:text-[#f4f5f7]">
                               {cat.label}
                             </div>
                             <div className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1">
@@ -480,7 +480,7 @@ export default function PostAdvertisementModal({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-1">
+                  <label className="block text-xs font-medium text-slate-800 dark:text-[#f4f5f7] mb-1">
                     Advertisement Title *
                   </label>
                   <input
@@ -488,7 +488,7 @@ export default function PostAdvertisementModal({
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="e.g. Ballygunge Cultural Durga Puja 2026"
-                    className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-city-blue transition-all ${
+                    className={`w-full px-4 py-2.5 rounded-xl border text-sm bg-slate-50 dark:bg-[#07090e] border-slate-200 dark:border-[#303139] text-slate-900 dark:text-[#f4f5f7] focus:outline-none focus:border-[#ff951f] focus:ring-1 focus:ring-[#ff951f] transition-all ${
                       errors.title ? 'border-rose-400 ring-2 ring-rose-200' : 'border-white/80 dark:border-slate-700'
                     }`}
                   />
@@ -496,7 +496,7 @@ export default function PostAdvertisementModal({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-1">
+                  <label className="block text-xs font-medium text-slate-800 dark:text-[#f4f5f7] mb-1">
                     Description *
                   </label>
                   <textarea
@@ -504,7 +504,7 @@ export default function PostAdvertisementModal({
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Provide highlights, theme details, artisan names, special attractions, or mela offerings..."
-                    className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-city-blue transition-all ${
+                    className={`w-full px-4 py-2.5 rounded-xl border text-sm bg-slate-50 dark:bg-[#07090e] border-slate-200 dark:border-[#303139] text-slate-900 dark:text-[#f4f5f7] focus:outline-none focus:border-[#ff951f] focus:ring-1 focus:ring-[#ff951f] transition-all ${
                       errors.description ? 'border-rose-400 ring-2 ring-rose-200' : 'border-white/80 dark:border-slate-700'
                     }`}
                   />
@@ -516,8 +516,8 @@ export default function PostAdvertisementModal({
             {/* STEP 2: CONTACT */}
             {currentStep === 2 && (
               <div className="space-y-4">
-                <div className="p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-900 text-xs text-slate-700 dark:text-slate-300 space-y-1">
-                  <div className="font-extrabold flex items-center gap-1.5 text-city-blue">
+                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#101522] border border-slate-200 dark:border-[#303139] text-xs text-slate-700 dark:text-[#c9ced8] space-y-1">
+                  <div className="font-extrabold flex items-center gap-1.5 text-[#ff951f]">
                     <Phone className="w-4 h-4" />
                     <span>Public Contact Number</span>
                   </div>
@@ -527,7 +527,7 @@ export default function PostAdvertisementModal({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-1">
+                  <label className="block text-xs font-medium text-slate-800 dark:text-[#f4f5f7] mb-1">
                     Contact Phone Number (10 digits) *
                   </label>
                   <div className="relative">
@@ -539,7 +539,7 @@ export default function PostAdvertisementModal({
                       value={contactPhone}
                       onChange={(e) => setContactPhone(e.target.value)}
                       placeholder="9830123456"
-                      className={`w-full pl-12 pr-4 py-2.5 rounded-2xl border text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-city-blue transition-all ${
+                      className={`w-full pl-12 pr-4 py-2.5 rounded-xl border text-sm bg-slate-50 dark:bg-[#07090e] border-slate-200 dark:border-[#303139] text-slate-900 dark:text-[#f4f5f7] focus:outline-none focus:border-[#ff951f] focus:ring-1 focus:ring-[#ff951f] transition-all ${
                         errors.contactPhone ? 'border-rose-400 ring-2 ring-rose-200' : 'border-white/80 dark:border-slate-700'
                       }`}
                     />
@@ -553,7 +553,7 @@ export default function PostAdvertisementModal({
             {currentStep === 3 && (
               <div className="space-y-3.5">
                 <div>
-                  <label className="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-1">
+                  <label className="block text-xs font-medium text-slate-800 dark:text-[#f4f5f7] mb-1">
                     Venue or Compound Name *
                   </label>
                   <input
@@ -561,7 +561,7 @@ export default function PostAdvertisementModal({
                     value={venueName}
                     onChange={(e) => setVenueName(e.target.value)}
                     placeholder="e.g. Maddox Square Ground, City Centre 1"
-                    className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-city-blue transition-all ${
+                    className={`w-full px-4 py-2.5 rounded-xl border text-sm bg-slate-50 dark:bg-[#07090e] border-slate-200 dark:border-[#303139] text-slate-900 dark:text-[#f4f5f7] focus:outline-none focus:border-[#ff951f] focus:ring-1 focus:ring-[#ff951f] transition-all ${
                       errors.venueName ? 'border-rose-400 ring-2 ring-rose-200' : 'border-white/80 dark:border-slate-700'
                     }`}
                   />
@@ -570,7 +570,7 @@ export default function PostAdvertisementModal({
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-1">
+                    <label className="block text-xs font-medium text-slate-800 dark:text-[#f4f5f7] mb-1">
                       City *
                     </label>
                     <input
@@ -578,7 +578,7 @@ export default function PostAdvertisementModal({
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
                       placeholder="e.g. Kolkata, Mumbai, Delhi"
-                      className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-city-blue transition-all ${
+                      className={`w-full px-4 py-2.5 rounded-xl border text-sm bg-slate-50 dark:bg-[#07090e] border-slate-200 dark:border-[#303139] text-slate-900 dark:text-[#f4f5f7] focus:outline-none focus:border-[#ff951f] focus:ring-1 focus:ring-[#ff951f] transition-all ${
                         errors.city ? 'border-rose-400 ring-2 ring-rose-200' : 'border-white/80 dark:border-slate-700'
                       }`}
                     />
@@ -586,7 +586,7 @@ export default function PostAdvertisementModal({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-1">
+                    <label className="block text-xs font-medium text-slate-800 dark:text-[#f4f5f7] mb-1">
                       Landmark *
                     </label>
                     <input
@@ -594,7 +594,7 @@ export default function PostAdvertisementModal({
                       value={landmark}
                       onChange={(e) => setLandmark(e.target.value)}
                       placeholder="e.g. Near Hazra Road Crossing"
-                      className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-city-blue transition-all ${
+                      className={`w-full px-4 py-2.5 rounded-xl border text-sm bg-slate-50 dark:bg-[#07090e] border-slate-200 dark:border-[#303139] text-slate-900 dark:text-[#f4f5f7] focus:outline-none focus:border-[#ff951f] focus:ring-1 focus:ring-[#ff951f] transition-all ${
                         errors.landmark ? 'border-rose-400 ring-2 ring-rose-200' : 'border-white/80 dark:border-slate-700'
                       }`}
                     />
@@ -602,7 +602,7 @@ export default function PostAdvertisementModal({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-1">
+                    <label className="block text-xs font-medium text-slate-800 dark:text-[#f4f5f7] mb-1">
                       Street Address *
                     </label>
                     <input
@@ -610,7 +610,7 @@ export default function PostAdvertisementModal({
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
                       placeholder="e.g. 15 Ritchie Rd, Ballygunge"
-                      className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-city-blue transition-all ${
+                      className={`w-full px-4 py-2.5 rounded-xl border text-sm bg-slate-50 dark:bg-[#07090e] border-slate-200 dark:border-[#303139] text-slate-900 dark:text-[#f4f5f7] focus:outline-none focus:border-[#ff951f] focus:ring-1 focus:ring-[#ff951f] transition-all ${
                         errors.address ? 'border-rose-400 ring-2 ring-rose-200' : 'border-white/80 dark:border-slate-700'
                       }`}
                     />
@@ -621,7 +621,7 @@ export default function PostAdvertisementModal({
                 {/* Map Picker with Pin */}
                 <div className="space-y-1.5 pt-1">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                    <label className="text-xs font-medium text-slate-800 dark:text-[#f4f5f7] flex items-center gap-1.5">
                       <MapPin className="w-3.5 h-3.5 text-city-blue" />
                       <span>Place Map Pin *</span>
                     </label>
@@ -656,14 +656,14 @@ export default function PostAdvertisementModal({
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-1">
+                    <label className="block text-xs font-medium text-slate-800 dark:text-[#f4f5f7] mb-1">
                       Start Date *
                     </label>
                     <input
                       type="date"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
-                      className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-city-blue transition-all ${
+                      className={`w-full px-4 py-2.5 rounded-xl border text-sm bg-slate-50 dark:bg-[#07090e] border-slate-200 dark:border-[#303139] text-slate-900 dark:text-[#f4f5f7] focus:outline-none focus:border-[#ff951f] focus:ring-1 focus:ring-[#ff951f] transition-all ${
                         errors.startDate ? 'border-rose-400 ring-2 ring-rose-200' : 'border-white/80 dark:border-slate-700'
                       }`}
                     />
@@ -671,14 +671,14 @@ export default function PostAdvertisementModal({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-1">
+                    <label className="block text-xs font-medium text-slate-800 dark:text-[#f4f5f7] mb-1">
                       End Date *
                     </label>
                     <input
                       type="date"
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
-                      className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-city-blue transition-all ${
+                      className={`w-full px-4 py-2.5 rounded-xl border text-sm bg-slate-50 dark:bg-[#07090e] border-slate-200 dark:border-[#303139] text-slate-900 dark:text-[#f4f5f7] focus:outline-none focus:border-[#ff951f] focus:ring-1 focus:ring-[#ff951f] transition-all ${
                         errors.endDate ? 'border-rose-400 ring-2 ring-rose-200' : 'border-white/80 dark:border-slate-700'
                       }`}
                     />
@@ -688,14 +688,14 @@ export default function PostAdvertisementModal({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-1">
+                    <label className="block text-xs font-medium text-slate-800 dark:text-[#f4f5f7] mb-1">
                       Daily Open Time *
                     </label>
                     <input
                       type="time"
                       value={dailyOpenTime}
                       onChange={(e) => setDailyOpenTime(e.target.value)}
-                      className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-city-blue transition-all ${
+                      className={`w-full px-4 py-2.5 rounded-xl border text-sm bg-slate-50 dark:bg-[#07090e] border-slate-200 dark:border-[#303139] text-slate-900 dark:text-[#f4f5f7] focus:outline-none focus:border-[#ff951f] focus:ring-1 focus:ring-[#ff951f] transition-all ${
                         errors.dailyOpenTime ? 'border-rose-400 ring-2 ring-rose-200' : 'border-white/80 dark:border-slate-700'
                       }`}
                     />
@@ -703,14 +703,14 @@ export default function PostAdvertisementModal({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-1">
+                    <label className="block text-xs font-medium text-slate-800 dark:text-[#f4f5f7] mb-1">
                       Daily Close Time *
                     </label>
                     <input
                       type="time"
                       value={dailyCloseTime}
                       onChange={(e) => setDailyCloseTime(e.target.value)}
-                      className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-city-blue transition-all ${
+                      className={`w-full px-4 py-2.5 rounded-xl border text-sm bg-slate-50 dark:bg-[#07090e] border-slate-200 dark:border-[#303139] text-slate-900 dark:text-[#f4f5f7] focus:outline-none focus:border-[#ff951f] focus:ring-1 focus:ring-[#ff951f] transition-all ${
                         errors.dailyCloseTime ? 'border-rose-400 ring-2 ring-rose-200' : 'border-white/80 dark:border-slate-700'
                       }`}
                     />
@@ -741,7 +741,7 @@ export default function PostAdvertisementModal({
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
+                    <h3 className="text-xs font-medium text-slate-800 dark:text-[#f4f5f7]">
                       Photos ({existingImages.length + newFiles.length} of 5)
                     </h3>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400">
@@ -753,7 +753,7 @@ export default function PostAdvertisementModal({
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="min-h-[44px] px-4 py-2 rounded-full bg-city-blue hover:bg-blue-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-md transition-all active:scale-95"
+                      className="min-h-[38px] px-4 py-1.5 rounded-full bg-[#ff951f] hover:bg-[#e07f12] text-black font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all active:scale-95 cursor-pointer"
                     >
                       <Upload className="w-4 h-4" />
                       <span>Add Photos</span>
@@ -845,7 +845,7 @@ export default function PostAdvertisementModal({
                   {existingImages.length + newFiles.length === 0 && (
                     <div
                       onClick={() => fileInputRef.current?.click()}
-                      className="col-span-2 sm:col-span-3 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-3xl p-8 text-center cursor-pointer hover:border-city-blue transition-colors flex flex-col items-center justify-center gap-2"
+                      className="col-span-2 sm:col-span-3 border-2 border-dashed border-slate-300 dark:border-[#303139] rounded-2xl p-8 text-center cursor-pointer hover:border-[#ff951f] transition-colors flex flex-col items-center justify-center gap-2 bg-slate-50 dark:bg-[#07090e]"
                     >
                       <div className="w-12 h-12 rounded-full bg-sky-base dark:bg-slate-800 flex items-center justify-center text-city-blue">
                         <ImageIcon className="w-6 h-6" />
@@ -870,7 +870,7 @@ export default function PostAdvertisementModal({
                 </div>
 
                 {/* Bottom Sheet Card Preview */}
-                <div className="bg-white dark:bg-slate-900 rounded-[26px] p-5 shadow-soft border border-slate-200 dark:border-slate-800 space-y-3.5">
+                <div className="bg-slate-50/60 dark:bg-[#101522] rounded-[20px] p-5 shadow-xs border border-slate-200 dark:border-[#303139] space-y-3.5">
                   {/* Photo Banner */}
                   <div className="h-44 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 relative">
                     {filePreviews.length > 0 ? (
@@ -928,13 +928,13 @@ export default function PostAdvertisementModal({
 
         {/* Footer Navigation Buttons */}
         {!isSubmittedSuccess && (
-          <div className="pt-3 border-t border-white/60 dark:border-slate-800 flex items-center justify-between gap-3">
+          <div className="pt-3 border-t border-slate-200 dark:border-[#303139] flex items-center justify-between gap-3">
             {currentStep > 1 ? (
               <button
                 type="button"
                 onClick={handleBack}
                 disabled={isSubmitting}
-                className="min-h-[44px] px-4 py-2 rounded-2xl bg-white/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center gap-1 hover:bg-white transition-colors"
+                className="min-h-[38px] px-4 py-1.5 rounded-xl bg-slate-100 dark:bg-[#101522] text-slate-700 dark:text-[#f4f5f7] border border-slate-200 dark:border-[#303139] hover:border-[#ff951f]/50 font-mono font-medium text-xs flex items-center gap-1 cursor-pointer transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" />
                 <span>Back</span>
@@ -946,7 +946,7 @@ export default function PostAdvertisementModal({
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="min-h-[44px] px-6 py-2.5 rounded-full bg-city-blue hover:bg-blue-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-md transition-all active:scale-95"
+                  className="min-h-[38px] px-6 py-2 rounded-full bg-[#ff951f] hover:bg-[#e07f12] text-black font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all active:scale-95 cursor-pointer"
                 >
                   <span>Continue</span>
                   <ChevronRight className="w-4 h-4" />
@@ -956,7 +956,7 @@ export default function PostAdvertisementModal({
                   type="button"
                   onClick={handleSubmit}
                   disabled={isSubmitting}
-                  className="min-h-[44px] px-6 py-2.5 rounded-full bg-city-blue hover:bg-blue-600 active:scale-95 text-white font-black text-xs flex items-center gap-2 shadow-lg transition-all disabled:opacity-50"
+                  className="min-h-[38px] px-6 py-2 rounded-full bg-[#ff951f] hover:bg-[#e07f12] active:scale-95 text-black font-bold text-xs flex items-center gap-2 shadow-sm transition-all disabled:opacity-50 cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>
