@@ -338,14 +338,10 @@ export default function ClientPublicProfileView({
                     <span className="px-2 py-0.5 rounded-full bg-indigo-600/90 text-white font-bold text-[9px] backdrop-blur-md">
                       Upcoming
                     </span>
-                  ) : listing.openNow ? (
+                  ) : (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/95 text-white font-bold text-[9px] backdrop-blur-md shadow-xs">
                       <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                       Live
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-black/60 text-slate-300 font-semibold text-[9px] backdrop-blur-md">
-                      Closed
                     </span>
                   )}
                 </div>

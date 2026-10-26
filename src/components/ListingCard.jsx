@@ -136,8 +136,8 @@ export default function ListingCard({
           </div>
         )}
 
-        {/* Checkout other updates if post is live & from client */}
-        {listing.clientSlug && listing.openNow && (
+        {/* Checkout other updates from client (always accessible) */}
+        {listing.clientSlug && (
           <div
             role="button"
             tabIndex={0}
@@ -155,7 +155,7 @@ export default function ListingCard({
               <span className="truncate text-slate-900 dark:text-[#f4f5f7]">
                 {listing.otherUpdatesCount && listing.otherUpdatesCount > 0
                   ? `${listing.otherUpdatesCount} more update${listing.otherUpdatesCount > 1 ? 's' : ''}`
-                  : 'View updates'}
+                  : 'View all posts & profile'}
               </span>
             </span>
             <span className="flex items-center gap-0.5 text-[10px] font-mono font-medium text-[#ff951f] group-hover/updates:translate-x-0.5 transition-transform flex-shrink-0 ml-1">

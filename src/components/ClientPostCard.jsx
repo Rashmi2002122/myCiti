@@ -136,14 +136,10 @@ export default function ClientPostCard({
               <Calendar className="w-3 h-3" />
               <span>Upcoming</span>
             </span>
-          ) : listing.openNow ? (
+          ) : (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/95 text-white backdrop-blur-md shadow-xs">
               <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
               <span>Live</span>
-            </span>
-          ) : (
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-black/60 text-slate-200 backdrop-blur-md">
-              Closed
             </span>
           )}
 

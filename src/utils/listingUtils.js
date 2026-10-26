@@ -210,11 +210,9 @@ export function filterUniqueClientListings(listings) {
 export function filterExploreListings(listings) {
   if (!Array.isArray(listings) || listings.length === 0) return [];
 
-  // Exclude all closed or over events
-  const liveListings = listings
-    .filter((item) => !isEventClosedOrOver(item))
-    .map((item) => ({ ...item, openNow: true })); // Guarantees live badge is active
+  // Exclude events that are already over (endDate < today)
+  const activeListings = listings.filter((item) => !isEventOver(item));
 
-  // Deduplicate client listings: show only most recent live post per client
-  return filterUniqueClientListings(liveListings);
+  // Deduplicate client listings: show only most recent post per client
+  return filterUniqueClientListings(activeListings);
 }
