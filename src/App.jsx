@@ -161,13 +161,16 @@ export default function App() {
     setShowSplash(false);
   }, []);
 
-  // Sync dark mode class on document
+  // Sync dark mode class on document and update theme-color meta tag
   useEffect(() => {
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (darkMode) {
       document.documentElement.classList.add('dark');
+      if (metaThemeColor) metaThemeColor.setAttribute('content', '#07090e');
       try { localStorage.setItem('myciti_theme', 'dark'); } catch {}
     } else {
       document.documentElement.classList.remove('dark');
+      if (metaThemeColor) metaThemeColor.setAttribute('content', '#f8fafc');
       try { localStorage.setItem('myciti_theme', 'light'); } catch {}
     }
   }, [darkMode]);
@@ -1265,7 +1268,7 @@ export default function App() {
       <InstallGuideModal />
 
       {/* Full-Screen Animated Splash Screen (once per session, force with ?splash=1) */}
-      {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
+      {showSplash && <SplashScreen darkMode={darkMode} onComplete={handleSplashComplete} />}
 
       {/* Role Change Celebration Toast */}
       {roleChangeNotice && (
