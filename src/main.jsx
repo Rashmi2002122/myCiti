@@ -1,3 +1,8 @@
+import L from 'leaflet'
+if (typeof window !== 'undefined') {
+  window.L = L
+}
+
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'

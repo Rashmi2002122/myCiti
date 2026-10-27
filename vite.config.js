@@ -114,18 +114,6 @@ export default defineConfig({
         drop_debugger: true,
       },
     },
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes('node_modules/gsap')) {
-            return 'animation-vendor';
-          }
-          if (id.includes('node_modules/leaflet') || id.includes('node_modules/maplibre-gl')) {
-            return 'map-vendor';
-          }
-        },
-      },
-    },
   },
   server: {
     port: 5173,
