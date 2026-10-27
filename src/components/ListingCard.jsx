@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tag, MapPin, Clock, Navigation, Bookmark, Share2, Store, Sparkles, ChevronRight } from 'lucide-react';
+import { Tag, MapPin, Clock, Navigation, Bookmark, Share2, Store, ChevronRight } from 'lucide-react';
 import { CATEGORIES } from '../services/api';
 import { getOptimizedImageUrl } from '../utils/imageUtils';
 

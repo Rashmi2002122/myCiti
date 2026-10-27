@@ -13,7 +13,7 @@ self.addEventListener('push', (event) => {
     try {
       const parsed = event.data.json();
       data = { ...data, ...parsed };
-    } catch (e) {
+    } catch {
       data.body = event.data.text();
     }
   }
@@ -48,7 +48,7 @@ self.addEventListener('notificationclick', (event) => {
     if (parsed.origin === self.location.origin && !rawUrl.startsWith('//')) {
       safeTargetUrl = parsed.pathname + parsed.search + parsed.hash;
     }
-  } catch (_) {
+  } catch {
     safeTargetUrl = '/';
   }
 

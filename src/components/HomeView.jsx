@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Compass, MapPin } from 'lucide-react';
+import { Compass, MapPin } from 'lucide-react';
 import ListingCard from './ListingCard';
 import SponsoredAdCard from './SponsoredAdCard';
 import { fetchActiveAds } from '../services/api';

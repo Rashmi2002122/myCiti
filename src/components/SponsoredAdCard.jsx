@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Sparkles, Flag, ExternalLink, MapPin, Tag } from 'lucide-react';
+import { Sparkles, Flag, MapPin } from 'lucide-react';
 import { recordAdImpression, recordAdClick, CATEGORIES } from '../services/api';
 import { getOptimizedImageUrl } from '../utils/imageUtils';
 import ReportAdModal from './ReportAdModal';

@@ -11,8 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Check,
-  Store,
-  Sparkles
+  Store
 } from 'lucide-react';
 import { CATEGORIES } from '../services/api';
 

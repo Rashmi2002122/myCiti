@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  X, Sun, Moon, Globe, Bell, Trash2,
+  X, Sun, Moon, Globe, Bell,
   Check, ChevronRight, AlertTriangle, Store
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';

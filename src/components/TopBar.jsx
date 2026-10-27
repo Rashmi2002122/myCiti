@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Compass, X, MapPin, ChevronDown, Bell } from 'lucide-react';
+import { Search, Compass, X, ChevronDown, Bell } from 'lucide-react';
 import { FILTER_CHIPS } from '../services/api';
 import { CITIES } from '../constants/cities';
 
@@ -12,8 +12,8 @@ export default function TopBar({
   onSearchChange,
   onNearMeClick,
   isLocating,
-  darkMode,
-  onToggleDarkMode,
+  _darkMode,
+  _onToggleDarkMode,
   selectedCity = 'Kolkata',
   onSelectCity,
   unreadCount = 0,

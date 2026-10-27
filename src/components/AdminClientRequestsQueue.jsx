@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  X, Check, AlertCircle, Clock, CheckCircle2, XCircle, Phone,
+  X, Check, AlertCircle, XCircle, Phone,
   User, Building2, Store, Calendar, Mail, FileText, Sparkles
 } from 'lucide-react';
 import {

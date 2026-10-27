@@ -50,8 +50,6 @@ export default function MyPostsDashboard({
     }
   }, [isOpen, isAuthenticated, loadSubmissions]);
 
-  if (!isOpen) return null;
-
   // Deduplicate any legacy submissions pointing to the same live listing
   const uniqueSubmissions = React.useMemo(() => {
     const map = new Map();
@@ -73,6 +71,8 @@ export default function MyPostsDashboard({
   const filteredSubmissions = activeTab === 'ALL'
     ? uniqueSubmissions
     : uniqueSubmissions.filter(s => s.status === activeTab);
+
+  if (!isOpen) return null;
 
   const handleDelete = async (sub) => {
     if (!window.confirm(`Are you sure you want to delete "${sub.title}"?`)) return;
