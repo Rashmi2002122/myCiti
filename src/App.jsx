@@ -369,7 +369,7 @@ export default function App() {
       setUnreadNotificationsCount(0);
       return;
     }
-    const token = accessToken || localStorage.getItem('myciti_access_token');
+    const token = accessToken;
     if (!token) return;
     try {
       const data = await fetchNotifications(token);
