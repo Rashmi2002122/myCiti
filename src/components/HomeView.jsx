@@ -191,7 +191,7 @@ export default function HomeView({
       <section className="bg-slate-100 dark:bg-[#10141c] border border-slate-200 dark:border-[#303139] rounded-[5px] p-6 text-center relative overflow-hidden space-y-3 mt-8">
         <div className="relative z-10 space-y-2">
           <h3 className="text-base font-medium text-slate-900 dark:text-[#f4f5f7]">
-            Looking for all locations across India?
+            Looking for all locations across Odisha?
           </h3>
           <p className="text-xs text-slate-600 dark:text-[#c9ced8] max-w-md mx-auto">
             Switch between map view and search to filter across all verified Durga Puja Pandals, Melas, and special festive sales.

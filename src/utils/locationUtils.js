@@ -45,9 +45,18 @@ export async function reverseGeocodeCity(lat, lng) {
     });
     if (res.ok) {
       const data = await res.json();
-      const detectedName = data.city || data.locality || data.principalSubdivision;
-      if (detectedName) {
-        return detectedName;
+      const detectedRaw = `${data.city || ''} ${data.locality || ''} ${data.localityInfo?.administrative?.[2]?.name || ''}`.toLowerCase();
+      // Match against supported Odisha cities and known regional aliases
+      const match = CITIES.slice(1).find((c) => {
+        const name = c.name.toLowerCase();
+        if (detectedRaw.includes(name)) return true;
+        if (name === 'balasore' && detectedRaw.includes('baleshwar')) return true;
+        if (name === 'berhampur' && (detectedRaw.includes('brahmapur') || detectedRaw.includes('berhampore'))) return true;
+        if (name === 'bhubaneswar' && (detectedRaw.includes('bbsr') || detectedRaw.includes('bhubaneshwar'))) return true;
+        return false;
+      });
+      if (match) {
+        return match.name;
       }
     }
   } catch {

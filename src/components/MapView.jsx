@@ -6,6 +6,7 @@ import { setWorkerUrl } from 'maplibre-gl';
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import '@maplibre/maplibre-gl-leaflet';
 import { CATEGORIES } from '../services/api';
+import { DEFAULT_LOCATION } from '../constants/cities';
 
 // Configure Web Worker for MapLibre GL
 try {
@@ -91,7 +92,12 @@ export default function MapView({
   const clusterGroupRef = useRef(null);
   const userMarkerRef = useRef(null);
   const onSelectListingRef = useRef(onSelectListing);
-  const prevCityKeyRef = useRef(null);
+  const prevCityKeyRef = useRef(
+    targetCity && targetCity.lat != null && targetCity.lng != null
+      ? `${targetCity.lat},${targetCity.lng},${targetCity.zoom || 13}`
+      : `${DEFAULT_LOCATION.lat},${DEFAULT_LOCATION.lng},${DEFAULT_LOCATION.zoom || 13}`
+  );
+  const prevCityTsRef = useRef(targetCity?._ts || null);
 
   // Keep callback ref updated without triggering marker rebuilds
   useEffect(() => {
@@ -102,10 +108,13 @@ export default function MapView({
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
 
-    // Bhubaneswar Center: 20.2961, 85.8245
+    const initialLat = (targetCity && targetCity.lat != null) ? targetCity.lat : DEFAULT_LOCATION.lat;
+    const initialLng = (targetCity && targetCity.lng != null) ? targetCity.lng : DEFAULT_LOCATION.lng;
+    const initialZoom = (targetCity && targetCity.zoom != null) ? targetCity.zoom : (DEFAULT_LOCATION.zoom || 13);
+
     const map = L.map(mapContainerRef.current, {
-      center: [20.2961, 85.8245],
-      zoom: 13,
+      center: [initialLat, initialLng],
+      zoom: initialZoom,
       minZoom: 3,
       maxZoom: 19,
       zoomControl: false,
@@ -261,22 +270,26 @@ export default function MapView({
     map.flyTo([userLocation.lat, userLocation.lng], 14, { duration: 1.2 });
   }, [userLocation]);
 
-  // Fly to selected city only when city actually changes
+  // Fly to selected city when city actually changes or when user explicitly selects it
   useEffect(() => {
-    if (!mapInstanceRef.current || !targetCity || !targetCity.lat || !targetCity.lng) return;
-    const key = `${targetCity.lat},${targetCity.lng},${targetCity.zoom || 12}`;
-    if (prevCityKeyRef.current === key) return;
+    if (!mapInstanceRef.current || !targetCity || targetCity.lat == null || targetCity.lng == null) return;
+    const key = `${targetCity.lat},${targetCity.lng},${targetCity.zoom || 13}`;
+    const isExplicitUserSelection = Boolean(targetCity._ts && targetCity._ts !== prevCityTsRef.current);
 
-    // Skip the flyTo on initial page load so camera doesn't jerk
-    if (prevCityKeyRef.current === null) {
-      prevCityKeyRef.current = key;
-      return;
-    }
+    if (prevCityKeyRef.current === key && !isExplicitUserSelection) return;
 
     prevCityKeyRef.current = key;
+    if (targetCity._ts) {
+      prevCityTsRef.current = targetCity._ts;
+    }
+
     const map = mapInstanceRef.current;
-    map.flyTo([targetCity.lat, targetCity.lng], targetCity.zoom || 12, { duration: 1.2 });
-  }, [targetCity]);
+    if (isVisible) {
+      map.flyTo([targetCity.lat, targetCity.lng], targetCity.zoom || 13, { duration: 1.2 });
+    } else {
+      map.setView([targetCity.lat, targetCity.lng], targetCity.zoom || 13);
+    }
+  }, [targetCity, isVisible]);
 
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden">

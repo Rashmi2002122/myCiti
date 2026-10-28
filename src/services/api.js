@@ -51,7 +51,7 @@ export const FILTER_CHIPS = [
 export async function fetchListings({ category = null, city = null, lat = null, lng = null, radiusKm = null, q = null, signal = null } = {}) {
   const params = new URLSearchParams();
   if (category && category !== 'ALL') params.append('category', category);
-  if (city && city !== 'ALL') params.append('city', city);
+  if (city && city !== 'ALL' && city !== 'All Odisha') params.append('city', city);
   if (lat !== null && lat !== undefined) params.append('lat', lat);
   if (lng !== null && lng !== undefined) params.append('lng', lng);
   if (radiusKm) params.append('radiusKm', radiusKm);
@@ -547,7 +547,7 @@ export async function fetchActiveAds(latOrOptions = null, maybeLng = null, maybe
   const params = new URLSearchParams();
   if (lat !== null && lat !== undefined) params.append('lat', lat);
   if (lng !== null && lng !== undefined) params.append('lng', lng);
-  if (city && city !== 'ALL') params.append('city', city);
+  if (city && city !== 'ALL' && city !== 'All Odisha') params.append('city', city);
 
   const res = await fetch(api(`/api/ads/active?${params.toString()}`));
   if (!res.ok) return [];

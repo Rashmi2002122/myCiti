@@ -707,7 +707,7 @@ export default function App() {
       const oldCity = selectedCity;
       const newCity = cityObj.name;
       setSelectedCity(newCity);
-      setMapCenter({ lat: cityObj.lat, lng: cityObj.lng, zoom: cityObj.zoom || 12 });
+      setMapCenter({ lat: cityObj.lat, lng: cityObj.lng, zoom: cityObj.zoom || 13, _ts: Date.now() });
       localStorage.setItem('myciti_selected_city', newCity);
       localStorage.setItem('myciti_user_lat', String(cityObj.lat));
       localStorage.setItem('myciti_user_lng', String(cityObj.lng));
@@ -741,7 +741,7 @@ export default function App() {
           lng: pos.coords.longitude,
         };
         setUserLocation(coords);
-        setMapCenter({ ...coords, zoom: 14 });
+        setMapCenter({ ...coords, zoom: 14, _ts: Date.now() });
         setIsLocating(false);
 
         const detectedCity = await reverseGeocodeCity(coords.lat, coords.lng);
@@ -800,7 +800,7 @@ export default function App() {
 
             const match = CITIES.find((c) => c.name.toLowerCase() === detectedCity.toLowerCase());
             if (match) {
-              setMapCenter({ lat: match.lat, lng: match.lng, zoom: match.zoom || 12 });
+              setMapCenter({ lat: match.lat, lng: match.lng, zoom: match.zoom || 13, _ts: Date.now() });
             }
           }
 
