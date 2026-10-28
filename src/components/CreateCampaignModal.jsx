@@ -29,7 +29,7 @@ export default function CreateCampaignModal({
   const [callToAction, setCallToAction] = useState('Visit Listing');
   const [targetType, setTargetType] = useState('RADIUS'); // RADIUS | CITY
   const [radiusKm, setRadiusKm] = useState(3.0);
-  const [targetCity, setTargetCity] = useState('Kolkata');
+  const [targetCity, setTargetCity] = useState('Bhubaneswar');
   const [startDate, setStartDate] = useState(
     new Date().toISOString().split('T')[0]
   );

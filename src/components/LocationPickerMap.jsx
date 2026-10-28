@@ -19,8 +19,8 @@ export default function LocationPickerMap({ lat, lng, onSelectLocation }) {
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    const initialLat = lat || 22.5726;
-    const initialLng = lng || 88.3639;
+    const initialLat = lat || 20.2961;
+    const initialLng = lng || 85.8245;
 
     const map = L.map(containerRef.current, {
       center: [initialLat, initialLng],

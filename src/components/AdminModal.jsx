@@ -444,7 +444,7 @@ export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCr
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                     required
-                    placeholder="Road, Area, Kolkata"
+                    placeholder="Road, Area, Bhubaneswar"
                     className="w-full px-3.5 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100"
                   />
                 </div>

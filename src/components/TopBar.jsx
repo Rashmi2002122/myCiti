@@ -14,7 +14,7 @@ export default function TopBar({
   isLocating,
   _darkMode,
   _onToggleDarkMode,
-  selectedCity = 'Kolkata',
+  selectedCity = 'Bhubaneswar',
   onSelectCity,
   unreadCount = 0,
   onOpenNotifications,
@@ -105,13 +105,15 @@ export default function TopBar({
                         setIsCityDropdownOpen(false);
                       }}
                       className={`w-full text-left px-3.5 py-2 text-xs font-medium flex items-center justify-between hover:bg-slate-50 dark:hover:bg-[#101522] transition-colors duration-160 cursor-pointer ${
-                        selectedCity === c.id || (selectedCity === 'All India' && c.id === 'ALL')
+                        selectedCity === c.id || selectedCity === c.name || (selectedCity === 'All Odisha' && c.id === 'ALL') || (selectedCity === 'ALL' && c.id === 'ALL')
                           ? 'text-[#ff951f] bg-slate-50 dark:bg-[#101522] font-semibold'
                           : 'text-slate-800 dark:text-[#f4f5f7]'
                       }`}
                     >
                       <span>{c.name}</span>
-                      {selectedCity === c.id && <span className="text-[#ff951f] text-xs font-mono">✓</span>}
+                      {(selectedCity === c.id || selectedCity === c.name || (selectedCity === 'All Odisha' && c.id === 'ALL')) && (
+                        <span className="text-[#ff951f] text-xs font-mono">✓</span>
+                      )}
                     </button>
                   ))}
                 </div>

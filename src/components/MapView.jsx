@@ -102,10 +102,10 @@ export default function MapView({
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
 
-    // Kolkata Center: 22.5726, 88.3639
+    // Bhubaneswar Center: 20.2961, 85.8245
     const map = L.map(mapContainerRef.current, {
-      center: [22.5726, 88.3639],
-      zoom: 12.5,
+      center: [20.2961, 85.8245],
+      zoom: 13,
       minZoom: 3,
       maxZoom: 19,
       zoomControl: false,

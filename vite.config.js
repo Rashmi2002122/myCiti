@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg', 'favicon.ico'],
       manifest: {
-        name: 'myCiti - India Pandals, Melas & Events Guide',
+        name: 'myCiti - Odisha Pandals, Melas & Events Guide',
         short_name: 'myCiti',
-        description: 'Explore Pandals, Melas, Offers and Inaugurations across India on an interactive offline-ready map.',
+        description: 'Explore Pandals, Melas, Offers and Inaugurations across Odisha on an interactive offline-ready map.',
         theme_color: '#07090e',
         background_color: '#07090e',
         display: 'standalone',

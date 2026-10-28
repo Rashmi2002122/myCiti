@@ -55,9 +55,9 @@ export default function PostAdvertisementModal({
   const [venueName, setVenueName] = useState('');
   const [address, setAddress] = useState('');
   const [landmark, setLandmark] = useState('');
-  const [city, setCity] = useState('Kolkata');
-  const [latitude, setLatitude] = useState(22.5726);
-  const [longitude, setLongitude] = useState(88.3639);
+  const [city, setCity] = useState('Bhubaneswar');
+  const [latitude, setLatitude] = useState(20.2961);
+  const [longitude, setLongitude] = useState(85.8245);
   const [startDate, setStartDate] = useState(() => getLocalDateString(1));
   const [endDate, setEndDate] = useState(() => getLocalDateString(10));
   const [dailyOpenTime, setDailyOpenTime] = useState('08:00');
@@ -86,9 +86,9 @@ export default function PostAdvertisementModal({
       setVenueName(editingSubmission.venueName || '');
       setAddress(editingSubmission.address || '');
       setLandmark(editingSubmission.landmark || '');
-      setCity(editingSubmission.city || 'Kolkata');
-      setLatitude(editingSubmission.latitude || 22.5726);
-      setLongitude(editingSubmission.longitude || 88.3639);
+      setCity(editingSubmission.city || 'Bhubaneswar');
+      setLatitude(editingSubmission.latitude || 20.2961);
+      setLongitude(editingSubmission.longitude || 85.8245);
       setStartDate(editingSubmission.startDate || '');
       setEndDate(editingSubmission.endDate || '');
       setDailyOpenTime(editingSubmission.dailyOpenTime ? editingSubmission.dailyOpenTime.substring(0, 5) : '08:00');
@@ -114,9 +114,9 @@ export default function PostAdvertisementModal({
         setVenueName(draft.venueName || '');
         setAddress(draft.address || '');
         setLandmark(draft.landmark || '');
-        setCity(draft.city || 'Kolkata');
-        setLatitude(draft.latitude || 22.5726);
-        setLongitude(draft.longitude || 88.3639);
+        setCity(draft.city || 'Bhubaneswar');
+        setLatitude(draft.latitude || 20.2961);
+        setLongitude(draft.longitude || 85.8245);
         setStartDate(draft.startDate || '');
         setEndDate(draft.endDate || '');
         setDailyOpenTime(draft.dailyOpenTime || '08:00');
@@ -238,9 +238,9 @@ export default function PostAdvertisementModal({
         setIsLocating(false);
       },
       (err) => {
-        console.warn('Geolocation denied or failed, using Kolkata default', err);
-        setLatitude(22.5726);
-        setLongitude(88.3639);
+        console.warn('Geolocation denied or failed, using Bhubaneswar default', err);
+        setLatitude(20.2961);
+        setLongitude(85.8245);
         setIsLocating(false);
       },
       { timeout: 10000, enableHighAccuracy: true }
@@ -577,7 +577,7 @@ export default function PostAdvertisementModal({
                       type="text"
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
-                      placeholder="e.g. Kolkata, Mumbai, Delhi"
+                      placeholder="e.g. Bhubaneswar, Cuttack, Balasore"
                       className={`w-full px-4 py-2.5 rounded-xl border text-sm bg-slate-50 dark:bg-[#07090e] border-slate-200 dark:border-[#303139] text-slate-900 dark:text-[#f4f5f7] focus:outline-none focus:border-[#ff951f] focus:ring-1 focus:ring-[#ff951f] transition-all ${
                         errors.city ? 'border-rose-400 ring-2 ring-rose-200' : 'border-white/80 dark:border-slate-700'
                       }`}

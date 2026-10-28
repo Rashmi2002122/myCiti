@@ -93,20 +93,24 @@ export default function App() {
   const [profileRefreshTrigger, setProfileRefreshTrigger] = useState(0);
   const [selectedCity, setSelectedCity] = useState(() => {
     try {
-      return localStorage.getItem('myciti_selected_city') || 'Kolkata';
+      const saved = localStorage.getItem('myciti_selected_city');
+      if (saved && CITIES.some((c) => c.name.toLowerCase() === saved.toLowerCase() || c.id.toLowerCase() === saved.toLowerCase())) {
+        return saved;
+      }
+      return 'Bhubaneswar';
     } catch {
-      return 'Kolkata';
+      return 'Bhubaneswar';
     }
   });
   const [mapCenter, setMapCenter] = useState(() => {
     try {
-      const savedCityName = localStorage.getItem('myciti_selected_city') || 'Kolkata';
-      const match = CITIES.find((c) => c.name.toLowerCase() === savedCityName.toLowerCase());
-      if (match) return { lat: match.lat, lng: match.lng, zoom: match.zoom || 12 };
+      const savedCityName = localStorage.getItem('myciti_selected_city') || 'Bhubaneswar';
+      const match = CITIES.find((c) => c.name.toLowerCase() === savedCityName.toLowerCase() || c.id.toLowerCase() === savedCityName.toLowerCase());
+      if (match) return { lat: match.lat, lng: match.lng, zoom: match.zoom || 13 };
     } catch (e) { console.warn('[myCiti] Failed to restore map center from localStorage', e); }
-    const defaultLat = Number(import.meta.env.VITE_DEFAULT_MAP_LAT) || 22.5726;
-    const defaultLng = Number(import.meta.env.VITE_DEFAULT_MAP_LNG) || 88.3639;
-    return { lat: defaultLat, lng: defaultLng, zoom: 12 };
+    const defaultLat = Number(import.meta.env.VITE_DEFAULT_MAP_LAT) || 20.2961;
+    const defaultLng = Number(import.meta.env.VITE_DEFAULT_MAP_LNG) || 85.8245;
+    return { lat: defaultLat, lng: defaultLng, zoom: 13 };
   });
   const [locationToast, setLocationToast] = useState(null);
   const [userLocation, setUserLocation] = useState(null);

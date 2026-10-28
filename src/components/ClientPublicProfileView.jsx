@@ -589,7 +589,7 @@ export default function ClientPublicProfileView({
                     <MapPin className="w-4 h-4 text-[#ff951f] flex-shrink-0 mt-0.5" />
                     <span className="font-medium group-hover:underline">
                       {profile.landmark ? `${profile.landmark}, ` : ''}
-                      {profile.address || 'Kolkata'}
+                      {profile.address || 'Bhubaneswar'}
                     </span>
                     <ExternalLink className="w-3 h-3 text-slate-400 dark:text-[#c9ced8] opacity-60 flex-shrink-0 mt-0.5" />
                   </button>

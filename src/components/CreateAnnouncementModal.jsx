@@ -27,7 +27,7 @@ export default function CreateAnnouncementModal({
   const [expiryHours, setExpiryHours] = useState(6);
   const [targetType, setTargetType] = useState(isAdmin ? 'BROADCAST' : 'RADIUS');
   const [radiusKm, setRadiusKm] = useState(3.0);
-  const [targetCity, setTargetCity] = useState('Kolkata');
+  const [targetCity, setTargetCity] = useState('Bhubaneswar');
 
   // Audience Estimate
   const [audienceEstimate, setAudienceEstimate] = useState(null);
@@ -111,8 +111,8 @@ export default function CreateAnnouncementModal({
         radiusKm: targetType === 'RADIUS' ? Number(radiusKm) : 5.0,
         targetLat: targetType === 'RADIUS' ? lat : null,
         targetLng: targetType === 'RADIUS' ? lng : null,
-        targetCity: targetType === 'CITY' || targetType === 'BROADCAST' ? targetCity : (activeListing?.city || 'Kolkata'),
-        targetAreaName: targetType === 'CITY' || targetType === 'BROADCAST' ? targetCity : (activeListing?.city || 'Kolkata'),
+        targetCity: targetType === 'CITY' || targetType === 'BROADCAST' ? targetCity : (activeListing?.city || 'Bhubaneswar'),
+        targetAreaName: targetType === 'CITY' || targetType === 'BROADCAST' ? targetCity : (activeListing?.city || 'Bhubaneswar'),
         expiresHours: Number(expiryHours)
       };
 

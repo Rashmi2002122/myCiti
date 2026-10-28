@@ -13,7 +13,7 @@ export default function HomeView({
   userLocation,
   onNearMeClick,
   isLocating,
-  selectedCity = 'Kolkata',
+  selectedCity = 'Bhubaneswar',
   onOpenClientProfile,
   onExploreMapClick
 }) {
