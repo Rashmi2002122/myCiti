@@ -28,47 +28,6 @@ export function getKolkataDateTime() {
   return { dateStr, timeStr };
 }
 
-export function getKolkataDateString() {
-  return getKolkataDateTime().dateStr;
-}
-
-export function getKolkataTimeString() {
-  return getKolkataDateTime().timeStr;
-}
-
-/**
- * Checks if a given time is within daily operating hours.
- * Handles normal daytime hours, overnight hours (past midnight), and 24h open.
- *
- * @param {string} openTime - 'HH:mm'
- * @param {string} closeTime - 'HH:mm'
- * @param {string} currentTime - 'HH:mm'
- * @returns {boolean} true if currentTime is between openTime and closeTime
- */
-export function isTimeWithinHours(openTime, closeTime, currentTime) {
-  if (!currentTime || !openTime || !closeTime) return false;
-
-  const open = openTime.slice(0, 5);
-  const close = closeTime.slice(0, 5);
-  const current = currentTime.slice(0, 5);
-
-  // 24 hours open case
-  if (open === close || (open === '00:00' && (close === '23:59' || close === '24:00'))) {
-    return true;
-  }
-
-  // Standard case: e.g. 09:00 to 22:00
-  if (open < close) {
-    return current >= open && current <= close;
-  }
-
-  // Overnight case: e.g. 18:00 to 04:00 (past midnight)
-  if (open > close) {
-    return current >= open || current <= close;
-  }
-
-  return true;
-}
 
 /**
  * Checks if an event is completely over (finished in the past).
@@ -99,38 +58,6 @@ export function isEventOver(listing) {
   return false;
 }
 
-/**
- * Checks if an event is currently closed OR over.
- * Returns true if the event has ended OR is outside its daily operating hours.
- *
- * @param {Object} listing - Listing object
- * @returns {boolean} true if event is closed right now or over
- */
-export function isEventClosedOrOver(listing) {
-  if (!listing) return true;
-
-  // 1. Check if the event is over
-  if (isEventOver(listing)) return true;
-
-  const { dateStr: todayStr, timeStr: currentTimeStr } = getKolkataDateTime();
-
-  // 2. Not started yet (future event)
-  if (listing.startDate && listing.startDate > todayStr) {
-    return true;
-  }
-
-  // 3. Real-time operating hours check
-  if (listing.dailyOpenTime && listing.dailyCloseTime) {
-    const isOpen = isTimeWithinHours(listing.dailyOpenTime, listing.dailyCloseTime, currentTimeStr);
-    if (!isOpen) {
-      return true; // Outside operating hours -> CLOSED
-    }
-  } else if (listing.openNow === false) {
-    return true;
-  }
-
-  return false;
-}
 
 /**
  * Filter listings for Map and General views:
@@ -210,9 +137,6 @@ export function filterUniqueClientListings(listings) {
 export function filterExploreListings(listings) {
   if (!Array.isArray(listings) || listings.length === 0) return [];
 
-  // Exclude events that are already over (endDate < today)
-  const activeListings = listings.filter((item) => !isEventOver(item));
-
-  // Deduplicate client listings: show only most recent post per client
-  return filterUniqueClientListings(activeListings);
+  // Deduplicate client listings: filterUniqueClientListings excludes over events and shows most recent post per client
+  return filterUniqueClientListings(listings);
 }

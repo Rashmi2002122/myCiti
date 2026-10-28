@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Sparkles, Bell, Flag, CheckCircle2, XCircle, Pause, Play,
-  Trash2, AlertTriangle, Users, MapPin, Calendar, Clock,
-  ExternalLink, Eye, MousePointerClick, TrendingUp, Plus
+  CheckCircle2, XCircle, Pause, Play, Trash2, AlertTriangle, Plus
 } from 'lucide-react';
 import {
   fetchAdminCampaigns,

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  X, Check, AlertCircle, XCircle, Phone,
-  User, Building2, Store, Calendar, Mail, FileText, Sparkles
+  X, Check, AlertCircle, Phone, Store, Sparkles
 } from 'lucide-react';
 import {
   fetchAdminClientRequests,

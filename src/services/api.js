@@ -154,7 +154,7 @@ export async function loginWithGoogle(idToken) {
 }
 
 export async function refreshSession(fallbackToken = null) {
-  const headers = { 'Content-Type': 'application/json' };
+  const headers = { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
   if (fallbackToken) {
     headers['X-Refresh-Token'] = fallbackToken;
   }
@@ -174,7 +174,7 @@ export async function refreshSession(fallbackToken = null) {
 }
 
 export async function logoutSession(fallbackToken = null) {
-  const headers = { 'Content-Type': 'application/json' };
+  const headers = { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
   if (fallbackToken) {
     headers['X-Refresh-Token'] = fallbackToken;
   }

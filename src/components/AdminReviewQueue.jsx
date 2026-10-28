@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
-  X, Check, AlertCircle, Clock, CheckCircle2, XCircle, MapPin, Phone,
-  User, Calendar, Image as ImageIcon, ExternalLink, ChevronRight, MessageSquare
+  X, Check, Clock, CheckCircle2, XCircle, MapPin,
+  User, Calendar, Image as ImageIcon
 } from 'lucide-react';
 import {
   fetchAdminSubmissions,
