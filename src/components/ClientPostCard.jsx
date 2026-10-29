@@ -69,17 +69,21 @@ function formatTwitterTime(dateStr) {
   }
 }
 
-export function TwitterVerifiedBadge({ className = 'w-4 h-4 text-[#1d9bf0]' }) {
+export function AppVerifiedBadge({ className = 'w-4 h-4' }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-label="Verified account"
-      className={`${className} fill-current flex-shrink-0 inline-block`}
+    <span
+      className={`inline-flex items-center justify-center rounded-full bg-[#ff951f] text-[#07090e] flex-shrink-0 shadow-xs ${className}`}
+      title="Verified business on myCiti"
     >
-      <g>
-        <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z" />
-      </g>
-    </svg>
+      <svg
+        className="w-2.5 h-2.5 fill-current stroke-current"
+        viewBox="0 0 24 24"
+        strokeWidth="3.2"
+        stroke="currentColor"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+      </svg>
+    </span>
   );
 }
 
@@ -132,15 +136,15 @@ export default function ClientPostCard({
   return (
     <article
       onClick={() => onSelect && onSelect(listing)}
-      className="px-4 py-3 border-b border-slate-150 dark:border-[#2f3336] hover:bg-slate-500/[0.03] dark:hover:bg-slate-500/[0.06] transition-colors cursor-pointer flex gap-3 text-slate-900 dark:text-[#e7e9ea]"
+      className="px-4 py-3.5 border-b border-slate-100 dark:border-[#303139] hover:bg-slate-50/75 dark:hover:bg-[#101522]/50 transition-colors cursor-pointer flex gap-3 text-slate-900 dark:text-[#f4f5f7]"
     >
       {/* --- Left Column: Avatar --- */}
       <div className="flex-shrink-0 pt-0.5">
-        <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-800 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-100 dark:bg-[#101522] border border-slate-200 dark:border-[#303139] flex items-center justify-center">
           {authorLogo ? (
             <img src={authorLogo} alt={authorName} className="w-full h-full object-cover" />
           ) : (
-            <span className="font-bold text-sm text-[#1d9bf0]">
+            <span className="font-mono font-bold text-sm text-[#ff951f]">
               {(authorName || 'C').charAt(0).toUpperCase()}
             </span>
           )}
@@ -151,20 +155,18 @@ export default function ClientPostCard({
       <div className="flex-1 min-w-0">
         {/* Header Line */}
         <div className="flex items-center justify-between gap-1 leading-snug">
-          <div className="flex items-center gap-1 min-w-0 flex-wrap">
-            <span className="font-bold text-[15px] text-slate-900 dark:text-white truncate hover:underline">
+          <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
+            <span className="font-semibold text-sm sm:text-[15px] text-slate-900 dark:text-[#f4f5f7] truncate hover:underline">
               {authorName}
             </span>
-            {isVerified && (
-              <TwitterVerifiedBadge className="w-4 h-4 text-[#1d9bf0]" />
-            )}
-            <span className="text-[14px] text-slate-500 dark:text-[#71767b] truncate">
+            {isVerified && <AppVerifiedBadge className="w-4 h-4" />}
+            <span className="text-xs sm:text-[13px] font-mono text-slate-500 dark:text-[#c9ced8] truncate">
               @{authorSlug}
             </span>
             {timeDisplay && (
               <>
-                <span className="text-slate-400 dark:text-[#71767b]">·</span>
-                <span className="text-[14px] text-slate-500 dark:text-[#71767b] flex-shrink-0">
+                <span className="text-slate-400 dark:text-[#c9ced8]/50">·</span>
+                <span className="text-xs font-mono text-slate-500 dark:text-[#c9ced8] flex-shrink-0">
                   {timeDisplay}
                 </span>
               </>
@@ -174,15 +176,15 @@ export default function ClientPostCard({
           {/* Right Status Pill */}
           <div className="flex items-center gap-1.5 flex-shrink-0">
             {isExpired ? (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-500 border border-rose-500/20">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
                 Expired
               </span>
             ) : isActuallyUpcoming ? (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
                 Upcoming
               </span>
             ) : (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 Live
               </span>
@@ -192,11 +194,11 @@ export default function ClientPostCard({
 
         {/* Post Text & Description */}
         <div className="mt-1">
-          <h3 className="font-semibold text-[15px] text-slate-900 dark:text-white leading-snug">
+          <h3 className="font-semibold text-sm sm:text-[15px] text-slate-900 dark:text-[#f4f5f7] leading-snug">
             {listing.title}
           </h3>
           {listing.description && (
-            <p className="mt-1 text-[14px] text-slate-700 dark:text-[#cfd9de] leading-relaxed whitespace-pre-line">
+            <p className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-[#c9ced8] leading-relaxed whitespace-pre-line">
               {listing.description}
             </p>
           )}
@@ -204,25 +206,27 @@ export default function ClientPostCard({
 
         {/* Special Offer Voucher Chip */}
         {listing.offerText && (
-          <div className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30 text-xs font-semibold">
-            <Tag className="w-3.5 h-3.5 text-amber-500" />
+          <div className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#ff951f]/10 text-amber-800 dark:text-[#edcd8c] border border-amber-300/60 dark:border-[#303139] text-xs font-mono font-medium">
+            <Tag className="w-3.5 h-3.5 text-[#ff951f]" />
             <span>{listing.offerText}</span>
           </div>
         )}
 
         {/* Media Container (Image / Gallery) */}
         {imageUrl && (
-          <div className="mt-3 rounded-2xl overflow-hidden border border-slate-200 dark:border-[#2f3336] bg-slate-100 dark:bg-slate-900 relative group/media aspect-[16/10] sm:aspect-[16/9] max-h-[360px]">
+          <div className="mt-3 rounded-[8px] overflow-hidden border border-slate-200 dark:border-[#303139] bg-slate-100 dark:bg-[#101522] relative group/media aspect-[16/10] sm:aspect-[16/9] max-h-[380px]">
             <img
               src={imageUrl}
               alt={listing.title}
               loading="lazy"
-              className={`w-full h-full object-cover group-hover/media:scale-[1.01] transition-transform duration-300 ${isExpired ? 'grayscale-[20%] opacity-90' : ''}`}
+              className={`w-full h-full object-cover group-hover/media:scale-[1.01] transition-transform duration-300 ${
+                isExpired ? 'grayscale-[20%] opacity-90' : ''
+              }`}
             />
 
             {/* Category Badge overlay on image */}
             <div className="absolute top-2.5 left-2.5">
-              <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border backdrop-blur-md shadow-xs ${categoryConfig.badgeBg}`}>
+              <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium border backdrop-blur-md shadow-xs ${categoryConfig.badgeBg}`}>
                 <span>{categoryConfig.icon}</span>
                 <span>{categoryConfig.label}</span>
               </span>
@@ -230,16 +234,16 @@ export default function ClientPostCard({
 
             {/* Date range chip overlay */}
             {dateRangeStr && (
-              <div className="absolute bottom-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-black/65 backdrop-blur-md text-[11px] font-medium text-white flex items-center gap-1.5">
-                <Calendar className="w-3 h-3 text-[#1d9bf0]" />
+              <div className="absolute bottom-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-black/70 backdrop-blur-md text-[11px] font-mono font-medium text-white flex items-center gap-1.5">
+                <Calendar className="w-3 h-3 text-[#ff951f]" />
                 <span>{dateRangeStr}</span>
               </div>
             )}
 
             {/* Photo count */}
             {imageCount > 1 && (
-              <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/65 backdrop-blur-md text-[10px] font-bold text-white flex items-center gap-1">
-                <Layers className="w-3 h-3" />
+              <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-md text-[10px] font-mono font-bold text-white flex items-center gap-1">
+                <Layers className="w-3 h-3 text-[#ff951f]" />
                 <span>{imageCount} photos</span>
               </div>
             )}
@@ -248,17 +252,17 @@ export default function ClientPostCard({
 
         {/* Location & Landmark sub-bar if available */}
         {(listing.landmark || listing.dailyOpenTime) && (
-          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-[#71767b]">
+          <div className="mt-2.5 flex flex-wrap items-center gap-x-3.5 gap-y-1 text-xs text-slate-500 dark:text-[#c9ced8]">
             {listing.landmark && (
               <div className="flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-[#1d9bf0] flex-shrink-0" />
+                <MapPin className="w-3.5 h-3.5 text-[#ff951f] flex-shrink-0" />
                 <span className="truncate">{listing.landmark}</span>
               </div>
             )}
             {(listing.dailyOpenTime || listing.dailyCloseTime) && (
               <div className="flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5 text-[#1d9bf0] flex-shrink-0" />
-                <span>
+                <Clock className="w-3.5 h-3.5 text-[#ff951f] flex-shrink-0" />
+                <span className="font-mono">
                   {formatTimeShort(listing.dailyOpenTime)} – {formatTimeShort(listing.dailyCloseTime)}
                 </span>
               </div>
@@ -266,19 +270,19 @@ export default function ClientPostCard({
           </div>
         )}
 
-        {/* --- Twitter Interaction Bar (Directions, Contact, Share, Bookmark) --- */}
-        <div className="mt-3 flex items-center justify-between text-slate-500 dark:text-[#71767b] text-xs max-w-sm pt-0.5">
+        {/* --- Interaction Bar (Directions, Contact, Share, Bookmark) --- */}
+        <div className="mt-3.5 flex items-center justify-between text-slate-500 dark:text-[#c9ced8] text-xs max-w-sm pt-0.5">
           {/* Directions */}
           <button
             type="button"
             onClick={handleDirections}
-            className="flex items-center gap-1.5 hover:text-[#1d9bf0] transition-colors group/btn py-1 cursor-pointer"
+            className="flex items-center gap-1.5 hover:text-[#ff951f] transition-colors group/btn py-1 cursor-pointer"
             title="Get Directions"
           >
-            <div className="p-1.5 rounded-full group-hover/btn:bg-[#1d9bf0]/10 transition-colors">
-              <Navigation className="w-4 h-4" />
+            <div className="p-1.5 rounded-full group-hover/btn:bg-[#ff951f]/10 transition-colors">
+              <Navigation className="w-4 h-4 text-[#ff951f]" />
             </div>
-            <span className="text-xs">Directions</span>
+            <span className="text-xs font-medium">Directions</span>
           </button>
 
           {/* Call / Contact */}
@@ -290,9 +294,9 @@ export default function ClientPostCard({
               title={`Call ${listing.contactPhone}`}
             >
               <div className="p-1.5 rounded-full group-hover/btn:bg-emerald-500/10 transition-colors">
-                <Phone className="w-4 h-4" />
+                <Phone className="w-4 h-4 text-emerald-500" />
               </div>
-              <span className="text-xs">Call</span>
+              <span className="text-xs font-medium">Call</span>
             </a>
           )}
 
@@ -300,24 +304,24 @@ export default function ClientPostCard({
           <button
             type="button"
             onClick={handleShareClick}
-            className="flex items-center gap-1.5 hover:text-emerald-500 transition-colors group/btn py-1 cursor-pointer"
+            className="flex items-center gap-1.5 hover:text-[#ff951f] transition-colors group/btn py-1 cursor-pointer"
             title="Share post"
           >
-            <div className="p-1.5 rounded-full group-hover/btn:bg-emerald-500/10 transition-colors">
+            <div className="p-1.5 rounded-full group-hover/btn:bg-[#ff951f]/10 transition-colors">
               <Share2 className="w-4 h-4" />
             </div>
-            <span className="text-xs">Share</span>
+            <span className="text-xs font-medium">Share</span>
           </button>
 
           {/* Bookmark / Save */}
           <button
             type="button"
             onClick={handleSaveClick}
-            className="flex items-center gap-1.5 hover:text-[#1d9bf0] transition-colors group/btn py-1 cursor-pointer"
+            className="flex items-center gap-1.5 hover:text-[#ff951f] transition-colors group/btn py-1 cursor-pointer"
             title={isSaved ? "Saved" : "Save"}
           >
-            <div className="p-1.5 rounded-full group-hover/btn:bg-[#1d9bf0]/10 transition-colors">
-              <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-[#1d9bf0] text-[#1d9bf0]' : ''}`} />
+            <div className="p-1.5 rounded-full group-hover/btn:bg-[#ff951f]/10 transition-colors">
+              <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-[#ff951f] text-[#ff951f]' : ''}`} />
             </div>
           </button>
         </div>
