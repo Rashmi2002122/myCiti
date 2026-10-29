@@ -174,22 +174,19 @@ export default function ClientPostCard({
           </div>
 
           {/* Right Status Pill */}
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            {isExpired ? (
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
-                Expired
-              </span>
-            ) : isActuallyUpcoming ? (
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
-                Upcoming
-              </span>
-            ) : (
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Live
-              </span>
-            )}
-          </div>
+          {(isExpired || isActuallyUpcoming) && (
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              {isExpired ? (
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                  Expired
+                </span>
+              ) : (
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                  Upcoming
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Post Text & Description */}

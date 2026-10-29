@@ -333,22 +333,19 @@ export default function ClientPublicProfileView({
                   </span>
                 </div>
 
-                <div className="absolute top-2 right-2 flex items-center gap-1 z-10">
-                  {isExpired ? (
-                    <span className="px-2 py-0.5 rounded-full bg-rose-950/85 text-rose-300 border border-rose-800/80 font-bold text-[9px] backdrop-blur-md">
-                      Expired
-                    </span>
-                  ) : isUpcoming ? (
-                    <span className="px-2 py-0.5 rounded-full bg-indigo-600/90 text-white font-bold text-[9px] backdrop-blur-md">
-                      Upcoming
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/95 text-white font-bold text-[9px] backdrop-blur-md">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                      Live
-                    </span>
-                  )}
-                </div>
+                {(isExpired || isUpcoming) && (
+                  <div className="absolute top-2 right-2 flex items-center gap-1 z-10">
+                    {isExpired ? (
+                      <span className="px-2 py-0.5 rounded-full bg-rose-950/85 text-rose-300 border border-rose-800/80 font-bold text-[9px] backdrop-blur-md">
+                        Expired
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full bg-indigo-600/90 text-white font-bold text-[9px] backdrop-blur-md">
+                        Upcoming
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 {/* Bottom Content Overlay */}
                 <div className="absolute bottom-2 left-2 right-2 z-10">
@@ -738,18 +735,6 @@ export default function ClientPublicProfileView({
                   </strong>{' '}
                   <span className="text-slate-500 dark:text-[#c9ced8]">Posts</span>
                 </span>
-                <span
-                  className="hover:underline cursor-pointer"
-                  onClick={() => {
-                    setCurrentTab('active');
-                    setViewMode('card');
-                  }}
-                >
-                  <strong className="font-bold text-slate-900 dark:text-[#f4f5f7]">
-                    {profile.activeListingsCount ?? activeListings.length}
-                  </strong>{' '}
-                  <span className="text-slate-500 dark:text-[#c9ced8]">Live</span>
-                </span>
                 {profile.expiredListingsCount > 0 && (
                   <span
                     className="hover:underline cursor-pointer"
@@ -784,30 +769,6 @@ export default function ClientPublicProfileView({
               >
                 <span>Posts</span>
                 {currentTab === 'all' && viewMode === 'card' && (
-                  <div className="absolute bottom-0 left-0 right-0 flex justify-center">
-                    <div className="h-0.5 w-12 sm:w-16 bg-[#ff951f] rounded-full" />
-                  </div>
-                )}
-              </button>
-
-              {/* Tab: Live */}
-              <button
-                type="button"
-                onClick={() => {
-                  setCurrentTab('active');
-                  setViewMode('card');
-                }}
-                className={`flex-1 h-12 px-2 flex items-center justify-center font-semibold text-xs sm:text-sm transition-colors relative cursor-pointer ${
-                  currentTab === 'active' && viewMode === 'card'
-                    ? 'text-[#ff951f]'
-                    : 'text-slate-600 dark:text-[#c9ced8] hover:text-slate-900 dark:hover:text-[#f4f5f7]'
-                }`}
-              >
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Live
-                </span>
-                {currentTab === 'active' && viewMode === 'card' && (
                   <div className="absolute bottom-0 left-0 right-0 flex justify-center">
                     <div className="h-0.5 w-12 sm:w-16 bg-[#ff951f] rounded-full" />
                   </div>
