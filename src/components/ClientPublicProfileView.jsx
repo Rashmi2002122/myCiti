@@ -49,7 +49,7 @@ export default function ClientPublicProfileView({
   onToggleSave,
   onShareListing,
   accessToken = null,
-  isOwner = false,
+  _isOwner = false,
   onOpenEdit = null,
   refreshTrigger = 0
 }) {
@@ -266,23 +266,23 @@ export default function ClientPublicProfileView({
     const type = profile?.clientType;
     if (type === 'COMPANY') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium bg-amber-50 dark:bg-[#101522] text-amber-800 dark:text-[#edcd8c] border border-amber-200 dark:border-[#303139]">
-          <Building2 className="w-3.5 h-3.5 text-[#ff951f]" />
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-medium bg-amber-50 dark:bg-[#101522] text-amber-800 dark:text-[#edcd8c] border border-amber-200 dark:border-[#303139]">
+          <Building2 className="w-3 h-3 text-[#ff951f]" />
           <span>Company</span>
         </span>
       );
     }
     if (type === 'INDIVIDUAL') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium bg-amber-50 dark:bg-[#101522] text-amber-800 dark:text-[#edcd8c] border border-amber-200 dark:border-[#303139]">
-          <UserIcon className="w-3.5 h-3.5 text-[#ff951f]" />
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-medium bg-amber-50 dark:bg-[#101522] text-amber-800 dark:text-[#edcd8c] border border-amber-200 dark:border-[#303139]">
+          <UserIcon className="w-3 h-3 text-[#ff951f]" />
           <span>Individual</span>
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium bg-amber-50 dark:bg-[#101522] text-amber-800 dark:text-[#edcd8c] border border-amber-200 dark:border-[#303139]">
-        <Store className="w-3.5 h-3.5 text-[#ff951f]" />
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-medium bg-amber-50 dark:bg-[#101522] text-amber-800 dark:text-[#edcd8c] border border-amber-200 dark:border-[#303139]">
+        <Store className="w-3 h-3 text-[#ff951f]" />
         <span>Store</span>
       </span>
     );
@@ -343,7 +343,7 @@ export default function ClientPublicProfileView({
                       Upcoming
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/95 text-white font-bold text-[9px] backdrop-blur-md shadow-xs">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/95 text-white font-bold text-[9px] backdrop-blur-md">
                       <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                       Live
                     </span>
@@ -351,13 +351,13 @@ export default function ClientPublicProfileView({
                 </div>
 
                 {/* Bottom Content Overlay */}
-                <div className="absolute bottom-2.5 left-2.5 right-2.5 z-10">
+                <div className="absolute bottom-2 left-2 right-2 z-10">
                   {listing.offerText && (
-                    <span className="inline-block max-w-full truncate px-1.5 py-0.5 rounded-[4px] bg-[#ff951f] text-[#07090e] font-mono font-bold text-[9px] mb-1">
+                    <span className="inline-block max-w-full truncate px-1.5 py-0.5 rounded-[3px] bg-amber-500 text-white font-bold text-[9px] mb-1">
                       🏷️ {listing.offerText}
                     </span>
                   )}
-                  <h4 className="text-white text-xs font-medium line-clamp-1 leading-tight group-hover:text-[#ff951f] transition-colors">
+                  <h4 className="text-white text-xs font-bold line-clamp-1 leading-tight group-hover:text-[#ff951f] transition-colors">
                     {listing.title}
                   </h4>
                 </div>
@@ -369,7 +369,7 @@ export default function ClientPublicProfileView({
     }
 
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
         {listings.map((listing) => {
           const isExpired = listing.isExpired === true || (listing.endDate && listing.endDate < todayStr);
           const isUpcoming = !isExpired && (listing.startDate && listing.startDate > todayStr);
@@ -389,125 +389,11 @@ export default function ClientPublicProfileView({
     );
   };
 
-  const hasHours = profile?.dailyOpenTime && profile?.dailyCloseTime;
-  const hoursFormatted = hasHours
-    ? `${formatTime(profile.dailyOpenTime)} – ${formatTime(profile.dailyCloseTime)}`
-    : profile?.dailyOpenTime
-    ? `From ${formatTime(profile.dailyOpenTime)}`
-    : profile?.dailyCloseTime
-    ? `Until ${formatTime(profile.dailyCloseTime)}`
-    : '';
-
   return (
     <div className="fixed inset-0 z-[3500] bg-slate-100 dark:bg-[#07090e] overflow-y-auto overscroll-contain flex flex-col items-center font-sans">
       <div className="w-full max-w-3xl min-h-screen bg-white dark:bg-[#10141c] border-x border-slate-200 dark:border-[#303139] shadow-xl flex flex-col relative pb-20 text-slate-900 dark:text-[#f4f5f7]">
 
-        {/* --- Top Sticky Navigation Bar --- */}
-        <header className="sticky top-0 z-30 w-full h-14 bg-white/95 dark:bg-[#10141c]/95 backdrop-blur-md border-b border-slate-200 dark:border-[#303139] px-4 flex items-center justify-between flex-shrink-0 transition-colors">
-          {/* Left: Back Button & Truncated Business Name */}
-          <div className="flex items-center gap-2.5 min-w-0 pr-2">
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Go back"
-              className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-slate-100 dark:bg-[#101522] hover:bg-slate-200 dark:hover:bg-[#1a2030] active:scale-95 text-slate-800 dark:text-[#f4f5f7] border border-slate-200 dark:border-[#303139] hover:border-[#ff951f]/50 flex items-center justify-center transition-all cursor-pointer shadow-xs"
-            >
-              <ArrowLeft className="w-5 h-5 stroke-[2.2]" />
-            </button>
-            {profile?.businessName && (
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className="font-medium text-base text-slate-900 dark:text-[#f4f5f7] truncate">
-                  {profile.businessName}
-                </span>
-                {profile.verified && (
-                  <span
-                    className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-[#ff951f] text-[#07090e] font-bold text-[10px] flex-shrink-0 shadow-xs"
-                    title="Verified client profile"
-                  >
-                    ✓
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Right: Action Buttons */}
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-            {(onOpenEdit || isOwner) && (
-              <button
-                type="button"
-                onClick={onOpenEdit}
-                aria-label="Edit Profile Settings"
-                title="Edit Profile Settings"
-                className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-slate-100 dark:bg-[#101522] hover:bg-slate-200 dark:hover:bg-[#1a2030] active:scale-95 text-slate-800 dark:text-[#f4f5f7] border border-slate-200 dark:border-[#303139] hover:border-[#ff951f]/50 flex items-center justify-center transition-all cursor-pointer shadow-xs"
-              >
-                <Settings className="w-4 h-4 text-[#ff951f]" />
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={handleShareProfile}
-              aria-label="Share profile"
-              className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-slate-100 dark:bg-[#101522] hover:bg-slate-200 dark:hover:bg-[#1a2030] active:scale-95 text-slate-800 dark:text-[#f4f5f7] border border-slate-200 dark:border-[#303139] hover:border-[#ff951f]/50 flex items-center justify-center transition-all cursor-pointer shadow-xs"
-            >
-              <Share2 className="w-4 h-4 text-slate-600 dark:text-[#c9ced8]" />
-            </button>
-
-            <div className="relative" ref={overflowRef}>
-              <button
-                type="button"
-                onClick={() => setIsOverflowOpen((prev) => !prev)}
-                aria-label="More options"
-                aria-expanded={isOverflowOpen}
-                className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-slate-100 dark:bg-[#101522] hover:bg-slate-200 dark:hover:bg-[#1a2030] active:scale-95 text-slate-800 dark:text-[#f4f5f7] border border-slate-200 dark:border-[#303139] hover:border-[#ff951f]/50 flex items-center justify-center transition-all cursor-pointer shadow-xs"
-              >
-                <MoreVertical className="w-4 h-4 text-slate-600 dark:text-[#c9ced8]" />
-              </button>
-
-              {/* Overflow dropdown */}
-              {isOverflowOpen && (
-                <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-[#10141c] rounded-[5px] shadow-2xl border border-slate-200 dark:border-[#303139] py-1.5 z-30 animate-in fade-in zoom-in-95 duration-160">
-                  {onOpenEdit ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsOverflowOpen(false);
-                        onOpenEdit();
-                      }}
-                      className="w-full min-h-[44px] px-4 py-2.5 text-left text-sm font-medium text-slate-800 dark:text-[#f4f5f7] hover:bg-slate-50 dark:hover:bg-[#101522] flex items-center gap-2.5 cursor-pointer"
-                    >
-                      <Settings className="w-4 h-4 text-[#ff951f]" />
-                      <span>Edit profile settings</span>
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsOverflowOpen(false);
-                        setIsReportOpen(true);
-                      }}
-                      className="w-full min-h-[44px] px-4 py-2.5 text-left text-sm font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center gap-2.5 cursor-pointer"
-                    >
-                      <Flag className="w-4 h-4" />
-                      <span>Report profile</span>
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={handleShareProfile}
-                    className="w-full min-h-[44px] px-4 py-2.5 text-left text-sm font-medium text-slate-700 dark:text-[#c9ced8] hover:bg-slate-50 dark:hover:bg-[#101522] flex items-center gap-2.5 cursor-pointer"
-                  >
-                    <Share2 className="w-4 h-4" />
-                    <span>Share link</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
-
-        {/* --- Top Cover Banner --- */}
+        {/* --- Top Cover Banner (At the very top edge: NO white bar above) --- */}
         <div className="relative w-full h-44 sm:h-56 md:h-64 bg-slate-200 dark:bg-[#101522] border-b border-slate-200 dark:border-[#303139] overflow-hidden flex-shrink-0">
           {profile?.coverUrl ? (
             <img
@@ -518,6 +404,95 @@ export default function ClientPublicProfileView({
           ) : (
             <div className="w-full h-full opacity-30 bg-[radial-gradient(#ff951f_1px,transparent_1px)] [background-size:20px_20px]" />
           )}
+
+          {/* Floating Controls Overlay directly on the Cover Banner */}
+          <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10 pointer-events-auto">
+            {/* Back Button */}
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Go back"
+              className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-black/50 hover:bg-black/70 active:scale-95 text-white border border-white/20 backdrop-blur-md flex items-center justify-center transition-all shadow-md cursor-pointer"
+            >
+              <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
+            </button>
+
+            {/* Top-Right Action Buttons */}
+            <div className="flex items-center gap-2">
+              {onOpenEdit && (
+                <button
+                  type="button"
+                  onClick={onOpenEdit}
+                  aria-label="Edit Profile Settings"
+                  title="Edit Profile Settings"
+                  className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-black/50 hover:bg-black/70 active:scale-95 text-white border border-white/20 backdrop-blur-md flex items-center justify-center transition-all shadow-md cursor-pointer"
+                >
+                  <Settings className="w-4.5 h-4.5 text-[#ff951f]" />
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={handleShareProfile}
+                aria-label="Share profile"
+                title="Share profile"
+                className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-black/50 hover:bg-black/70 active:scale-95 text-white border border-white/20 backdrop-blur-md flex items-center justify-center transition-all shadow-md cursor-pointer"
+              >
+                <Share2 className="w-4.5 h-4.5" />
+              </button>
+
+              <div className="relative" ref={overflowRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsOverflowOpen((prev) => !prev)}
+                  aria-label="More options"
+                  aria-expanded={isOverflowOpen}
+                  className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-black/50 hover:bg-black/70 active:scale-95 text-white border border-white/20 backdrop-blur-md flex items-center justify-center transition-all shadow-md cursor-pointer"
+                >
+                  <MoreVertical className="w-4.5 h-4.5" />
+                </button>
+
+                {/* Overflow dropdown */}
+                {isOverflowOpen && (
+                  <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-[#10141c] rounded-[5px] shadow-2xl border border-slate-200 dark:border-[#303139] py-1.5 z-30 animate-in fade-in zoom-in-95 duration-150">
+                    {onOpenEdit ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsOverflowOpen(false);
+                          onOpenEdit();
+                        }}
+                        className="w-full min-h-[44px] px-4 py-2.5 text-left text-sm font-medium text-slate-800 dark:text-[#f4f5f7] hover:bg-slate-50 dark:hover:bg-[#101522] flex items-center gap-2.5 cursor-pointer"
+                      >
+                        <Settings className="w-4 h-4 text-[#ff951f]" />
+                        <span>Edit profile settings</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsOverflowOpen(false);
+                          setIsReportOpen(true);
+                        }}
+                        className="w-full min-h-[44px] px-4 py-2.5 text-left text-sm font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center gap-2.5 cursor-pointer"
+                      >
+                        <Flag className="w-4 h-4" />
+                        <span>Report profile</span>
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={handleShareProfile}
+                      className="w-full min-h-[44px] px-4 py-2.5 text-left text-sm font-medium text-slate-700 dark:text-[#c9ced8] hover:bg-slate-50 dark:hover:bg-[#101522] flex items-center gap-2.5 cursor-pointer"
+                    >
+                      <Share2 className="w-4 h-4" />
+                      <span>Share link</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* --- Loading State --- */}
@@ -537,13 +512,13 @@ export default function ClientPublicProfileView({
               <AlertCircle className="w-8 h-8" />
             </div>
             <div>
-              <h2 className="text-lg font-medium text-slate-900 dark:text-[#f4f5f7]">Profile Unavailable</h2>
-              <p className="text-sm text-slate-500 dark:text-[#c9ced8] mt-1 max-w-sm">{error}</p>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Profile Unavailable</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-sm">{error}</p>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="min-h-[44px] px-6 py-2.5 bg-[#ff951f] hover:bg-[#e68416] text-[#07090e] font-semibold text-sm rounded-full shadow-md transition-all active:scale-95 cursor-pointer"
+              className="min-h-[44px] px-6 py-2.5 bg-[#ff951f] hover:bg-[#e68416] text-[#07090e] font-bold text-sm rounded-full shadow-md transition-all active:scale-95 cursor-pointer"
             >
               Back to Home
             </button>
@@ -582,10 +557,17 @@ export default function ClientPublicProfileView({
                 </h1>
                 {profile.verified && (
                   <span
-                    className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#ff951f] text-[#07090e] font-bold text-xs flex-shrink-0 shadow-sm"
+                    className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#ff951f] text-[#07090e] flex-shrink-0 shadow-sm"
                     title="Verified client profile"
                   >
-                    ✓
+                    <svg
+                      className="w-3 h-3 fill-current stroke-current"
+                      viewBox="0 0 24 24"
+                      strokeWidth="3"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
                   </span>
                 )}
               </div>
@@ -619,52 +601,63 @@ export default function ClientPublicProfileView({
                 )}
 
                 {/* Operating Hours & Open Now Badge */}
-                {(profile.dailyOpenTime || profile.dailyCloseTime) && (
-                  <div className="flex flex-col gap-1">
-                    <button
-                      type="button"
-                      onClick={() => setIsHoursExpanded((prev) => !prev)}
-                      className="w-full flex items-center justify-between gap-2 text-slate-700 dark:text-[#c9ced8] hover:text-slate-900 dark:hover:text-[#f4f5f7] transition-colors cursor-pointer py-1 text-left"
-                    >
-                      <div className="flex items-center gap-2 min-w-0 flex-1 flex-wrap sm:flex-nowrap">
-                        <Clock className="w-4 h-4 text-[#ff951f] flex-shrink-0" />
-                        {profile.openNow === true ? (
-                          <span className="inline-flex items-center gap-1.5 font-mono font-medium text-emerald-600 dark:text-emerald-400 flex-shrink-0">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                            Open now
-                          </span>
-                        ) : profile.openNow === false ? (
-                          <span className="inline-flex items-center gap-1.5 font-mono font-medium text-rose-600 dark:text-rose-400 flex-shrink-0">
-                            <span className="w-2 h-2 rounded-full bg-rose-500" />
-                            Closed
-                          </span>
-                        ) : (
-                          <span className="font-medium flex-shrink-0">Operating Hours</span>
-                        )}
-                        {hoursFormatted && (
-                          <span className="text-amber-700 dark:text-[#edcd8c] font-mono font-normal truncate">
-                            · {hoursFormatted}
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-slate-400 dark:text-[#c9ced8] flex-shrink-0">
-                        {isHoursExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                      </div>
-                    </button>
+                {(profile.dailyOpenTime || profile.dailyCloseTime) && (() => {
+                  const hasBoth = profile.dailyOpenTime && profile.dailyCloseTime;
+                  const hoursFormatted = hasBoth
+                    ? `${formatTime(profile.dailyOpenTime)} – ${formatTime(profile.dailyCloseTime)}`
+                    : profile.dailyOpenTime
+                    ? `From ${formatTime(profile.dailyOpenTime)}`
+                    : profile.dailyCloseTime
+                    ? `Until ${formatTime(profile.dailyCloseTime)}`
+                    : '';
 
-                    {isHoursExpanded && (
-                      <div className="ml-6 p-2.5 rounded-[4px] bg-slate-100 dark:bg-[#101522] text-[11px] text-slate-600 dark:text-[#c9ced8] border border-slate-200 dark:border-[#303139] animate-in fade-in duration-160">
-                        <p className="font-medium text-slate-900 dark:text-[#f4f5f7]">Standard Daily Hours:</p>
-                        <p className="mt-0.5 font-mono text-amber-700 dark:text-[#edcd8c]">
-                          Daily: {hoursFormatted}
-                        </p>
-                        <p className="text-[10px] text-slate-400 dark:text-[#c9ced8]/60 mt-1">
-                          * Hours may vary on public holidays and festival days.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
+                  return (
+                    <div className="flex flex-col gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setIsHoursExpanded((prev) => !prev)}
+                        className="w-full flex items-center justify-between gap-2 text-slate-700 dark:text-[#c9ced8] hover:text-slate-900 dark:hover:text-[#f4f5f7] transition-colors cursor-pointer py-1 text-left"
+                      >
+                        <div className="flex items-center gap-2 min-w-0 flex-1 flex-wrap sm:flex-nowrap">
+                          <Clock className="w-4 h-4 text-[#ff951f] flex-shrink-0" />
+                          {profile.openNow === true ? (
+                            <span className="inline-flex items-center gap-1.5 font-mono font-medium text-emerald-600 dark:text-emerald-400 flex-shrink-0">
+                              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                              Open now
+                            </span>
+                          ) : profile.openNow === false ? (
+                            <span className="inline-flex items-center gap-1.5 font-mono font-medium text-rose-600 dark:text-rose-400 flex-shrink-0">
+                              <span className="w-2 h-2 rounded-full bg-rose-500" />
+                              Closed
+                            </span>
+                          ) : (
+                            <span className="font-medium flex-shrink-0">Operating Hours</span>
+                          )}
+                          {hoursFormatted && (
+                            <span className="text-slate-500 dark:text-[#edcd8c] font-mono font-normal truncate">
+                              · {hoursFormatted}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-slate-400 dark:text-[#c9ced8] flex-shrink-0">
+                          {isHoursExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                        </div>
+                      </button>
+
+                      {isHoursExpanded && (
+                        <div className="ml-6 p-2.5 rounded-[4px] bg-slate-100 dark:bg-[#101522] text-[11px] text-slate-600 dark:text-[#c9ced8] border border-slate-200 dark:border-[#303139] animate-in fade-in duration-160">
+                          <p className="font-medium text-slate-900 dark:text-[#f4f5f7]">Standard Daily Hours:</p>
+                          <p className="mt-0.5 font-mono text-amber-700 dark:text-[#edcd8c]">
+                            Daily: {hoursFormatted}
+                          </p>
+                          <p className="text-[10px] text-slate-400 dark:text-[#c9ced8]/60 mt-1">
+                            * Hours may vary on public holidays and festival days.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* Action Buttons Row */}
@@ -673,7 +666,7 @@ export default function ClientPublicProfileView({
                 <button
                   type="button"
                   onClick={() => window.open(getDirectionsUrl(), '_blank', 'noopener,noreferrer')}
-                  className="min-h-[44px] px-5 py-2.5 rounded-full bg-[#ff951f] hover:bg-[#e68416] active:scale-95 text-[#07090e] font-semibold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-md cursor-pointer"
+                  className="min-h-[44px] px-5 py-2.5 rounded-full bg-[#ff951f] hover:bg-[#e68416] active:scale-95 text-[#07090e] font-semibold text-xs flex items-center gap-2 transition-all shadow-md cursor-pointer"
                 >
                   <Navigation className="w-4 h-4 fill-[#07090e]" />
                   <span>Get directions</span>
@@ -683,7 +676,7 @@ export default function ClientPublicProfileView({
                 {profile.showPhone && profile.publicPhone && (
                   <a
                     href={`tel:${profile.publicPhone}`}
-                    className="min-h-[44px] px-4 py-2.5 rounded-full bg-slate-100 dark:bg-[#101522] border border-slate-200 dark:border-[#303139] hover:border-[#ff951f]/50 active:scale-95 text-slate-800 dark:text-[#f4f5f7] font-medium text-xs sm:text-sm flex items-center gap-2 transition-all shadow-xs cursor-pointer"
+                    className="min-h-[44px] px-4 py-2.5 rounded-full bg-slate-100 dark:bg-[#101522] border border-slate-200 dark:border-[#303139] hover:border-[#ff951f]/50 active:scale-95 text-slate-800 dark:text-[#f4f5f7] font-medium text-xs flex items-center gap-2 transition-all shadow-xs cursor-pointer"
                   >
                     <Phone className="w-4 h-4 text-[#ff951f]" />
                     <span>Call</span>
@@ -696,7 +689,7 @@ export default function ClientPublicProfileView({
                     href={`https://wa.me/91${profile.whatsappNumber}?text=${encodeURIComponent('Hi, saw your profile on myciti')}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="min-h-[44px] px-4 py-2.5 rounded-full bg-emerald-50 dark:bg-[#101522] border border-emerald-200 dark:border-[#303139] hover:border-[#ff951f]/50 text-emerald-700 dark:text-emerald-400 font-medium text-xs sm:text-sm flex items-center gap-2 transition-all shadow-xs active:scale-95 cursor-pointer"
+                    className="min-h-[44px] px-4 py-2.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 hover:border-emerald-400 text-emerald-700 dark:text-emerald-400 font-medium text-xs flex items-center gap-2 transition-all shadow-xs active:scale-95 cursor-pointer"
                   >
                     <MessageCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     <span>WhatsApp</span>
@@ -704,11 +697,11 @@ export default function ClientPublicProfileView({
                 )}
 
                 {/* Setting / Edit Profile button for owner */}
-                {(onOpenEdit || isOwner) && (
+                {onOpenEdit && (
                   <button
                     type="button"
                     onClick={onOpenEdit}
-                    className="min-h-[44px] px-5 py-2.5 rounded-full bg-slate-100 dark:bg-[#101522] border border-slate-200 dark:border-[#303139] hover:bg-slate-200 dark:hover:bg-[#1a2030] text-slate-800 dark:text-[#f4f5f7] font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-xs transition-all active:scale-95 cursor-pointer"
+                    className="min-h-[44px] px-4 py-2.5 rounded-full bg-slate-100 dark:bg-[#101522] border border-slate-200 dark:border-[#303139] hover:bg-slate-200 dark:hover:bg-[#1a2030] text-slate-800 dark:text-[#f4f5f7] font-medium text-xs flex items-center gap-2 shadow-xs transition-all active:scale-95 cursor-pointer"
                   >
                     <Settings className="w-4 h-4 text-[#ff951f]" />
                     <span>Edit Profile</span>
@@ -719,7 +712,7 @@ export default function ClientPublicProfileView({
                 <button
                   type="button"
                   onClick={handleShareProfile}
-                  className="min-h-[44px] px-4 py-2.5 rounded-full bg-slate-100 dark:bg-[#101522] border border-slate-200 dark:border-[#303139] hover:border-[#ff951f]/50 active:scale-95 text-slate-800 dark:text-[#f4f5f7] font-medium text-xs sm:text-sm flex items-center gap-2 transition-all shadow-xs cursor-pointer"
+                  className="min-h-[44px] px-4 py-2.5 rounded-full bg-slate-100 dark:bg-[#101522] border border-slate-200 dark:border-[#303139] hover:border-[#ff951f]/50 active:scale-95 text-slate-700 dark:text-[#c9ced8] font-medium text-xs flex items-center gap-2 transition-all shadow-xs cursor-pointer"
                 >
                   <Share2 className="w-4 h-4 text-slate-500 dark:text-[#c9ced8]" />
                   <span>Share</span>
@@ -727,8 +720,8 @@ export default function ClientPublicProfileView({
               </div>
             </div>
 
-            {/* --- Sticky Tabs --- */}
-            <div className="sticky top-14 z-20 bg-white/95 dark:bg-[#10141c]/95 backdrop-blur-md border-b border-slate-200 dark:border-[#303139] flex overflow-x-auto scrollbar-none">
+            {/* --- Sticky Tabs (Docks at top: 0 when scrolling past cover) --- */}
+            <div className="sticky top-0 z-20 bg-white/95 dark:bg-[#10141c]/95 backdrop-blur-md border-b border-slate-200 dark:border-[#303139] flex overflow-x-auto scrollbar-none">
               {/* Tab: All Posts */}
               <button
                 type="button"
@@ -926,7 +919,7 @@ export default function ClientPublicProfileView({
                           type="button"
                           disabled={listingsLoading}
                           onClick={() => loadTabListings(currentTab, currentPage + 1)}
-                          className="min-h-[44px] px-6 py-2.5 rounded-full bg-slate-100 dark:bg-[#101522] hover:bg-slate-200 dark:hover:bg-[#1a2030] text-slate-700 dark:text-[#f4f5f7] border border-slate-200 dark:border-[#303139] hover:border-[#ff951f]/50 font-mono font-medium text-xs transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                          className="min-h-[44px] px-6 py-2.5 rounded-full bg-slate-100 dark:bg-[#101522] hover:bg-slate-200 dark:hover:bg-[#1a2030] border border-slate-200 dark:border-[#303139] text-slate-700 dark:text-[#f4f5f7] font-semibold text-xs transition-all active:scale-95 disabled:opacity-50 cursor-pointer shadow-xs"
                         >
                           {listingsLoading ? 'Loading more...' : 'Load more listings'}
                         </button>
@@ -942,7 +935,7 @@ export default function ClientPublicProfileView({
 
       {/* --- Floating Toast Notification --- */}
       {toastMessage && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[4200] max-w-sm w-[90%] bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-900 px-4 py-3 rounded-2xl shadow-2xl backdrop-blur-md text-xs font-bold flex items-center justify-center gap-2 animate-in slide-in-from-bottom-4 duration-200">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[4200] max-w-sm w-[90%] bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-900 px-4 py-3 rounded-2xl shadow-2xl backdrop-blur-md text-xs font-semibold flex items-center justify-center gap-2 animate-in slide-in-from-bottom-4 duration-200">
           <Check className="w-4 h-4 text-emerald-400 dark:text-emerald-600 flex-shrink-0" />
           <span>{toastMessage}</span>
         </div>
@@ -958,7 +951,7 @@ export default function ClientPublicProfileView({
                 <div className="w-8 h-8 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center">
                   <Flag className="w-4 h-4" />
                 </div>
-                <h3 className="font-medium text-slate-900 dark:text-[#f4f5f7] text-base">
+                <h3 className="font-semibold text-slate-900 dark:text-[#f4f5f7] text-base">
                   Report Profile
                 </h3>
               </div>
@@ -974,7 +967,7 @@ export default function ClientPublicProfileView({
             {reportSuccess ? (
               <div className="py-6 flex flex-col items-center justify-center text-center gap-2 text-emerald-600 dark:text-emerald-400">
                 <Check className="w-12 h-12" />
-                <p className="font-medium text-sm">Report submitted successfully.</p>
+                <p className="font-semibold text-sm">Report submitted successfully.</p>
               </div>
             ) : (
               <form onSubmit={handleSubmitReport} className="flex flex-col gap-3.5">

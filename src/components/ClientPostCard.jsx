@@ -125,8 +125,8 @@ export default function ClientPostCard({
               Upcoming
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-white/90 dark:bg-[#10141c]/90 text-slate-800 dark:text-[#f4f5f7] border border-slate-200 dark:border-[#303139] backdrop-blur-md">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#ff951f] animate-pulse" />
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50 backdrop-blur-md">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               Live
             </span>
           )}
@@ -190,26 +190,28 @@ export default function ClientPostCard({
           )}
         </div>
 
-        {/* Interactive Action Bar */}
-        <div className="pt-2 border-t border-slate-100 dark:border-[#303139] flex items-center justify-between">
+        {/* Interactive Action Bar (Updated Button UI) */}
+        <div className="pt-2.5 border-t border-slate-100 dark:border-[#303139] flex items-center justify-between">
+          {/* Directions Button */}
           <button
             type="button"
             onClick={handleDirections}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-[#101522] dark:hover:bg-[#1a2030] text-xs font-mono font-semibold text-slate-800 dark:text-[#f4f5f7] transition-all active:scale-95 cursor-pointer border border-slate-200 dark:border-[#303139]"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 active:scale-95 text-[#ff951f] hover:text-amber-500 dark:text-[#edcd8c] text-xs font-semibold border border-amber-500/25 transition-all shadow-2xs cursor-pointer"
           >
-            <Navigation className="w-3.5 h-3.5 text-[#ff951f]" />
+            <Navigation className="w-3.5 h-3.5 fill-[#ff951f]" />
             <span>Directions</span>
           </button>
 
+          {/* Action Icons Row */}
           <div className="flex items-center gap-1.5">
             {listing.contactPhone && (
               <a
                 href={`tel:${listing.contactPhone}`}
                 onClick={(e) => e.stopPropagation()}
                 title={`Call ${listing.contactPhone}`}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-[#101522] dark:hover:bg-[#1a2030] text-slate-700 dark:text-[#f4f5f7] flex items-center justify-center transition-all active:scale-95 cursor-pointer border border-slate-200 dark:border-[#303139]"
+                className="w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/60 flex items-center justify-center transition-all active:scale-90 cursor-pointer shadow-2xs"
               >
-                <Phone className="w-3.5 h-3.5 text-[#ff951f]" />
+                <Phone className="w-3.5 h-3.5" />
               </a>
             )}
 
@@ -217,7 +219,8 @@ export default function ClientPostCard({
               type="button"
               onClick={handleShareClick}
               aria-label="Share post"
-              className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-[#101522] dark:hover:bg-[#1a2030] text-slate-700 dark:text-[#c9ced8] flex items-center justify-center transition-all active:scale-95 cursor-pointer border border-slate-200 dark:border-[#303139]"
+              title="Share post"
+              className="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#101522] hover:bg-slate-200 dark:hover:bg-[#1a2030] text-slate-600 dark:text-[#c9ced8] hover:text-slate-900 dark:hover:text-[#f4f5f7] border border-slate-200 dark:border-[#303139] flex items-center justify-center transition-all active:scale-90 cursor-pointer shadow-2xs"
             >
               <Share2 className="w-3.5 h-3.5" />
             </button>
@@ -226,7 +229,12 @@ export default function ClientPostCard({
               type="button"
               onClick={handleSaveClick}
               aria-label={isSaved ? "Saved post" : "Save post"}
-              className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-[#101522] dark:hover:bg-[#1a2030] text-slate-700 dark:text-[#c9ced8] flex items-center justify-center transition-all active:scale-95 cursor-pointer border border-slate-200 dark:border-[#303139]"
+              title={isSaved ? "Saved" : "Save post"}
+              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90 cursor-pointer shadow-2xs ${
+                isSaved
+                  ? 'bg-amber-50 dark:bg-amber-950/40 text-[#ff951f] border border-amber-300 dark:border-amber-700'
+                  : 'bg-slate-100 dark:bg-[#101522] hover:bg-slate-200 dark:hover:bg-[#1a2030] text-slate-600 dark:text-[#c9ced8] hover:text-slate-900 dark:hover:text-[#f4f5f7] border border-slate-200 dark:border-[#303139]'
+              }`}
             >
               <Bookmark className={`w-3.5 h-3.5 ${isSaved ? 'fill-[#ff951f] text-[#ff951f]' : ''}`} />
             </button>
