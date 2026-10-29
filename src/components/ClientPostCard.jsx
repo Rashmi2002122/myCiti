@@ -8,10 +8,7 @@ import {
   Share2,
   Phone,
   Calendar,
-  Sparkles,
-  ChevronRight,
-  Layers,
-  AlertCircle
+  Layers
 } from 'lucide-react';
 import { CATEGORIES } from '../services/api';
 import { getOptimizedImageUrl } from '../utils/imageUtils';
@@ -50,8 +47,45 @@ function formatTimeShort(timeStr) {
   return timeStr;
 }
 
+function formatTwitterTime(dateStr) {
+  if (!dateStr) return '';
+  try {
+    const d = new Date(dateStr);
+    const now = new Date();
+    const diffSec = Math.floor((now - d) / 1000);
+    if (diffSec < 60) return 'now';
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin}m`;
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return `${diffHr}h`;
+    const diffDays = Math.floor(diffHr / 24);
+    if (diffDays < 7) return `${diffDays}d`;
+    if (d.getFullYear() === now.getFullYear()) {
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  } catch {
+    return '';
+  }
+}
+
+export function TwitterVerifiedBadge({ className = 'w-4 h-4 text-[#1d9bf0]' }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-label="Verified account"
+      className={`${className} fill-current flex-shrink-0 inline-block`}
+    >
+      <g>
+        <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z" />
+      </g>
+    </svg>
+  );
+}
+
 export default function ClientPostCard({
   listing,
+  clientProfile = null,
   onSelect,
   isSaved,
   onToggleSave,
@@ -60,7 +94,7 @@ export default function ClientPostCard({
 }) {
   const categoryConfig = CATEGORIES[listing.category] || CATEGORIES.PANDAL;
   const rawImageUrl = listing.primaryImageUrl || (listing.images && listing.images[0]?.url);
-  const imageUrl = getOptimizedImageUrl(rawImageUrl, 600, 375);
+  const imageUrl = getOptimizedImageUrl(rawImageUrl, 700, 420);
   const imageCount = listing.images ? listing.images.length : (listing.primaryImageUrl ? 1 : 0);
   const dateRangeStr = formatDateRange(listing.startDate, listing.endDate);
 
@@ -68,201 +102,224 @@ export default function ClientPostCard({
   const isExpired = listing.isExpired === true || (listing.endDate && listing.endDate < todayStr);
   const isActuallyUpcoming = !isExpired && (isUpcoming || (listing.startDate && listing.startDate > todayStr));
 
+  const authorName = clientProfile?.businessName || listing.businessName || 'Business';
+  const authorSlug = clientProfile?.slug || listing.clientSlug || 'myciti';
+  const authorLogo = clientProfile?.logoUrl || listing.businessLogoUrl;
+  const isVerified = clientProfile?.verified ?? listing.verified;
+
+  const timeDisplay = formatTwitterTime(listing.createdAt || listing.startDate);
+
   const handleDirections = (e) => {
     e.stopPropagation();
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${listing.latitude},${listing.longitude}`;
+    const lat = listing.latitude || clientProfile?.latitude;
+    const lng = listing.longitude || clientProfile?.longitude;
+    const url = lat && lng
+      ? `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(listing.title + ' ' + (listing.landmark || ''))}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const handleShareClick = (e) => {
     e.stopPropagation();
-    if (onShare) {
-      onShare(listing);
-    }
+    if (onShare) onShare(listing);
   };
 
   const handleSaveClick = (e) => {
     e.stopPropagation();
-    if (onToggleSave) {
-      onToggleSave(listing.id);
-    }
+    if (onToggleSave) onToggleSave(listing.id);
   };
 
   return (
     <article
       onClick={() => onSelect && onSelect(listing)}
-      className="group relative cursor-pointer flex flex-col rounded-[26px] bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/90 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06)] hover:shadow-[0_16px_32px_-8px_rgba(0,0,0,0.12)] hover:-translate-y-1 active:translate-y-0 transition-all duration-200 overflow-hidden"
+      className="px-4 py-3 border-b border-slate-150 dark:border-[#2f3336] hover:bg-slate-500/[0.03] dark:hover:bg-slate-500/[0.06] transition-colors cursor-pointer flex gap-3 text-slate-900 dark:text-[#e7e9ea]"
     >
-      {/* --- Visual Hero Container --- */}
-      <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={listing.title}
-            loading="lazy"
-            className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out ${isExpired ? 'grayscale-[25%] opacity-90' : ''}`}
-          />
-        ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-100 dark:from-slate-800 dark:to-slate-900 text-slate-400">
-            <span className="text-4xl">{categoryConfig.icon}</span>
-            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 mt-1">
-              {categoryConfig.label}
-            </span>
-          </div>
-        )}
-
-        {/* Ambient Bottom Gradient for High Readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
-
-        {/* Category Badge - Top Left */}
-        <div className="absolute top-3 left-3 flex items-center gap-1.5 z-10">
-          <span
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border backdrop-blur-md shadow-xs ${categoryConfig.badgeBg}`}
-          >
-            <span>{categoryConfig.icon}</span>
-            <span>{categoryConfig.label}</span>
-          </span>
-        </div>
-
-        {/* Live / Expired / Upcoming Status & Save Button - Top Right */}
-        <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
-          {isExpired ? (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-950/85 text-rose-300 border border-rose-800/80 backdrop-blur-md shadow-xs">
-              <AlertCircle className="w-3 h-3 text-rose-400" />
-              <span>Expired</span>
-            </span>
-          ) : isActuallyUpcoming ? (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-indigo-600/90 text-white backdrop-blur-md shadow-xs">
-              <Calendar className="w-3 h-3" />
-              <span>Upcoming</span>
-            </span>
+      {/* --- Left Column: Avatar --- */}
+      <div className="flex-shrink-0 pt-0.5">
+        <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-800 flex items-center justify-center">
+          {authorLogo ? (
+            <img src={authorLogo} alt={authorName} className="w-full h-full object-cover" />
           ) : (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/95 text-white backdrop-blur-md shadow-xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-              <span>Live</span>
+            <span className="font-bold text-sm text-[#1d9bf0]">
+              {(authorName || 'C').charAt(0).toUpperCase()}
             </span>
           )}
-
-          <button
-            type="button"
-            onClick={handleSaveClick}
-            aria-label="Save post"
-            className="w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-md text-white flex items-center justify-center transition-all active:scale-90"
-          >
-            <Bookmark className={`w-3.5 h-3.5 ${isSaved ? 'fill-amber-400 text-amber-400' : ''}`} />
-          </button>
         </div>
-
-        {/* Multi-Photo Count Pill - Bottom Right */}
-        {imageCount > 1 && (
-          <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-bold text-white flex items-center gap-1 z-10">
-            <Layers className="w-3 h-3" />
-            <span>{imageCount} photos</span>
-          </div>
-        )}
-
-        {/* Date Range Chip - Bottom Left */}
-        {dateRangeStr && (
-          <div
-            className={`absolute bottom-2.5 left-2.5 px-2.5 py-0.5 rounded-full backdrop-blur-md text-[11px] font-semibold flex items-center gap-1.5 z-10 ${
-              isExpired ? 'bg-black/75 text-rose-200/90' : 'bg-black/60 text-white/95'
-            }`}
-          >
-            <Calendar className={`w-3 h-3 ${isExpired ? 'text-rose-400' : 'text-sky-300'}`} />
-            <span>{dateRangeStr}</span>
-          </div>
-        )}
       </div>
 
-      {/* --- Body Content --- */}
-      <div className="p-4 flex flex-col flex-1 gap-2.5">
-        {/* Promotional Offer Voucher Banner */}
-        {listing.offerText && (
-          <div className="flex items-center gap-2 p-2.5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-amber-500/5 dark:from-amber-950/30 dark:via-rose-950/20 dark:to-slate-800 border border-amber-300/60 dark:border-amber-800/60 shadow-2xs">
-            <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-amber-500 to-rose-500 text-white flex items-center justify-center flex-shrink-0 shadow-xs">
-              <Tag className="w-3.5 h-3.5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-[10px] uppercase font-black tracking-wider text-amber-700 dark:text-amber-400 leading-none">
-                Special Offer
-              </p>
-              <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate mt-0.5">
-                {listing.offerText}
-              </p>
-            </div>
+      {/* --- Right Column: Tweet Content --- */}
+      <div className="flex-1 min-w-0">
+        {/* Header Line */}
+        <div className="flex items-center justify-between gap-1 leading-snug">
+          <div className="flex items-center gap-1 min-w-0 flex-wrap">
+            <span className="font-bold text-[15px] text-slate-900 dark:text-white truncate hover:underline">
+              {authorName}
+            </span>
+            {isVerified && (
+              <TwitterVerifiedBadge className="w-4 h-4 text-[#1d9bf0]" />
+            )}
+            <span className="text-[14px] text-slate-500 dark:text-[#71767b] truncate">
+              @{authorSlug}
+            </span>
+            {timeDisplay && (
+              <>
+                <span className="text-slate-400 dark:text-[#71767b]">·</span>
+                <span className="text-[14px] text-slate-500 dark:text-[#71767b] flex-shrink-0">
+                  {timeDisplay}
+                </span>
+              </>
+            )}
           </div>
-        )}
 
-        {/* Title */}
-        <h3 className="font-black text-base text-slate-900 dark:text-white line-clamp-1 group-hover:text-city-blue dark:group-hover:text-sky-400 transition-colors tracking-tight">
-          {listing.title}
-        </h3>
-
-        {/* Description snippet */}
-        {listing.description && (
-          <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
-            {listing.description}
-          </p>
-        )}
-
-        {/* Location & Operating Hours */}
-        <div className="mt-auto pt-2 flex flex-wrap items-center gap-y-1.5 gap-x-3 text-xs text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800/80">
-          {listing.landmark && (
-            <div className="flex items-center gap-1 font-medium truncate max-w-[200px]">
-              <MapPin className="w-3.5 h-3.5 text-city-blue dark:text-sky-400 flex-shrink-0" />
-              <span className="truncate">{listing.landmark}</span>
-            </div>
-          )}
-
-          {(listing.dailyOpenTime || listing.dailyCloseTime) && (
-            <div className="flex items-center gap-1 font-medium">
-              <Clock className="w-3.5 h-3.5 text-city-blue dark:text-sky-400 flex-shrink-0" />
-              <span>
-                {formatTimeShort(listing.dailyOpenTime)} – {formatTimeShort(listing.dailyCloseTime)}
+          {/* Right Status Pill */}
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            {isExpired ? (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                Expired
               </span>
-            </div>
+            ) : isActuallyUpcoming ? (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                Upcoming
+              </span>
+            ) : (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Live
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Post Text & Description */}
+        <div className="mt-1">
+          <h3 className="font-semibold text-[15px] text-slate-900 dark:text-white leading-snug">
+            {listing.title}
+          </h3>
+          {listing.description && (
+            <p className="mt-1 text-[14px] text-slate-700 dark:text-[#cfd9de] leading-relaxed whitespace-pre-line">
+              {listing.description}
+            </p>
           )}
         </div>
 
-        {/* --- Interactive Action Bar --- */}
-        <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
+        {/* Special Offer Voucher Chip */}
+        {listing.offerText && (
+          <div className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30 text-xs font-semibold">
+            <Tag className="w-3.5 h-3.5 text-amber-500" />
+            <span>{listing.offerText}</span>
+          </div>
+        )}
+
+        {/* Media Container (Image / Gallery) */}
+        {imageUrl && (
+          <div className="mt-3 rounded-2xl overflow-hidden border border-slate-200 dark:border-[#2f3336] bg-slate-100 dark:bg-slate-900 relative group/media aspect-[16/10] sm:aspect-[16/9] max-h-[360px]">
+            <img
+              src={imageUrl}
+              alt={listing.title}
+              loading="lazy"
+              className={`w-full h-full object-cover group-hover/media:scale-[1.01] transition-transform duration-300 ${isExpired ? 'grayscale-[20%] opacity-90' : ''}`}
+            />
+
+            {/* Category Badge overlay on image */}
+            <div className="absolute top-2.5 left-2.5">
+              <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border backdrop-blur-md shadow-xs ${categoryConfig.badgeBg}`}>
+                <span>{categoryConfig.icon}</span>
+                <span>{categoryConfig.label}</span>
+              </span>
+            </div>
+
+            {/* Date range chip overlay */}
+            {dateRangeStr && (
+              <div className="absolute bottom-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-black/65 backdrop-blur-md text-[11px] font-medium text-white flex items-center gap-1.5">
+                <Calendar className="w-3 h-3 text-[#1d9bf0]" />
+                <span>{dateRangeStr}</span>
+              </div>
+            )}
+
+            {/* Photo count */}
+            {imageCount > 1 && (
+              <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/65 backdrop-blur-md text-[10px] font-bold text-white flex items-center gap-1">
+                <Layers className="w-3 h-3" />
+                <span>{imageCount} photos</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Location & Landmark sub-bar if available */}
+        {(listing.landmark || listing.dailyOpenTime) && (
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-[#71767b]">
+            {listing.landmark && (
+              <div className="flex items-center gap-1">
+                <MapPin className="w-3.5 h-3.5 text-[#1d9bf0] flex-shrink-0" />
+                <span className="truncate">{listing.landmark}</span>
+              </div>
+            )}
+            {(listing.dailyOpenTime || listing.dailyCloseTime) && (
+              <div className="flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5 text-[#1d9bf0] flex-shrink-0" />
+                <span>
+                  {formatTimeShort(listing.dailyOpenTime)} – {formatTimeShort(listing.dailyCloseTime)}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* --- Twitter Interaction Bar (Directions, Contact, Share, Bookmark) --- */}
+        <div className="mt-3 flex items-center justify-between text-slate-500 dark:text-[#71767b] text-xs max-w-sm pt-0.5">
+          {/* Directions */}
           <button
             type="button"
             onClick={handleDirections}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 transition-all active:scale-95 cursor-pointer"
+            className="flex items-center gap-1.5 hover:text-[#1d9bf0] transition-colors group/btn py-1 cursor-pointer"
+            title="Get Directions"
           >
-            <Navigation className="w-3.5 h-3.5 text-city-blue dark:text-sky-400 fill-current" />
-            <span>Directions</span>
+            <div className="p-1.5 rounded-full group-hover/btn:bg-[#1d9bf0]/10 transition-colors">
+              <Navigation className="w-4 h-4" />
+            </div>
+            <span className="text-xs">Directions</span>
           </button>
 
-          <div className="flex items-center gap-1.5">
-            {listing.contactPhone && (
-              <a
-                href={`tel:${listing.contactPhone}`}
-                onClick={(e) => e.stopPropagation()}
-                title={`Call ${listing.contactPhone}`}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all active:scale-95 cursor-pointer"
-              >
-                <Phone className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              </a>
-            )}
-
-            <button
-              type="button"
-              onClick={handleShareClick}
-              aria-label="Share post"
-              className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all active:scale-95 cursor-pointer"
+          {/* Call / Contact */}
+          {listing.contactPhone && (
+            <a
+              href={`tel:${listing.contactPhone}`}
+              onClick={(e) => e.stopPropagation()}
+              className="flex items-center gap-1.5 hover:text-emerald-500 transition-colors group/btn py-1 cursor-pointer"
+              title={`Call ${listing.contactPhone}`}
             >
-              <Share2 className="w-3.5 h-3.5" />
-            </button>
+              <div className="p-1.5 rounded-full group-hover/btn:bg-emerald-500/10 transition-colors">
+                <Phone className="w-4 h-4" />
+              </div>
+              <span className="text-xs">Call</span>
+            </a>
+          )}
 
-            <div
-              className="w-8 h-8 rounded-full bg-sky-50 dark:bg-sky-950/60 text-city-blue dark:text-sky-400 flex items-center justify-center group-hover:bg-city-blue group-hover:text-white transition-all ml-0.5 shadow-2xs"
-              title="View full post details"
-            >
-              <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+          {/* Share */}
+          <button
+            type="button"
+            onClick={handleShareClick}
+            className="flex items-center gap-1.5 hover:text-emerald-500 transition-colors group/btn py-1 cursor-pointer"
+            title="Share post"
+          >
+            <div className="p-1.5 rounded-full group-hover/btn:bg-emerald-500/10 transition-colors">
+              <Share2 className="w-4 h-4" />
             </div>
-          </div>
+            <span className="text-xs">Share</span>
+          </button>
+
+          {/* Bookmark / Save */}
+          <button
+            type="button"
+            onClick={handleSaveClick}
+            className="flex items-center gap-1.5 hover:text-[#1d9bf0] transition-colors group/btn py-1 cursor-pointer"
+            title={isSaved ? "Saved" : "Save"}
+          >
+            <div className="p-1.5 rounded-full group-hover/btn:bg-[#1d9bf0]/10 transition-colors">
+              <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-[#1d9bf0] text-[#1d9bf0]' : ''}`} />
+            </div>
+          </button>
         </div>
       </div>
     </article>

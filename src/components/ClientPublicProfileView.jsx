@@ -8,23 +8,14 @@ import {
   Phone,
   MessageCircle,
   Navigation,
-  ChevronDown,
-  ChevronUp,
   Flag,
-  Sparkles,
   Calendar,
   AlertCircle,
   Check,
   X,
-  ExternalLink,
-  Store,
-  Building2,
-  User as UserIcon,
-  LayoutGrid,
-  Rows,
   Settings
 } from 'lucide-react';
-import ClientPostCard from './ClientPostCard';
+import ClientPostCard, { TwitterVerifiedBadge } from './ClientPostCard';
 import { getOptimizedImageUrl } from '../utils/imageUtils';
 import {
   fetchPublicClientProfile,
@@ -49,7 +40,7 @@ export default function ClientPublicProfileView({
   onToggleSave,
   onShareListing,
   accessToken = null,
-  isOwner = false,
+  _isOwner = false,
   onOpenEdit = null,
   refreshTrigger = 0
 }) {
@@ -59,7 +50,7 @@ export default function ClientPublicProfileView({
 
   // Tabs: 'all' | 'active' | 'expired' | 'upcoming'
   const [currentTab, setCurrentTab] = useState('all');
-  const [viewMode, setViewMode] = useState('card'); // 'card' | 'grid'
+  const [viewMode, setViewMode] = useState('card'); // 'card' (tweet stream) | 'grid' (media photos)
   const [allListings, setAllListings] = useState([]);
   const [activeListings, setActiveListings] = useState([]);
   const [upcomingListings, setUpcomingListings] = useState([]);
@@ -75,7 +66,7 @@ export default function ClientPublicProfileView({
   const [expiredHasMore, setExpiredHasMore] = useState(false);
 
   // UI state
-  const [isHoursExpanded, setIsHoursExpanded] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [isOverflowOpen, setIsOverflowOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
   const [isReportOpen, setIsReportOpen] = useState(false);
@@ -86,6 +77,14 @@ export default function ClientPublicProfileView({
   const [reportError, setReportError] = useState(null);
 
   const overflowRef = useRef(null);
+  const scrollContainerRef = useRef(null);
+
+  // Scroll listener for sticky header morphing
+  const handleScroll = (e) => {
+    const top = e.currentTarget.scrollTop;
+    if (top > 70 && !isScrolled) setIsScrolled(true);
+    else if (top <= 70 && isScrolled) setIsScrolled(false);
+  };
 
   // Close overflow menu when clicking outside
   useEffect(() => {
@@ -262,38 +261,12 @@ export default function ClientPublicProfileView({
     }
   };
 
-  const renderClientTypePill = () => {
-    const type = profile?.clientType;
-    if (type === 'COMPANY') {
-      return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-medium bg-amber-50 dark:bg-[#101522] text-amber-800 dark:text-[#edcd8c] border border-amber-200 dark:border-[#303139]">
-          <Building2 className="w-3 h-3 text-[#ff951f]" />
-          <span>Company</span>
-        </span>
-      );
-    }
-    if (type === 'INDIVIDUAL') {
-      return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-medium bg-amber-50 dark:bg-[#101522] text-amber-800 dark:text-[#edcd8c] border border-amber-200 dark:border-[#303139]">
-          <UserIcon className="w-3 h-3 text-[#ff951f]" />
-          <span>Individual</span>
-        </span>
-      );
-    }
-    return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-medium bg-amber-50 dark:bg-[#101522] text-amber-800 dark:text-[#edcd8c] border border-amber-200 dark:border-[#303139]">
-        <Store className="w-3 h-3 text-[#ff951f]" />
-        <span>Store</span>
-      </span>
-    );
-  };
-
   const renderListingsList = (listings) => {
     const todayStr = new Date().toISOString().split('T')[0];
 
     if (viewMode === 'grid') {
       return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
           {listings.map((listing) => {
             const rawImageUrl = listing.primaryImageUrl || (listing.images && listing.images[0]?.url);
             const imageUrl = getOptimizedImageUrl(rawImageUrl, 400, 400);
@@ -305,33 +278,33 @@ export default function ClientPublicProfileView({
               <article
                 key={listing.id}
                 onClick={() => onSelectListing && onSelectListing(listing)}
-                className={`group relative aspect-square rounded-[22px] overflow-hidden bg-slate-100 dark:bg-slate-800 cursor-pointer shadow-soft hover:shadow-float active:scale-[0.98] transition-all border border-slate-100 dark:border-slate-800 ${isExpired ? 'opacity-90' : ''}`}
+                className={`group relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-900 cursor-pointer hover:opacity-90 active:scale-[0.99] transition-all border border-slate-200/50 dark:border-slate-800 ${isExpired ? 'opacity-80' : ''}`}
               >
                 {imageUrl ? (
                   <img
                     src={imageUrl}
                     alt={listing.title}
                     loading="lazy"
-                    className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ${isExpired ? 'grayscale-[25%]' : ''}`}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-sky-50 to-blue-100 dark:from-slate-800 dark:to-slate-900 text-3xl">
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-slate-100 dark:bg-slate-800 text-3xl">
                     {catCfg.icon}
                   </div>
                 )}
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent pointer-events-none" />
 
                 {/* Top Badges */}
                 <div className="absolute top-2 left-2 flex items-center gap-1 z-10">
-                  <span className="w-6 h-6 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-xs">
+                  <span className="w-6 h-6 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-xs text-white">
                     {catCfg.icon}
                   </span>
                 </div>
 
                 <div className="absolute top-2 right-2 flex items-center gap-1 z-10">
                   {isExpired ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-950/85 text-rose-300 border border-rose-800/80 font-bold text-[9px] backdrop-blur-md shadow-2xs">
+                    <span className="px-2 py-0.5 rounded-full bg-rose-950/85 text-rose-300 border border-rose-800/80 font-bold text-[9px] backdrop-blur-md">
                       Expired
                     </span>
                   ) : isUpcoming ? (
@@ -339,7 +312,7 @@ export default function ClientPublicProfileView({
                       Upcoming
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/95 text-white font-bold text-[9px] backdrop-blur-md shadow-xs">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/95 text-white font-bold text-[9px] backdrop-blur-md">
                       <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                       Live
                     </span>
@@ -347,13 +320,13 @@ export default function ClientPublicProfileView({
                 </div>
 
                 {/* Bottom Content Overlay */}
-                <div className="absolute bottom-2.5 left-2.5 right-2.5 z-10">
+                <div className="absolute bottom-2 left-2 right-2 z-10">
                   {listing.offerText && (
-                    <span className="inline-block max-w-full truncate px-1.5 py-0.5 rounded-md bg-amber-500 text-white font-extrabold text-[9px] mb-1 shadow-2xs">
+                    <span className="inline-block max-w-full truncate px-1.5 py-0.5 rounded bg-amber-500 text-white font-bold text-[9px] mb-1">
                       🏷️ {listing.offerText}
                     </span>
                   )}
-                  <h4 className="text-white text-xs font-black line-clamp-1 leading-tight group-hover:text-sky-300 transition-colors">
+                  <h4 className="text-white text-xs font-bold line-clamp-1 leading-tight group-hover:text-[#1d9bf0] transition-colors">
                     {listing.title}
                   </h4>
                 </div>
@@ -365,7 +338,7 @@ export default function ClientPublicProfileView({
     }
 
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="flex flex-col divide-y divide-slate-150 dark:divide-[#2f3336]">
         {listings.map((listing) => {
           const isExpired = listing.isExpired === true || (listing.endDate && listing.endDate < todayStr);
           const isUpcoming = !isExpired && (listing.startDate && listing.startDate > todayStr);
@@ -373,6 +346,7 @@ export default function ClientPublicProfileView({
             <ClientPostCard
               key={listing.id}
               listing={listing}
+              clientProfile={profile}
               onSelect={onSelectListing}
               isSaved={savedListingIds.includes(listing.id)}
               onToggleSave={onToggleSave}
@@ -385,57 +359,81 @@ export default function ClientPublicProfileView({
     );
   };
 
-  return (
-    <div className="fixed inset-0 z-[3500] bg-slate-100 dark:bg-[#07090e] overflow-y-auto overscroll-contain flex flex-col items-center">
-      <div className="w-full max-w-3xl min-h-screen bg-white dark:bg-[#10141c] border-x border-slate-200 dark:border-[#303139] shadow-xl flex flex-col relative pb-20 text-slate-900 dark:text-[#f4f5f7]">
+  const hasHours = profile?.dailyOpenTime && profile?.dailyCloseTime;
+  const hoursFormatted = hasHours
+    ? `${formatTime(profile.dailyOpenTime)} – ${formatTime(profile.dailyCloseTime)}`
+    : profile?.dailyOpenTime
+    ? `From ${formatTime(profile.dailyOpenTime)}`
+    : profile?.dailyCloseTime
+    ? `Until ${formatTime(profile.dailyCloseTime)}`
+    : '';
 
-        {/* --- Top Sticky Navigation Bar --- */}
-        <header className="sticky top-0 z-30 w-full h-14 bg-white/95 dark:bg-[#10141c]/95 backdrop-blur-md border-b border-slate-200 dark:border-[#303139] px-3 sm:px-4 flex items-center justify-between flex-shrink-0 transition-colors">
-          {/* Left: Back Button & Truncated Business Name */}
-          <div className="flex items-center gap-2.5 min-w-0 pr-2">
+  return (
+    <div
+      ref={scrollContainerRef}
+      onScroll={handleScroll}
+      className="fixed inset-0 z-[3500] bg-slate-100 dark:bg-black overflow-y-auto overscroll-contain flex flex-col items-center"
+    >
+      <div className="w-full max-w-2xl min-h-screen bg-white dark:bg-black border-x border-slate-200 dark:border-[#2f3336] flex flex-col relative pb-24 text-slate-900 dark:text-[#e7e9ea]">
+
+        {/* --- Twitter Style Top Navigation Header --- */}
+        <header
+          className={`sticky top-0 z-30 w-full h-13.5 px-3 sm:px-4 flex items-center justify-between flex-shrink-0 transition-colors duration-200 ${
+            isScrolled
+              ? 'bg-white/85 dark:bg-black/85 backdrop-blur-md border-b border-slate-200 dark:border-[#2f3336]'
+              : 'bg-transparent border-transparent'
+          }`}
+        >
+          {/* Left: Back Arrow & Scrolled Title */}
+          <div className="flex items-center gap-3 min-w-0 pr-2">
             <button
               type="button"
               onClick={onClose}
               aria-label="Go back"
-              className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-slate-100 dark:bg-[#101522] hover:bg-slate-200 dark:hover:bg-[#1a2030] active:scale-95 text-slate-800 dark:text-[#f4f5f7] border border-slate-200 dark:border-[#303139] flex items-center justify-center transition-all cursor-pointer shadow-xs"
+              className={`w-9 h-9 min-w-[36px] min-h-[36px] rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                isScrolled
+                  ? 'hover:bg-slate-500/10 text-slate-900 dark:text-white'
+                  : 'bg-black/60 hover:bg-black/80 text-white backdrop-blur-md shadow-md'
+              }`}
             >
-              <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
+              <ArrowLeft className="w-5 h-5 stroke-[2.2]" />
             </button>
-            {profile?.businessName && (
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className="font-semibold text-sm sm:text-base text-slate-900 dark:text-[#f4f5f7] truncate">
-                  {profile.businessName}
+
+            {/* Scrolled Title (Appears when scrolling past banner) */}
+            <div
+              className={`flex flex-col justify-center min-w-0 transition-opacity duration-150 ${
+                isScrolled ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              }`}
+            >
+              <div className="flex items-center gap-1 min-w-0">
+                <span className="font-bold text-[17px] text-slate-900 dark:text-white truncate leading-tight">
+                  {profile?.businessName || 'Profile'}
                 </span>
-                {profile.verified && (
-                  <span
-                    className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-[#ff951f] text-[#07090e] flex-shrink-0 shadow-xs"
-                    title="Verified client profile"
-                  >
-                    <svg
-                      className="w-2.5 h-2.5 fill-current stroke-current"
-                      viewBox="0 0 24 24"
-                      strokeWidth="3"
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                    </svg>
-                  </span>
+                {profile?.verified && (
+                  <TwitterVerifiedBadge className="w-4 h-4 text-[#1d9bf0]" />
                 )}
               </div>
-            )}
+              <span className="text-[12px] text-slate-500 dark:text-[#71767b] font-normal leading-none mt-0.5">
+                {profile?.totalListingsCount ?? allListings.length} Posts
+              </span>
+            </div>
           </div>
 
-          {/* Right: Action Buttons */}
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+          {/* Right: Actions */}
+          <div className="flex items-center gap-1.5 flex-shrink-0">
             {onOpenEdit && (
               <button
                 type="button"
                 onClick={onOpenEdit}
                 aria-label="Edit Profile Settings"
                 title="Edit Profile Settings"
-                className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-slate-100 dark:bg-[#101522] hover:bg-slate-200 dark:hover:bg-[#1a2030] active:scale-95 text-slate-800 dark:text-[#f4f5f7] border border-slate-200 dark:border-[#303139] flex items-center justify-center transition-all cursor-pointer shadow-xs"
+                className={`w-9 h-9 min-w-[36px] min-h-[36px] rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                  isScrolled
+                    ? 'hover:bg-slate-500/10 text-slate-900 dark:text-white'
+                    : 'bg-black/60 hover:bg-black/80 text-white backdrop-blur-md shadow-md'
+                }`}
               >
-                <Settings className="w-4 h-4 text-[#ff951f]" />
+                <Settings className="w-4.5 h-4.5" />
               </button>
             )}
 
@@ -443,9 +441,13 @@ export default function ClientPublicProfileView({
               type="button"
               onClick={handleShareProfile}
               aria-label="Share profile"
-              className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-slate-100 dark:bg-[#101522] hover:bg-slate-200 dark:hover:bg-[#1a2030] active:scale-95 text-slate-800 dark:text-[#f4f5f7] border border-slate-200 dark:border-[#303139] flex items-center justify-center transition-all cursor-pointer shadow-xs"
+              className={`w-9 h-9 min-w-[36px] min-h-[36px] rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                isScrolled
+                  ? 'hover:bg-slate-500/10 text-slate-900 dark:text-white'
+                  : 'bg-black/60 hover:bg-black/80 text-white backdrop-blur-md shadow-md'
+              }`}
             >
-              <Share2 className="w-4 h-4 text-slate-600 dark:text-[#c9ced8]" />
+              <Share2 className="w-4.5 h-4.5" />
             </button>
 
             <div className="relative" ref={overflowRef}>
@@ -454,14 +456,17 @@ export default function ClientPublicProfileView({
                 onClick={() => setIsOverflowOpen((prev) => !prev)}
                 aria-label="More options"
                 aria-expanded={isOverflowOpen}
-                className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-slate-100 dark:bg-[#101522] hover:bg-slate-200 dark:hover:bg-[#1a2030] active:scale-95 text-slate-800 dark:text-[#f4f5f7] border border-slate-200 dark:border-[#303139] flex items-center justify-center transition-all cursor-pointer shadow-xs"
+                className={`w-9 h-9 min-w-[36px] min-h-[36px] rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                  isScrolled
+                    ? 'hover:bg-slate-500/10 text-slate-900 dark:text-white'
+                    : 'bg-black/60 hover:bg-black/80 text-white backdrop-blur-md shadow-md'
+                }`}
               >
-                <MoreVertical className="w-4 h-4 text-slate-600 dark:text-[#c9ced8]" />
+                <MoreVertical className="w-4.5 h-4.5" />
               </button>
 
-              {/* Overflow dropdown */}
               {isOverflowOpen && (
-                <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-[#10141c] rounded-[8px] shadow-2xl border border-slate-200 dark:border-[#303139] py-1.5 z-30 animate-in fade-in zoom-in-95 duration-150">
+                <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-[#16181c] rounded-2xl shadow-2xl border border-slate-200 dark:border-[#2f3336] py-1.5 z-30 animate-in fade-in zoom-in-95 duration-150">
                   {onOpenEdit ? (
                     <button
                       type="button"
@@ -469,9 +474,9 @@ export default function ClientPublicProfileView({
                         setIsOverflowOpen(false);
                         onOpenEdit();
                       }}
-                      className="w-full min-h-[44px] px-4 py-2.5 text-left text-sm font-medium text-slate-800 dark:text-[#f4f5f7] hover:bg-slate-50 dark:hover:bg-[#101522] flex items-center gap-2.5 cursor-pointer"
+                      className="w-full min-h-[44px] px-4 py-2.5 text-left text-sm font-medium text-slate-800 dark:text-[#e7e9ea] hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 cursor-pointer"
                     >
-                      <Settings className="w-4 h-4 text-[#ff951f]" />
+                      <Settings className="w-4 h-4 text-[#1d9bf0]" />
                       <span>Edit profile settings</span>
                     </button>
                   ) : (
@@ -484,16 +489,16 @@ export default function ClientPublicProfileView({
                       className="w-full min-h-[44px] px-4 py-2.5 text-left text-sm font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center gap-2.5 cursor-pointer"
                     >
                       <Flag className="w-4 h-4" />
-                      <span>Report profile</span>
+                      <span>Report @{slug}</span>
                     </button>
                   )}
                   <button
                     type="button"
                     onClick={handleShareProfile}
-                    className="w-full min-h-[44px] px-4 py-2.5 text-left text-sm font-medium text-slate-700 dark:text-[#c9ced8] hover:bg-slate-50 dark:hover:bg-[#101522] flex items-center gap-2.5 cursor-pointer"
+                    className="w-full min-h-[44px] px-4 py-2.5 text-left text-sm font-medium text-slate-700 dark:text-[#cfd9de] hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 cursor-pointer"
                   >
                     <Share2 className="w-4 h-4" />
-                    <span>Share link</span>
+                    <span>Copy link to profile</span>
                   </button>
                 </div>
               )}
@@ -501,8 +506,8 @@ export default function ClientPublicProfileView({
           </div>
         </header>
 
-        {/* --- Top Cover Banner --- */}
-        <div className="relative w-full h-44 sm:h-56 md:h-64 bg-slate-200 dark:bg-[#101522] border-b border-slate-200 dark:border-[#303139] overflow-hidden flex-shrink-0">
+        {/* --- Top Cover Banner (Slides under floating header) --- */}
+        <div className="relative w-full aspect-[3/1] sm:aspect-[3.2/1] bg-slate-200 dark:bg-[#15202b] -mt-13.5 overflow-hidden flex-shrink-0">
           {profile?.coverUrl ? (
             <img
               src={profile.coverUrl}
@@ -510,23 +515,23 @@ export default function ClientPublicProfileView({
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full opacity-30 bg-[radial-gradient(#ff951f_1px,transparent_1px)] [background-size:20px_20px]" />
+            <div className="w-full h-full bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-600 dark:from-slate-800 dark:via-slate-900 dark:to-black" />
           )}
         </div>
 
         {/* --- Loading State --- */}
         {loading && (
-          <div className="p-8 flex flex-col items-center justify-center gap-3 text-slate-500 animate-pulse">
+          <div className="p-8 flex flex-col items-center justify-center gap-3 text-slate-500 animate-pulse py-20">
             <div className="w-20 h-20 rounded-full bg-slate-200 dark:bg-slate-800" />
             <div className="h-6 w-48 bg-slate-200 dark:bg-slate-800 rounded-md" />
             <div className="h-4 w-32 bg-slate-200 dark:bg-slate-800 rounded-md" />
-            <p className="text-xs text-slate-400 font-medium mt-2">Loading verified profile...</p>
+            <p className="text-xs text-slate-400 font-medium mt-2">Loading profile...</p>
           </div>
         )}
 
         {/* --- Error State --- */}
         {error && (
-          <div className="p-8 flex flex-col items-center justify-center text-center gap-4">
+          <div className="p-8 flex flex-col items-center justify-center text-center gap-4 py-20">
             <div className="w-16 h-16 rounded-full bg-rose-100 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center">
               <AlertCircle className="w-8 h-8" />
             </div>
@@ -537,7 +542,7 @@ export default function ClientPublicProfileView({
             <button
               type="button"
               onClick={onClose}
-              className="min-h-[44px] px-6 py-2.5 bg-[#ff951f] hover:bg-[#e68416] text-[#07090e] font-bold text-sm rounded-full shadow-md transition-all active:scale-95 cursor-pointer"
+              className="min-h-[40px] px-6 py-2 bg-black hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-slate-200 dark:text-black font-bold text-sm rounded-full shadow-md transition-all active:scale-95 cursor-pointer"
             >
               Back to Home
             </button>
@@ -547,158 +552,33 @@ export default function ClientPublicProfileView({
         {/* --- Loaded Profile Content --- */}
         {!loading && !error && profile && (
           <>
-            {/* Header info & Avatar */}
-            <div className="px-5 relative pb-4 border-b border-slate-200 dark:border-[#303139]">
-              <div className="flex items-end justify-between -mt-[44px] md:-mt-[56px] mb-3">
-                {/* Round Avatar */}
-                <div className="w-[88px] h-[88px] md:w-[112px] md:h-[112px] rounded-full border-[3px] border-white dark:border-[#303139] bg-slate-100 dark:bg-[#101522] shadow-lg overflow-hidden flex-shrink-0 flex items-center justify-center relative z-10">
-                  {profile.logoUrl ? (
-                    <img
-                      src={profile.logoUrl}
-                      alt={profile.businessName}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-3xl md:text-4xl font-mono font-bold text-[#ff951f]">
-                      {(profile.businessName || 'C').charAt(0).toUpperCase()}
-                    </span>
-                  )}
-                </div>
-
-                {/* Client Type Pill on right */}
-                <div className="mb-1">{renderClientTypePill()}</div>
-              </div>
-
-              {/* Title & Verified Badge */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-xl md:text-2xl font-medium text-slate-900 dark:text-[#f4f5f7] tracking-tight leading-tight">
-                  {profile.businessName}
-                </h1>
-                {profile.verified && (
-                  <span
-                    className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#ff951f] text-[#07090e] flex-shrink-0 shadow-sm"
-                    title="Verified client profile"
-                  >
-                    <svg
-                      className="w-3 h-3 fill-current stroke-current"
-                      viewBox="0 0 24 24"
-                      strokeWidth="3"
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                    </svg>
+            {/* --- Avatar & Action Row --- */}
+            <div className="px-4 relative flex justify-between items-end mb-3">
+              {/* Round Avatar */}
+              <div className="w-[84px] h-[84px] sm:w-[130px] sm:h-[130px] rounded-full border-4 border-white dark:border-black bg-slate-100 dark:bg-slate-900 -mt-[42px] sm:-mt-[65px] relative z-10 overflow-hidden shadow-sm flex items-center justify-center flex-shrink-0">
+                {profile.logoUrl ? (
+                  <img
+                    src={profile.logoUrl}
+                    alt={profile.businessName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-3xl sm:text-5xl font-black text-[#1d9bf0]">
+                    {(profile.businessName || 'C').charAt(0).toUpperCase()}
                   </span>
                 )}
               </div>
 
-              {/* Slug Handle */}
-              <p className="text-xs text-slate-500 dark:text-[#c9ced8] font-mono mt-0.5">@{profile.slug}</p>
-
-              {/* Bio */}
-              {profile.bio && (
-                <p className="mt-2.5 text-sm text-slate-600 dark:text-[#c9ced8] leading-relaxed font-normal whitespace-pre-line">
-                  {profile.bio}
-                </p>
-              )}
-
-              {/* Metadata Row: Address & Hours */}
-              <div className="mt-3.5 flex flex-col gap-2 pt-2 border-t border-slate-100 dark:border-[#303139] text-xs">
-                {/* Location / Address */}
-                {(profile.address || profile.landmark) && (
-                  <button
-                    type="button"
-                    onClick={() => window.open(getDirectionsUrl(), '_blank', 'noopener,noreferrer')}
-                    className="flex items-start gap-2 text-slate-600 dark:text-[#c9ced8] hover:text-[#ff951f] text-left transition-colors cursor-pointer group"
-                  >
-                    <MapPin className="w-4 h-4 text-[#ff951f] flex-shrink-0 mt-0.5" />
-                    <span className="font-medium group-hover:underline">
-                      {profile.landmark ? `${profile.landmark}, ` : ''}
-                      {profile.address || 'Bhubaneswar'}
-                    </span>
-                    <ExternalLink className="w-3 h-3 text-slate-400 dark:text-[#c9ced8] opacity-60 flex-shrink-0 mt-0.5" />
-                  </button>
-                )}
-
-                {/* Operating Hours & Open Now Badge */}
-                {(profile.dailyOpenTime || profile.dailyCloseTime) && (() => {
-                  const hasBoth = profile.dailyOpenTime && profile.dailyCloseTime;
-                  const hoursFormatted = hasBoth
-                    ? `${formatTime(profile.dailyOpenTime)} – ${formatTime(profile.dailyCloseTime)}`
-                    : profile.dailyOpenTime
-                    ? `From ${formatTime(profile.dailyOpenTime)}`
-                    : profile.dailyCloseTime
-                    ? `Until ${formatTime(profile.dailyCloseTime)}`
-                    : '';
-
-                  return (
-                    <div className="flex flex-col gap-1">
-                      <button
-                        type="button"
-                        onClick={() => setIsHoursExpanded((prev) => !prev)}
-                        className="w-full flex items-center justify-between gap-2 text-slate-700 dark:text-[#c9ced8] hover:text-slate-900 dark:hover:text-[#f4f5f7] transition-colors cursor-pointer py-1 text-left"
-                      >
-                        <div className="flex items-center gap-2 min-w-0 flex-1 flex-wrap sm:flex-nowrap">
-                          <Clock className="w-4 h-4 text-[#ff951f] flex-shrink-0" />
-                          {profile.openNow === true ? (
-                            <span className="inline-flex items-center gap-1.5 font-mono font-medium text-emerald-600 dark:text-emerald-400 flex-shrink-0">
-                              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                              Open now
-                            </span>
-                          ) : profile.openNow === false ? (
-                            <span className="inline-flex items-center gap-1.5 font-mono font-medium text-rose-600 dark:text-rose-400 flex-shrink-0">
-                              <span className="w-2 h-2 rounded-full bg-rose-500" />
-                              Closed
-                            </span>
-                          ) : (
-                            <span className="font-medium flex-shrink-0">Operating Hours</span>
-                          )}
-                          {hoursFormatted && (
-                            <span className="text-slate-500 dark:text-[#edcd8c] font-mono font-normal truncate">
-                              · {hoursFormatted}
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-slate-400 dark:text-[#c9ced8] flex-shrink-0">
-                          {isHoursExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                        </div>
-                      </button>
-
-                      {isHoursExpanded && (
-                        <div className="ml-6 p-2.5 rounded-[4px] bg-slate-100 dark:bg-[#101522] text-[11px] text-slate-600 dark:text-[#c9ced8] border border-slate-200 dark:border-[#303139] animate-in fade-in duration-160">
-                          <p className="font-medium text-slate-900 dark:text-[#f4f5f7]">Standard Daily Hours:</p>
-                          <p className="mt-0.5 font-mono text-amber-700 dark:text-[#edcd8c]">
-                            Daily: {hoursFormatted}
-                          </p>
-                          <p className="text-[10px] text-slate-400 dark:text-[#c9ced8]/60 mt-1">
-                            * Hours may vary on public holidays and festival days.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })()}
-              </div>
-
-              {/* Action Buttons Row (min 44px touch target) */}
-              <div className="mt-4 flex items-center gap-2.5 flex-wrap">
-                {/* Get directions button (Primary CTA) */}
-                <button
-                  type="button"
-                  onClick={() => window.open(getDirectionsUrl(), '_blank', 'noopener,noreferrer')}
-                  className="min-h-[44px] px-5 py-2 rounded-full bg-[#ff951f] hover:bg-[#e68416] active:scale-95 text-[#07090e] font-semibold text-xs flex items-center gap-2 transition-all shadow-md cursor-pointer"
-                >
-                  <Navigation className="w-4 h-4 fill-[#07090e]" />
-                  <span>Get directions</span>
-                </button>
-
-                {/* Call button (only shown if showPhone is true and publicPhone is present) */}
+              {/* Action Buttons on Right */}
+              <div className="flex items-center gap-2 pb-0.5 z-10">
+                {/* Call button */}
                 {profile.showPhone && profile.publicPhone && (
                   <a
                     href={`tel:${profile.publicPhone}`}
-                    className="min-h-[44px] px-4 py-2 rounded-full bg-slate-100 dark:bg-[#101522] border border-slate-200 dark:border-[#303139] hover:border-[#ff951f]/50 active:scale-95 text-slate-800 dark:text-[#f4f5f7] font-medium text-xs flex items-center gap-2 transition-all shadow-sm cursor-pointer"
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-300 dark:border-[#536471] hover:bg-slate-500/10 text-slate-800 dark:text-slate-200 flex items-center justify-center transition-all active:scale-95 cursor-pointer"
+                    title={`Call ${profile.publicPhone}`}
                   >
-                    <Phone className="w-4 h-4 text-[#ff951f]" />
-                    <span>Call</span>
+                    <Phone className="w-4 h-4" />
                   </a>
                 )}
 
@@ -708,111 +588,235 @@ export default function ClientPublicProfileView({
                     href={`https://wa.me/91${profile.whatsappNumber}?text=${encodeURIComponent('Hi, saw your profile on myciti')}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="min-h-[44px] px-4 py-2 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 hover:border-emerald-400 text-emerald-700 dark:text-emerald-400 font-medium text-xs flex items-center gap-2 transition-all shadow-sm active:scale-95 cursor-pointer"
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-300 dark:border-[#536471] hover:bg-slate-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center transition-all active:scale-95 cursor-pointer"
+                    title="Chat on WhatsApp"
                   >
-                    <MessageCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                    <span>WhatsApp</span>
+                    <MessageCircle className="w-4.5 h-4.5" />
                   </a>
                 )}
 
-                {/* Setting / Edit Profile button for owner */}
-                {onOpenEdit && (
+                {/* Edit Profile (Owner) or Directions (Customer) */}
+                {onOpenEdit ? (
                   <button
                     type="button"
                     onClick={onOpenEdit}
-                    className="min-h-[44px] px-4 py-2 rounded-full bg-slate-100 dark:bg-[#101522] border border-slate-200 dark:border-[#303139] hover:bg-slate-200 dark:hover:bg-[#1a2030] text-slate-800 dark:text-[#f4f5f7] font-medium text-xs flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer"
+                    className="min-h-[36px] sm:min-h-[38px] px-4 sm:px-5 py-1.5 rounded-full border border-slate-300 dark:border-[#536471] hover:bg-slate-500/10 text-slate-900 dark:text-white font-bold text-sm transition-all active:scale-95 cursor-pointer"
                   >
-                    <Settings className="w-4 h-4 text-[#ff951f]" />
-                    <span>Edit Profile</span>
+                    Edit profile
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => window.open(getDirectionsUrl(), '_blank', 'noopener,noreferrer')}
+                    className="min-h-[36px] sm:min-h-[38px] px-4 sm:px-5 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-slate-200 dark:text-black font-bold text-sm transition-all active:scale-95 cursor-pointer shadow-xs flex items-center gap-1.5"
+                  >
+                    <Navigation className="w-3.5 h-3.5 fill-current" />
+                    <span>Directions</span>
                   </button>
                 )}
-
-                {/* Share button */}
-                <button
-                  type="button"
-                  onClick={handleShareProfile}
-                  className="min-h-[44px] px-4 py-2 rounded-full bg-slate-100 dark:bg-[#101522] border border-slate-200 dark:border-[#303139] hover:border-[#ff951f]/50 active:scale-95 text-slate-800 dark:text-[#f4f5f7] font-medium text-xs flex items-center gap-2 transition-all shadow-sm cursor-pointer"
-                >
-                  <Share2 className="w-4 h-4 text-slate-500 dark:text-[#c9ced8]" />
-                  <span>Share</span>
-                </button>
               </div>
             </div>
 
-            {/* --- Sticky Tabs --- */}
-            <div className="sticky top-14 z-20 bg-white/95 dark:bg-[#10141c]/95 backdrop-blur-md border-b border-slate-200 dark:border-[#303139] flex overflow-x-auto scrollbar-none">
-              {/* Tab: All Posts */}
-              <button
-                type="button"
-                onClick={() => setCurrentTab('all')}
-                className={`flex-1 min-w-[76px] min-h-[48px] py-3 px-2 text-center text-xs sm:text-sm font-semibold transition-all relative cursor-pointer ${
-                  currentTab === 'all'
-                    ? 'text-[#ff951f]'
-                    : 'text-slate-600 dark:text-[#c9ced8] hover:text-slate-900 dark:hover:text-[#f4f5f7]'
-                }`}
-              >
-                <span>All ({profile.totalListingsCount ?? allListings.length})</span>
-                {currentTab === 'all' && (
-                  <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-[#ff951f] rounded-full" />
-                )}
-              </button>
-
-              {/* Tab: Live / Active */}
-              <button
-                type="button"
-                onClick={() => setCurrentTab('active')}
-                className={`flex-1 min-w-[76px] min-h-[48px] py-3 px-2 text-center text-xs sm:text-sm font-semibold transition-all relative cursor-pointer ${
-                  currentTab === 'active'
-                    ? 'text-emerald-500 dark:text-emerald-400'
-                    : 'text-slate-600 dark:text-[#c9ced8] hover:text-slate-900 dark:hover:text-[#f4f5f7]'
-                }`}
-              >
-                <span className="inline-flex items-center gap-1.5 justify-center">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Live ({profile.activeListingsCount ?? activeListings.length})
-                </span>
-                {currentTab === 'active' && (
-                  <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-emerald-500 rounded-full" />
-                )}
-              </button>
-
-              {/* Tab: Expired */}
-              <button
-                type="button"
-                onClick={() => setCurrentTab('expired')}
-                className={`flex-1 min-w-[76px] min-h-[48px] py-3 px-2 text-center text-xs sm:text-sm font-semibold transition-all relative cursor-pointer ${
-                  currentTab === 'expired'
-                    ? 'text-rose-500 dark:text-rose-400'
-                    : 'text-slate-600 dark:text-[#c9ced8] hover:text-slate-900 dark:hover:text-[#f4f5f7]'
-                }`}
-              >
-                <span>Expired ({profile.expiredListingsCount ?? expiredListings.length})</span>
-                {currentTab === 'expired' && (
-                  <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-rose-500 rounded-full" />
-                )}
-              </button>
-
-              {/* Tab: Upcoming */}
-              {(profile.upcomingListingsCount > 0 || upcomingListings.length > 0) && (
-                <button
-                  type="button"
-                  onClick={() => setCurrentTab('upcoming')}
-                  className={`flex-1 min-w-[76px] min-h-[48px] py-3 px-2 text-center text-xs sm:text-sm font-semibold transition-all relative cursor-pointer ${
-                    currentTab === 'upcoming'
-                      ? 'text-indigo-500 dark:text-indigo-400'
-                      : 'text-slate-600 dark:text-[#c9ced8] hover:text-slate-900 dark:hover:text-[#f4f5f7]'
-                  }`}
-                >
-                  <span>Upcoming ({profile.upcomingListingsCount ?? upcomingListings.length})</span>
-                  {currentTab === 'upcoming' && (
-                    <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-indigo-500 rounded-full" />
+            {/* --- Profile Info Section --- */}
+            <div className="px-4 flex flex-col gap-2.5 pb-4">
+              {/* Name & Verified Badge */}
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                    {profile.businessName}
+                  </h1>
+                  {profile.verified && (
+                    <TwitterVerifiedBadge className="w-5 h-5 text-[#1d9bf0]" />
                   )}
-                </button>
+                </div>
+                <div className="flex items-center gap-2 text-[14px] text-slate-500 dark:text-[#71767b] mt-0.5">
+                  <span>@{profile.slug}</span>
+                  <span>·</span>
+                  <span className="font-medium text-slate-600 dark:text-[#a0a6ac]">
+                    {profile.clientType === 'COMPANY' ? 'Company' : profile.clientType === 'INDIVIDUAL' ? 'Individual' : 'Store'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Bio */}
+              {profile.bio && (
+                <p className="text-[15px] text-slate-900 dark:text-[#e7e9ea] leading-normal font-normal whitespace-pre-line">
+                  {profile.bio}
+                </p>
               )}
+
+              {/* Metadata Row: Address, Hours, Verification */}
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[14px] text-slate-500 dark:text-[#71767b] pt-1">
+                {(profile.address || profile.landmark) && (
+                  <button
+                    type="button"
+                    onClick={() => window.open(getDirectionsUrl(), '_blank', 'noopener,noreferrer')}
+                    className="flex items-center gap-1 hover:text-[#1d9bf0] transition-colors cursor-pointer text-left"
+                  >
+                    <MapPin className="w-4 h-4 flex-shrink-0" />
+                    <span className="hover:underline">{profile.landmark ? `${profile.landmark}, ` : ''}{profile.address || 'Bhubaneswar'}</span>
+                  </button>
+                )}
+
+                {(profile.dailyOpenTime || profile.dailyCloseTime) && (
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="w-4 h-4 flex-shrink-0" />
+                    {profile.openNow === true ? (
+                      <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold text-xs">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        Open now
+                      </span>
+                    ) : profile.openNow === false ? (
+                      <span className="inline-flex items-center gap-1 text-rose-600 dark:text-rose-400 font-semibold text-xs">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                        Closed
+                      </span>
+                    ) : null}
+                    <span className="text-xs">{hoursFormatted}</span>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-1 text-xs">
+                  <Calendar className="w-4 h-4 flex-shrink-0" />
+                  <span>Verified on myCiti</span>
+                </div>
+              </div>
+
+              {/* Stats Row (Twitter style) */}
+              <div className="flex items-center gap-5 text-[14px] pt-1">
+                <span
+                  className="hover:underline cursor-pointer"
+                  onClick={() => {
+                    setCurrentTab('all');
+                    setViewMode('card');
+                  }}
+                >
+                  <strong className="font-bold text-slate-900 dark:text-white">
+                    {profile.totalListingsCount ?? allListings.length}
+                  </strong>{' '}
+                  <span className="text-slate-500 dark:text-[#71767b]">Posts</span>
+                </span>
+                <span
+                  className="hover:underline cursor-pointer"
+                  onClick={() => {
+                    setCurrentTab('active');
+                    setViewMode('card');
+                  }}
+                >
+                  <strong className="font-bold text-slate-900 dark:text-white">
+                    {profile.activeListingsCount ?? activeListings.length}
+                  </strong>{' '}
+                  <span className="text-slate-500 dark:text-[#71767b]">Live</span>
+                </span>
+                {profile.expiredListingsCount > 0 && (
+                  <span
+                    className="hover:underline cursor-pointer"
+                    onClick={() => {
+                      setCurrentTab('expired');
+                      setViewMode('card');
+                    }}
+                  >
+                    <strong className="font-bold text-slate-900 dark:text-white">
+                      {profile.expiredListingsCount}
+                    </strong>{' '}
+                    <span className="text-slate-500 dark:text-[#71767b]">Past</span>
+                  </span>
+                )}
+              </div>
             </div>
 
-            {/* --- Listings Content --- */}
-            <div className="p-4 flex-1">
+            {/* --- Twitter Style Sticky Tabs --- */}
+            <div className="sticky top-13.5 z-20 bg-white/90 dark:bg-black/90 backdrop-blur-md border-b border-slate-200 dark:border-[#2f3336] flex">
+              {/* Tab: Posts */}
+              <button
+                type="button"
+                onClick={() => {
+                  setCurrentTab('all');
+                  setViewMode('card');
+                }}
+                className={`flex-1 h-13 px-2 flex items-center justify-center font-bold text-[15px] hover:bg-slate-500/10 transition-colors relative cursor-pointer ${
+                  currentTab === 'all' && viewMode === 'card'
+                    ? 'text-slate-900 dark:text-white'
+                    : 'text-slate-500 dark:text-[#71767b]'
+                }`}
+              >
+                <span>Posts</span>
+                {currentTab === 'all' && viewMode === 'card' && (
+                  <div className="absolute bottom-0 left-0 right-0 flex justify-center">
+                    <div className="h-1 w-12 sm:w-16 bg-[#1d9bf0] rounded-full" />
+                  </div>
+                )}
+              </button>
+
+              {/* Tab: Live */}
+              <button
+                type="button"
+                onClick={() => {
+                  setCurrentTab('active');
+                  setViewMode('card');
+                }}
+                className={`flex-1 h-13 px-2 flex items-center justify-center font-bold text-[15px] hover:bg-slate-500/10 transition-colors relative cursor-pointer ${
+                  currentTab === 'active' && viewMode === 'card'
+                    ? 'text-slate-900 dark:text-white'
+                    : 'text-slate-500 dark:text-[#71767b]'
+                }`}
+              >
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Live
+                </span>
+                {currentTab === 'active' && viewMode === 'card' && (
+                  <div className="absolute bottom-0 left-0 right-0 flex justify-center">
+                    <div className="h-1 w-12 sm:w-16 bg-[#1d9bf0] rounded-full" />
+                  </div>
+                )}
+              </button>
+
+              {/* Tab: Media (Photo Grid) */}
+              <button
+                type="button"
+                onClick={() => {
+                  setCurrentTab('all');
+                  setViewMode('grid');
+                }}
+                className={`flex-1 h-13 px-2 flex items-center justify-center font-bold text-[15px] hover:bg-slate-500/10 transition-colors relative cursor-pointer ${
+                  viewMode === 'grid'
+                    ? 'text-slate-900 dark:text-white'
+                    : 'text-slate-500 dark:text-[#71767b]'
+                }`}
+              >
+                <span>Media</span>
+                {viewMode === 'grid' && (
+                  <div className="absolute bottom-0 left-0 right-0 flex justify-center">
+                    <div className="h-1 w-12 sm:w-16 bg-[#1d9bf0] rounded-full" />
+                  </div>
+                )}
+              </button>
+
+              {/* Tab: Past */}
+              <button
+                type="button"
+                onClick={() => {
+                  setCurrentTab('expired');
+                  setViewMode('card');
+                }}
+                className={`flex-1 h-13 px-2 flex items-center justify-center font-bold text-[15px] hover:bg-slate-500/10 transition-colors relative cursor-pointer ${
+                  currentTab === 'expired' && viewMode === 'card'
+                    ? 'text-slate-900 dark:text-white'
+                    : 'text-slate-500 dark:text-[#71767b]'
+                }`}
+              >
+                <span>Past</span>
+                {currentTab === 'expired' && viewMode === 'card' && (
+                  <div className="absolute bottom-0 left-0 right-0 flex justify-center">
+                    <div className="h-1 w-12 sm:w-16 bg-[#1d9bf0] rounded-full" />
+                  </div>
+                )}
+              </button>
+            </div>
+
+            {/* --- Feed Content --- */}
+            <div className="flex-1">
               {(() => {
                 const currentListings =
                   currentTab === 'all'
@@ -845,102 +849,47 @@ export default function ClientPublicProfileView({
 
                 return (
                   <>
-                    {/* View Mode & Header Bar */}
-                    {currentListings.length > 0 && (
-                      <div className="flex items-center justify-between px-1 mb-3.5">
-                        <p className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                          {currentTab === 'all'
-                            ? `${currentListings.length} Post${currentListings.length > 1 ? 's' : ''}`
-                            : currentTab === 'active'
-                            ? `${currentListings.length} Live Update${currentListings.length > 1 ? 's' : ''}`
-                            : currentTab === 'expired'
-                            ? `${currentListings.length} Expired Post${currentListings.length > 1 ? 's' : ''}`
-                            : `${currentListings.length} Scheduled Event${currentListings.length > 1 ? 's' : ''}`}
-                        </p>
-
-                        <div className="flex items-center bg-slate-100 dark:bg-[#101522] p-0.5 rounded-full border border-slate-200 dark:border-[#303139]">
-                          <button
-                            type="button"
-                            onClick={() => setViewMode('card')}
-                            aria-label="Feed card view"
-                            title="Feed card view"
-                            className={`p-1.5 rounded-full transition-all cursor-pointer ${
-                              viewMode === 'card'
-                                ? 'bg-white dark:bg-[#1a2030] text-[#ff951f] shadow-xs'
-                                : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                            }`}
-                          >
-                            <Rows className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setViewMode('grid')}
-                            aria-label="Photo grid view"
-                            title="Photo grid view"
-                            className={`p-1.5 rounded-full transition-all cursor-pointer ${
-                              viewMode === 'grid'
-                                ? 'bg-white dark:bg-[#1a2030] text-[#ff951f] shadow-xs'
-                                : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                            }`}
-                          >
-                            <LayoutGrid className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
                     {isCurrentTabLoading ? (
-                      <div className="py-12 flex flex-col items-center justify-center gap-3 text-slate-400">
-                        <div className="w-8 h-8 border-3 border-[#ff951f] border-t-transparent rounded-full animate-spin" />
-                        <p className="text-xs font-semibold">Loading posts & updates...</p>
+                      <div className="py-16 flex flex-col items-center justify-center gap-3 text-slate-400">
+                        <div className="w-7 h-7 border-2 border-[#1d9bf0] border-t-transparent rounded-full animate-spin" />
+                        <p className="text-xs font-semibold">Loading posts...</p>
                       </div>
                     ) : currentListings.length > 0 ? (
                       renderListingsList(currentListings)
                     ) : (
-                      /* Empty state depending on currentTab */
-                      <div className="py-16 px-4 flex flex-col items-center justify-center text-center">
-                        <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-[#101522] text-slate-500 dark:text-slate-400 flex items-center justify-center mb-3 border border-slate-200/50 dark:border-[#303139]">
-                          {currentTab === 'active' ? (
-                            <Sparkles className="w-8 h-8 text-emerald-500" />
-                          ) : currentTab === 'expired' ? (
-                            <AlertCircle className="w-8 h-8 text-rose-400" />
-                          ) : currentTab === 'upcoming' ? (
-                            <Calendar className="w-8 h-8 text-indigo-400" />
-                          ) : (
-                            <Sparkles className="w-8 h-8 text-[#ff951f]" />
-                          )}
-                        </div>
-                        <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
+                      /* Twitter style empty state */
+                      <div className="py-20 px-4 flex flex-col items-center justify-center text-center">
+                        <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">
                           {currentTab === 'active'
                             ? 'No live offers right now'
                             : currentTab === 'expired'
-                            ? 'No expired posts'
-                            : currentTab === 'upcoming'
-                            ? 'No upcoming events scheduled'
+                            ? 'No past posts'
+                            : viewMode === 'grid'
+                            ? 'No media uploaded'
                             : 'No posts published yet'}
                         </h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs leading-relaxed">
+                        <p className="text-sm text-slate-500 dark:text-[#71767b] mt-1.5 max-w-sm leading-relaxed">
                           {currentTab === 'active'
-                            ? 'Check back soon for festive pandal timings, store discounts, and announcements.'
+                            ? 'Check back soon for new offers, store discounts, and announcements.'
                             : currentTab === 'expired'
                             ? 'There are no expired posts for this business.'
-                            : currentTab === 'upcoming'
-                            ? "This business hasn't scheduled any upcoming events or offers yet."
-                            : 'Check back soon for latest events, announcements, and discounts.'}
+                            : viewMode === 'grid'
+                            ? 'Photos and videos from published posts will appear here.'
+                            : 'When this business shares updates, offers, or events, they will show up here.'}
                         </p>
                       </div>
                     )}
 
                     {/* Load More Button */}
                     {currentHasMore && (
-                      <div className="mt-6 flex justify-center">
+                      <div className="py-6 flex justify-center border-t border-slate-100 dark:border-[#2f3336]">
                         <button
                           type="button"
                           disabled={listingsLoading}
                           onClick={() => loadTabListings(currentTab, currentPage + 1)}
-                          className="min-h-[44px] px-6 py-2.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                          className="min-h-[40px] px-6 py-2 rounded-full border border-slate-300 dark:border-[#536471] hover:bg-slate-500/10 text-slate-800 dark:text-slate-200 font-bold text-xs transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
                         >
-                          {listingsLoading ? 'Loading more...' : 'Load more listings'}
+                          {listingsLoading ? 'Loading...' : 'Show more posts'}
                         </button>
                       </div>
                     )}
@@ -963,9 +912,9 @@ export default function ClientPublicProfileView({
       {/* --- Report Modal / Sheet --- */}
       {isReportOpen && (
         <div className="fixed inset-0 z-[4100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-t-[28px] sm:rounded-[28px] shadow-2xl border border-slate-100 dark:border-slate-800 p-5 animate-in slide-in-from-bottom duration-300 flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-[#16181c] w-full max-w-md rounded-t-[28px] sm:rounded-[28px] shadow-2xl border border-slate-100 dark:border-[#2f3336] p-5 animate-in slide-in-from-bottom duration-300 flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
             {/* Header */}
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-150 dark:border-[#2f3336]">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center">
                   <Flag className="w-4 h-4" />
@@ -991,7 +940,7 @@ export default function ClientPublicProfileView({
             ) : (
               <form onSubmit={handleSubmitReport} className="flex flex-col gap-3.5">
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Help us keep myciti safe. Select a reason why you are reporting <strong>@{slug}</strong>:
+                  Help us keep myCiti safe. Select a reason why you are reporting <strong>@{slug}</strong>:
                 </p>
 
                 {reportError && (
@@ -1007,8 +956,8 @@ export default function ClientPublicProfileView({
                       key={r.id}
                       className={`min-h-[44px] flex items-center gap-3 px-3.5 py-2.5 rounded-xl border text-xs font-semibold cursor-pointer transition-colors ${
                         reportReason === r.id
-                          ? 'border-city-blue bg-blue-50/50 dark:bg-blue-950/30 text-city-blue dark:text-sky-300'
-                          : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-300'
+                          ? 'border-[#1d9bf0] bg-sky-500/10 text-[#1d9bf0]'
+                          : 'border-slate-200 dark:border-[#2f3336] hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-300'
                       }`}
                     >
                       <input
@@ -1017,7 +966,7 @@ export default function ClientPublicProfileView({
                         value={r.id}
                         checked={reportReason === r.id}
                         onChange={(e) => setReportReason(e.target.value)}
-                        className="text-city-blue focus:ring-city-blue"
+                        className="text-[#1d9bf0] focus:ring-[#1d9bf0]"
                       />
                       <span>{r.label}</span>
                     </label>
@@ -1035,7 +984,7 @@ export default function ClientPublicProfileView({
                     value={reportDetails}
                     onChange={(e) => setReportDetails(e.target.value)}
                     placeholder="Provide context or explanation..."
-                    className="w-full text-xs p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-city-blue resize-none"
+                    className="w-full text-xs p-3 rounded-xl border border-slate-200 dark:border-[#2f3336] bg-white dark:bg-[#16181c] text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#1d9bf0] resize-none"
                   />
                   <div className="flex justify-end text-[10px] text-slate-400 mt-0.5">
                     {reportDetails.length}/300
@@ -1047,14 +996,14 @@ export default function ClientPublicProfileView({
                   <button
                     type="button"
                     onClick={() => setIsReportOpen(false)}
-                    className="min-h-[44px] px-4 py-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer"
+                    className="min-h-[40px] px-4 py-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={reportSubmitting}
-                    className="min-h-[44px] px-6 py-2 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                    className="min-h-[40px] px-6 py-2 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
                   >
                     {reportSubmitting ? 'Submitting...' : 'Submit Report'}
                   </button>
