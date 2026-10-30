@@ -554,8 +554,8 @@ export async function fetchActiveAds(latOrOptions = null, maybeLng = null, maybe
   return res.json();
 }
 
-export async function recordAdImpression(campaignId, count = 1) {
-  fetch(api(`/api/ads/campaigns/${campaignId}/impressions?count=${count}`), {
+export async function recordAdImpression(campaignId) {
+  fetch(api(`/api/ads/campaigns/${campaignId}/impressions`), {
     method: 'POST'
   }).catch(() => {});
 }
