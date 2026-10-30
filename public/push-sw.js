@@ -1,12 +1,12 @@
-// myCiti Push Notification Service Worker Extension
+// myCite Push Notification Service Worker Extension
 // Handles background web push and notification click events
 
 self.addEventListener('push', (event) => {
   let data = {
-    title: 'myCiti Local Announcement',
+    title: 'myCite Local Announcement',
     body: 'New update from your neighborhood.',
     url: '/',
-    tag: 'myciti-notification'
+    tag: 'mycite-notification'
   };
 
   if (event.data) {
@@ -26,7 +26,7 @@ self.addEventListener('push', (event) => {
     data: {
       url: data.url || '/'
     },
-    tag: data.tag || 'myciti-announcement',
+    tag: data.tag || 'mycite-announcement',
     renotify: true
   };
 

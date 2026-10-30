@@ -84,7 +84,8 @@ export default function MapView({
   targetCity = null,
   darkMode = false,
   sponsoredListingIds = [],
-  isVisible = true
+  isVisible = true,
+  isSearching = false
 }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -237,8 +238,22 @@ export default function MapView({
 
     if (markers.length > 0) {
       clusterGroup.addLayers(markers);
+
+      // Pan or fit bounds to search results when search is active
+      if (isSearching && mapInstanceRef.current) {
+        const validCoords = listings
+          .filter((l) => l.latitude != null && l.longitude != null)
+          .map((l) => [l.latitude, l.longitude]);
+
+        if (validCoords.length === 1) {
+          mapInstanceRef.current.flyTo(validCoords[0], 15, { duration: 0.8 });
+        } else if (validCoords.length > 1) {
+          const bounds = L.latLngBounds(validCoords);
+          mapInstanceRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+        }
+      }
     }
-  }, [listings, sponsoredListingIds]);
+  }, [listings, sponsoredListingIds, isSearching]);
 
   // Update User Location pin & pan
   useEffect(() => {

@@ -26,7 +26,7 @@ export default function InstallGuideModal() {
               <Smartphone className="w-6 h-6" />
             </div>
             <h3 className="text-base font-black text-slate-900 dark:text-slate-100">
-              Add myCiti to Home Screen
+              Add myCite to Home Screen
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Install the app for instant full-screen access and offline maps
@@ -67,7 +67,7 @@ export default function InstallGuideModal() {
                 <div>
                   <p className="font-bold text-slate-900 dark:text-slate-100">Confirm by tapping "Add"</p>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    Tap <b>Add</b> at the top right to place myCiti on your home screen
+                    Tap <b>Add</b> at the top right to place myCite on your home screen
                   </p>
                 </div>
               </div>
@@ -93,7 +93,7 @@ export default function InstallGuideModal() {
                 <div>
                   <p className="font-bold text-slate-900 dark:text-slate-100">Instant Access</p>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    Once added, myCiti launches as a standalone app with offline map support.
+                    Once added, myCite launches as a standalone app with offline map support.
                   </p>
                 </div>
               </div>

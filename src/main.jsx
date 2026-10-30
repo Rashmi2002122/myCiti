@@ -15,11 +15,11 @@ import { registerSW } from 'virtual:pwa-register'
 const updateSW = registerSW({
   immediate: true,
   onNeedRefresh() {
-    console.log('New myCiti version available. Updating immediately...');
+    console.log('New myCite version available. Updating immediately...');
     updateSW(true);
   },
   onOfflineReady() {
-    console.log('myCiti is ready for offline use.');
+    console.log('myCite is ready for offline use.');
   },
 })
 

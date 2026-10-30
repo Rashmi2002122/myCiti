@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 
 const PWAInstallContext = createContext(null);
 
-const STORAGE_DISMISSED_KEY = 'myciti_a2hs_dismissed';
+const STORAGE_DISMISSED_KEY = 'mycite_a2hs_dismissed';
 const DISMISS_DURATION_MS = 5 * 24 * 60 * 60 * 1000; // 5 days
 
 function checkIsInstalled() {
@@ -37,7 +37,7 @@ export function PWAInstallProvider({ children }) {
     }
 
     // Check if user dismissed banner recently
-    const dismissedAt = localStorage.getItem(STORAGE_DISMISSED_KEY);
+    const dismissedAt = localStorage.getItem(STORAGE_DISMISSED_KEY) || localStorage.getItem('myciti_a2hs_dismissed');
     const isDismissActive = dismissedAt && Date.now() - parseInt(dismissedAt, 10) < DISMISS_DURATION_MS;
 
     const handleBeforeInstallPrompt = (e) => {

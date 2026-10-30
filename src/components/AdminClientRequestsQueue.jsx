@@ -291,7 +291,7 @@ export default function AdminClientRequestsQueue({ token, onRequestsChanged }) {
               <textarea
                 value={declineReason}
                 onChange={(e) => setDeclineReason(e.target.value)}
-                placeholder="e.g., Incomplete documentation. Please contact admin@myciti.com..."
+                placeholder="e.g., Incomplete documentation. Please contact admin@mycite.com..."
                 rows={3}
                 required
                 minLength={10}

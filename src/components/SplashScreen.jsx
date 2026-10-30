@@ -269,7 +269,7 @@ export default function SplashScreen({ onComplete }) {
       ref={containerRef}
       role="dialog"
       aria-modal="true"
-      aria-label="myCiti introduction animation"
+      aria-label="myCite introduction animation"
       onClick={handleExit}
       style={{
         position: 'fixed',
@@ -371,7 +371,7 @@ export default function SplashScreen({ onComplete }) {
             </svg>
           </div>
 
-          {/* Custom Vector Typography Logo: "myCiti" */}
+          {/* Custom Vector Typography Logo: "myCite" */}
           <div className="w-[280px] sm:w-[380px] md:w-[440px]">
             <svg
               viewBox="0 0 380 140"
@@ -472,21 +472,14 @@ export default function SplashScreen({ onComplete }) {
                 className="vector-stroke"
               />
 
-              {/* ----------------- LETTER: 'i' (Second) ----------------- */}
+              {/* ----------------- LETTER: 'e' ----------------- */}
               <path
-                d="M 350 64 L 350 114"
+                d="M 342 88 L 370 88 C 370 66 342 64 342 88 C 342 112 368 114 372 104"
                 stroke="#000000"
                 strokeWidth="6"
                 strokeLinecap="round"
+                strokeLinejoin="round"
                 className="vector-stroke"
-              />
-              {/* 'i' Dot */}
-              <circle
-                cx="350"
-                cy="44"
-                r="4.5"
-                fill="#000000"
-                className="vector-dot"
               />
             </svg>
           </div>

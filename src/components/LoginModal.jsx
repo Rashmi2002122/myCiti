@@ -101,7 +101,7 @@ export default function LoginModal({ isOpen, onClose }) {
 
           <div>
             <h2 className="text-xl font-medium tracking-tight text-slate-900 dark:text-[#f4f5f7]">
-              my<span className="text-[#ff951f]">Citi</span>
+              my<span className="text-[#ff951f]">Cite</span>
             </h2>
             <p className="text-xs font-mono text-slate-600 dark:text-[#c9ced8] mt-1">
               Sign in to post your event or offer
@@ -115,7 +115,7 @@ export default function LoginModal({ isOpen, onClose }) {
                 <ShieldAlert className="w-4 h-4 flex-shrink-0" />
                 <span>Account Suspended</span>
               </div>
-              <p>Your account is suspended. Contact <a href="mailto:admin@myciti.com" className="underline font-bold text-[#ff951f]">admin@myciti.com</a></p>
+              <p>Your account is suspended. Contact <a href="mailto:admin@mycite.com" className="underline font-bold text-[#ff951f]">admin@mycite.com</a></p>
             </div>
           ) : authError ? (
             <div className="p-3 rounded-[4px] bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-300 text-xs font-mono flex items-center gap-2 text-left">

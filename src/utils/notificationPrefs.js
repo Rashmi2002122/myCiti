@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'myciti_notif_prefs';
+const STORAGE_KEY = 'mycite_notif_prefs';
 
 export const NOTIFICATION_CATEGORIES = [
   {
@@ -37,7 +37,7 @@ export const DEFAULT_PREFERENCES = {
 export function getNotificationPreferences() {
   if (typeof window === 'undefined') return { ...DEFAULT_PREFERENCES };
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = (localStorage.getItem(STORAGE_KEY) || localStorage.getItem('myciti_notif_prefs'));
     if (!raw) return { ...DEFAULT_PREFERENCES };
     const parsed = JSON.parse(raw);
     return {
@@ -55,7 +55,7 @@ export function saveNotificationPreferences(prefs) {
   try {
     const merged = { ...DEFAULT_PREFERENCES, ...prefs };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-    window.dispatchEvent(new CustomEvent('myciti_notif_prefs_changed', { detail: merged }));
+    window.dispatchEvent(new CustomEvent('mycite_notif_prefs_changed', { detail: merged }));
   } catch (e) {
     console.warn('Failed to save notification preferences:', e);
   }

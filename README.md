@@ -1,4 +1,4 @@
-# myCiti - Frontend PWA (React + Vite)
+# myCite - Frontend PWA (React + Vite)
 
 A mobile-first Progressive Web Application for exploring community pandals, melas, local deals, and shop inaugurations.
 
@@ -35,7 +35,7 @@ A mobile-first Progressive Web Application for exploring community pandals, mela
 5. **App Settings ([`SettingsModal.jsx`](src/components/SettingsModal.jsx))**:
    - Light / Dark mode theme toggle.
    - Language selector placeholder (English, Bengali, Odia, Hindi).
-   - Account deletion request flow via `mailto:admin@myciti.com`.
+   - Account deletion request flow via `mailto:admin@mycite.com`.
 
 6. **Route Guards & Access Protection**:
    - Guards protected paths (`/admin`, `/admin/users`, `/admin/client-requests`, `/account/posts`, `/posts`, `/campaigns`).

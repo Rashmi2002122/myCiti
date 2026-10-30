@@ -73,7 +73,7 @@ export default function ClientRequestDeclineSheet({ isOpen, onClose, request, on
                 Application Summary
               </span>
               <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-                Your request to become a Client is pending review by the myCiti administrative team. Once approved, you will gain access to listing management and ad campaigns.
+                Your request to become a Client is pending review by the myCite administrative team. Once approved, you will gain access to listing management and ad campaigns.
               </p>
 
               <div className="pt-2 border-t border-amber-200/50 dark:border-amber-900/40 space-y-1.5 text-xs">
@@ -132,11 +132,11 @@ export default function ClientRequestDeclineSheet({ isOpen, onClose, request, on
                 Contact our verification team with any inquiries. Please mention your registered email.
               </p>
               <a
-                href="mailto:admin@myciti.com?subject=Client%20Request%20Inquiry"
+                href="mailto:admin@mycite.com?subject=Client%20Request%20Inquiry"
                 className="inline-flex items-center gap-1.5 text-city-blue font-extrabold hover:underline pt-1"
               >
                 <Mail className="w-3.5 h-3.5" />
-                <span>Contact admin@myciti.com</span>
+                <span>Contact admin@mycite.com</span>
               </a>
             </div>
           </div>

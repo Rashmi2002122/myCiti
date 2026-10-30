@@ -3,9 +3,9 @@ import { refreshSession, logoutSession, loginWithGoogle, updateMyCoarseLocation,
 
 const AuthContext = createContext(null);
 
-const USER_STORAGE_KEY = 'myciti_user';
-const ACCESS_TOKEN_STORAGE_KEY = 'myciti_access_token';
-const REFRESH_TOKEN_STORAGE_KEY = 'myciti_refresh_token';
+const USER_STORAGE_KEY = 'mycite_user';
+const ACCESS_TOKEN_STORAGE_KEY = 'mycite_access_token';
+const REFRESH_TOKEN_STORAGE_KEY = 'mycite_refresh_token';
 
 // Singleton in-flight promise to avoid multiple simultaneous refresh requests
 let inFlightRefresh = null;
@@ -31,8 +31,11 @@ function persistSession(data) {
 
 function clearSessionStorage() {
   localStorage.removeItem(USER_STORAGE_KEY);
+  localStorage.removeItem('myciti_user');
   localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
+  localStorage.removeItem('myciti_access_token');
   localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
+  localStorage.removeItem('myciti_refresh_token');
   try {
     sessionStorage.clear();
   } catch (_) {}
@@ -58,7 +61,7 @@ export function AuthProvider({ children }) {
   // Synchronously restore user profile for non-flicker UI render on reload
   const [user, setUser] = useState(() => {
     try {
-      const stored = localStorage.getItem(USER_STORAGE_KEY);
+      const stored = (localStorage.getItem(USER_STORAGE_KEY) || localStorage.getItem('myciti_user'));
       return stored ? JSON.parse(stored) : null;
     } catch {
       return null;
@@ -72,14 +75,14 @@ export function AuthProvider({ children }) {
   // Check for role change on user change
   useEffect(() => {
     if (user?.role) {
-      const knownRole = localStorage.getItem('myciti_known_role');
+      const knownRole = (localStorage.getItem('mycite_known_role') || localStorage.getItem('myciti_known_role'));
       if (knownRole && knownRole !== user.role) {
         setRoleChangeNotice({
           oldRole: knownRole,
           newRole: user.role
         });
       }
-      localStorage.setItem('myciti_known_role', user.role);
+      localStorage.setItem('mycite_known_role', user.role);
     }
   }, [user?.role]);
 
@@ -113,7 +116,7 @@ export function AuthProvider({ children }) {
     let isMounted = true;
 
     async function initSession() {
-      const storedUser = localStorage.getItem(USER_STORAGE_KEY);
+      const storedUser = (localStorage.getItem(USER_STORAGE_KEY) || localStorage.getItem('myciti_user'));
 
       // If user is not logged in at all, skip network call
       if (!storedUser) {
@@ -193,7 +196,7 @@ export function AuthProvider({ children }) {
     } catch (err) {
       clearSessionStorage();
       if (err.status === 403) {
-        setAuthError('Your account is suspended. Contact admin@myciti.com');
+        setAuthError('Your account is suspended. Contact admin@mycite.com');
       } else {
         setAuthError(err.message || 'Google sign-in failed. Please try again.');
       }

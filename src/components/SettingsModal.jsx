@@ -28,11 +28,11 @@ export default function SettingsModal({
 
   const handleDeleteRequest = () => {
     const userEmail = user?.email || '';
-    const subject = encodeURIComponent('Account Deletion Request - myCiti');
+    const subject = encodeURIComponent('Account Deletion Request - myCite');
     const body = encodeURIComponent(
-      `Hello myCiti Support,\n\nPlease delete my account and associated data.\nRegistered Email: ${userEmail}\nUser Name: ${user?.name || ''}\n\nThank you.`
+      `Hello myCite Support,\n\nPlease delete my account and associated data.\nRegistered Email: ${userEmail}\nUser Name: ${user?.name || ''}\n\nThank you.`
     );
-    window.location.href = `mailto:admin@myciti.com?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:admin@mycite.com?subject=${subject}&body=${body}`;
     setIsDeleteConfirmOpen(false);
   };
 
@@ -236,7 +236,7 @@ export default function SettingsModal({
 
           {/* App Info Footer */}
           <div className="pt-2 text-center text-[11px] text-slate-400 space-y-0.5 border-t border-slate-100 dark:border-slate-800">
-            <div className="font-bold text-slate-500 dark:text-slate-400">myCiti PWA v2.0.0</div>
+            <div className="font-bold text-slate-500 dark:text-slate-400">myCite PWA v2.0.0</div>
             <div>Designed for Durga Puja & Year-Round Community Events</div>
             <div className="text-[10px] text-slate-400 dark:text-slate-500 pt-0.5">Map Data &copy; OpenFreeMap &bull; &copy; OpenStreetMap contributors</div>
           </div>
@@ -256,7 +256,7 @@ export default function SettingsModal({
                 Request Account Deletion?
               </h3>
               <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                This will send an official deletion request to <strong>admin@myciti.com</strong>. Your account, submissions, and bookmarks will be purged.
+                This will send an official deletion request to <strong>admin@mycite.com</strong>. Your account, submissions, and bookmarks will be purged.
               </p>
             </div>
 

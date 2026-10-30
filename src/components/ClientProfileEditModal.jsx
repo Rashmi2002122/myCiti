@@ -507,7 +507,7 @@ export default function ClientProfileEditModal({
                     </label>
                     <div className="flex items-center gap-2">
                       <div className="flex-1 min-h-[44px] px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between text-xs font-semibold text-slate-600 dark:text-slate-300">
-                        <span className="truncate">myciti.in/c/{slug}</span>
+                        <span className="truncate">mycite.in/c/{slug}</span>
                         {verified && (
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
                             Verified

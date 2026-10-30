@@ -58,7 +58,7 @@ export default function BottomSheet({
 
   const handleShare = async () => {
     const shareData = {
-      title: `${listing.title} on myCiti`,
+      title: `${listing.title} on myCite`,
       text: `${listing.title} - ${listing.landmark}, ${listing.city || 'Bhubaneswar'}`,
       url: window.location.href,
     };

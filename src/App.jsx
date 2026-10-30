@@ -42,7 +42,7 @@ const SettingsModal = lazy(() => import('./components/SettingsModal'));
 const ClientPublicProfileView = lazy(() => import('./components/ClientPublicProfileView'));
 const ClientProfileEditModal = lazy(() => import('./components/ClientProfileEditModal'));
 
-const SAVED_STORAGE_KEY = 'myciti_saved_listings';
+const SAVED_STORAGE_KEY = 'mycite_saved_listings';
 
 export default function App() {
   const {
@@ -65,6 +65,23 @@ export default function App() {
   const [selectedListing, setSelectedListing] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+
+  // Debounce search query by 350ms to prevent network thrashing on every keystroke
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setDebouncedSearchQuery('');
+      return;
+    }
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery.trim());
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const handleSearchSubmit = useCallback(() => {
+    setDebouncedSearchQuery(searchQuery.trim());
+  }, [searchQuery]);
   const [activeTab, setActiveTab] = useState('map'); // 'home' | 'map' | 'saved'
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [adminInitialSection, setAdminInitialSection] = useState('QUEUE');
@@ -93,7 +110,7 @@ export default function App() {
   const [profileRefreshTrigger, setProfileRefreshTrigger] = useState(0);
   const [selectedCity, setSelectedCity] = useState(() => {
     try {
-      const saved = localStorage.getItem('myciti_selected_city');
+      const saved = (localStorage.getItem('mycite_selected_city') || localStorage.getItem('myciti_selected_city'));
       if (saved && CITIES.some((c) => c.name.toLowerCase() === saved.toLowerCase() || c.id.toLowerCase() === saved.toLowerCase())) {
         return saved;
       }
@@ -104,10 +121,10 @@ export default function App() {
   });
   const [mapCenter, setMapCenter] = useState(() => {
     try {
-      const savedCityName = localStorage.getItem('myciti_selected_city') || 'Bhubaneswar';
+      const savedCityName = (localStorage.getItem('mycite_selected_city') || localStorage.getItem('myciti_selected_city')) || 'Bhubaneswar';
       const match = CITIES.find((c) => c.name.toLowerCase() === savedCityName.toLowerCase() || c.id.toLowerCase() === savedCityName.toLowerCase());
       if (match) return { lat: match.lat, lng: match.lng, zoom: match.zoom || 13 };
-    } catch (e) { console.warn('[myCiti] Failed to restore map center from localStorage', e); }
+    } catch (e) { console.warn('[myCite] Failed to restore map center from localStorage', e); }
     const defaultLat = Number(import.meta.env.VITE_DEFAULT_MAP_LAT) || 20.2961;
     const defaultLng = Number(import.meta.env.VITE_DEFAULT_MAP_LNG) || 85.8245;
     return { lat: defaultLat, lng: defaultLng, zoom: 13 };
@@ -119,7 +136,7 @@ export default function App() {
   const [error, setError] = useState(null);
   const [darkMode, setDarkMode] = useState(() => {
     try {
-      const saved = localStorage.getItem('myciti_theme');
+      const saved = (localStorage.getItem('mycite_theme') || localStorage.getItem('myciti_theme'));
       if (saved !== null) return saved === 'dark';
       return true;
     } catch {
@@ -128,7 +145,7 @@ export default function App() {
   });
   const [savedIds, setSavedIds] = useState(() => {
     try {
-      const stored = localStorage.getItem(SAVED_STORAGE_KEY);
+      const stored = (localStorage.getItem(SAVED_STORAGE_KEY) || localStorage.getItem('myciti_saved_listings'));
       return stored ? JSON.parse(stored) : [];
     } catch {
       return [];
@@ -157,11 +174,11 @@ export default function App() {
     if (typeof window === 'undefined') return false;
     const params = new URLSearchParams(window.location.search);
     if (params.get('splash') === '1') return true;
-    return !sessionStorage.getItem('myciti_splash_shown');
+    return !(sessionStorage.getItem('mycite_splash_shown') || sessionStorage.getItem('myciti_splash_shown'));
   });
 
   const handleSplashComplete = useCallback(() => {
-    sessionStorage.setItem('myciti_splash_shown', 'true');
+    sessionStorage.setItem('mycite_splash_shown', 'true');
     setShowSplash(false);
   }, []);
 
@@ -177,10 +194,10 @@ export default function App() {
 
     if (darkMode) {
       document.documentElement.classList.add('dark');
-      try { localStorage.setItem('myciti_theme', 'dark'); } catch {}
+      try { localStorage.setItem('mycite_theme', 'dark'); } catch {}
     } else {
       document.documentElement.classList.remove('dark');
-      try { localStorage.setItem('myciti_theme', 'light'); } catch {}
+      try { localStorage.setItem('mycite_theme', 'light'); } catch {}
     }
   }, [darkMode]);
 
@@ -235,7 +252,7 @@ export default function App() {
             const merged = Array.from(new Set([...localIds, ...backendIds]));
             try {
               localStorage.setItem(SAVED_STORAGE_KEY, JSON.stringify(merged));
-            } catch (e) { console.warn('[myCiti] Failed to persist saved listings to localStorage', e); }
+            } catch (e) { console.warn('[myCite] Failed to persist saved listings to localStorage', e); }
             return merged;
           });
         }
@@ -272,7 +289,7 @@ export default function App() {
   const handleShare = useCallback(async (listing) => {
     const shareUrl = `${window.location.origin}/?listingId=${listing.id}`;
     const shareData = {
-      title: `${listing.title} - myCiti`,
+      title: `${listing.title} - myCite`,
       text: `${listing.title} (${listing.category})\n📍 ${listing.landmark}, ${listing.address}`,
       url: shareUrl,
     };
@@ -312,7 +329,7 @@ export default function App() {
       const data = await fetchListings({
         category: selectedCategory,
         city: selectedCity,
-        q: searchQuery,
+        q: debouncedSearchQuery,
         lat: userLocation ? userLocation.lat : null,
         lng: userLocation ? userLocation.lng : null,
         signal
@@ -327,7 +344,7 @@ export default function App() {
         setIsLoading(false);
       }
     }
-  }, [selectedCategory, selectedCity, searchQuery, userLocation]);
+  }, [selectedCategory, selectedCity, debouncedSearchQuery, userLocation]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -359,7 +376,7 @@ export default function App() {
   const knownNotificationIdsRef = useRef(new Set(
     (() => {
       try {
-        const stored = sessionStorage.getItem('myciti_seen_notif_ids');
+        const stored = (sessionStorage.getItem('mycite_seen_notif_ids') || sessionStorage.getItem('myciti_seen_notif_ids'));
         return stored ? JSON.parse(stored) : [];
       } catch {
         return [];
@@ -411,11 +428,11 @@ export default function App() {
           if ('serviceWorker' in navigator) {
             try {
               const reg = await navigator.serviceWorker.ready;
-              await reg.showNotification(notif.title || 'myCiti Announcement', {
+              await reg.showNotification(notif.title || 'myCite Announcement', {
                 body: notif.message || notif.body,
                 icon: '/icon.svg',
                 badge: '/icon.svg',
-                tag: `myciti-${notif.id}`,
+                tag: `mycite-${notif.id}`,
                 data: { url: notif.actionUrl || '/' },
                 renotify: true
               });
@@ -428,8 +445,8 @@ export default function App() {
 
       list.forEach((n) => knownNotificationIdsRef.current.add(n.id));
       try {
-        sessionStorage.setItem('myciti_seen_notif_ids', JSON.stringify([...knownNotificationIdsRef.current]));
-      } catch (e) { console.warn('[myCiti] Failed to persist notification IDs to sessionStorage', e); }
+        sessionStorage.setItem('mycite_seen_notif_ids', JSON.stringify([...knownNotificationIdsRef.current]));
+      } catch (e) { console.warn('[myCite] Failed to persist notification IDs to sessionStorage', e); }
     } catch (e) {
       console.warn('Failed to check notifications:', e);
     }
@@ -449,7 +466,7 @@ export default function App() {
   // Auto-sync Web Push subscription when user is authenticated and permission is granted
   useEffect(() => {
     if (isAuthenticated && accessToken && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-      registerPushSubscription(accessToken).catch((e) => console.warn('[myCiti] Push subscription registration failed', e));
+      registerPushSubscription(accessToken).catch((e) => console.warn('[myCite] Push subscription registration failed', e));
     }
   }, [isAuthenticated, accessToken]);
 
@@ -708,9 +725,9 @@ export default function App() {
       const newCity = cityObj.name;
       setSelectedCity(newCity);
       setMapCenter({ lat: cityObj.lat, lng: cityObj.lng, zoom: cityObj.zoom || 13, _ts: Date.now() });
-      localStorage.setItem('myciti_selected_city', newCity);
-      localStorage.setItem('myciti_user_lat', String(cityObj.lat));
-      localStorage.setItem('myciti_user_lng', String(cityObj.lng));
+      localStorage.setItem('mycite_selected_city', newCity);
+      localStorage.setItem('mycite_user_lat', String(cityObj.lat));
+      localStorage.setItem('mycite_user_lng', String(cityObj.lng));
 
       if (oldCity !== newCity) {
         setLocationToast(`Location updated to ${newCity}`);
@@ -748,9 +765,9 @@ export default function App() {
         if (detectedCity) {
           const oldCity = selectedCity;
           setSelectedCity(detectedCity);
-          localStorage.setItem('myciti_selected_city', detectedCity);
-          localStorage.setItem('myciti_user_lat', String(coords.lat));
-          localStorage.setItem('myciti_user_lng', String(coords.lng));
+          localStorage.setItem('mycite_selected_city', detectedCity);
+          localStorage.setItem('mycite_user_lat', String(coords.lat));
+          localStorage.setItem('mycite_user_lng', String(coords.lng));
 
           if (oldCity !== detectedCity) {
             setLocationToast(`Location updated to ${detectedCity}`);
@@ -787,15 +804,15 @@ export default function App() {
           const lng = pos.coords.longitude;
           setUserLocation({ lat, lng });
 
-          localStorage.setItem('myciti_user_lat', String(lat));
-          localStorage.setItem('myciti_user_lng', String(lng));
+          localStorage.setItem('mycite_user_lat', String(lat));
+          localStorage.setItem('mycite_user_lng', String(lng));
 
           const detectedCity = await reverseGeocodeCity(lat, lng);
-          const currentSavedCity = localStorage.getItem('myciti_selected_city');
+          const currentSavedCity = (localStorage.getItem('mycite_selected_city') || localStorage.getItem('myciti_selected_city'));
 
           if (detectedCity && detectedCity !== currentSavedCity) {
             setSelectedCity(detectedCity);
-            localStorage.setItem('myciti_selected_city', detectedCity);
+            localStorage.setItem('mycite_selected_city', detectedCity);
             setLocationToast(`Location updated to ${detectedCity}`);
 
             const match = CITIES.find((c) => c.name.toLowerCase() === detectedCity.toLowerCase());
@@ -814,7 +831,7 @@ export default function App() {
         },
         (err) => {
           // Geolocation not granted; sync stored city for authenticated user
-          const savedCity = localStorage.getItem('myciti_selected_city') || selectedCity;
+          const savedCity = (localStorage.getItem('mycite_selected_city') || localStorage.getItem('myciti_selected_city')) || selectedCity;
           const cityObj = CITIES.find((c) => c.name.toLowerCase() === savedCity.toLowerCase()) || CITIES[1];
           if (syncLocation) {
             syncLocation({
@@ -844,9 +861,9 @@ export default function App() {
   // Sync stored location when user logs in
   useEffect(() => {
     if (isAuthenticated && syncLocation) {
-      const savedCity = localStorage.getItem('myciti_selected_city') || selectedCity;
-      const savedLat = parseFloat(localStorage.getItem('myciti_user_lat')) || null;
-      const savedLng = parseFloat(localStorage.getItem('myciti_user_lng')) || null;
+      const savedCity = (localStorage.getItem('mycite_selected_city') || localStorage.getItem('myciti_selected_city')) || selectedCity;
+      const savedLat = parseFloat((localStorage.getItem('mycite_user_lat') || localStorage.getItem('myciti_user_lat'))) || null;
+      const savedLng = parseFloat((localStorage.getItem('mycite_user_lng') || localStorage.getItem('myciti_user_lng'))) || null;
       const cityObj = CITIES.find((c) => c.name.toLowerCase() === savedCity.toLowerCase()) || CITIES[1];
 
       syncLocation({
@@ -874,6 +891,8 @@ export default function App() {
         onSelectCategory={setSelectedCategory}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        onSearchSubmit={handleSearchSubmit}
+        isSearching={isLoading && Boolean(searchQuery)}
         onNearMeClick={handleNearMe}
         isLocating={isLocating}
         darkMode={darkMode}
@@ -898,7 +917,22 @@ export default function App() {
             darkMode={darkMode}
             sponsoredListingIds={sponsoredListingIds}
             isVisible={activeTab === 'map'}
+            isSearching={Boolean(debouncedSearchQuery)}
           />
+
+          {/* Empty Search Feedback on Map */}
+          {activeTab === 'map' && !isLoading && debouncedSearchQuery && cleanListings.length === 0 && (
+            <div className="absolute top-36 sm:top-40 left-1/2 -translate-x-1/2 z-[990] bg-white/95 dark:bg-[#10141c]/95 backdrop-blur-md px-4 py-2 rounded-full shadow-float border border-slate-200/80 dark:border-[#303139] flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-[#f4f5f7] animate-in fade-in slide-in-from-top-2 duration-200 pointer-events-auto">
+              <span>No results for &ldquo;{debouncedSearchQuery}&rdquo;</span>
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="text-[#ff951f] hover:underline font-semibold ml-1 cursor-pointer"
+              >
+                Clear
+              </button>
+            </div>
+          )}
         </div>
 
         {activeTab === 'home' && (
@@ -912,6 +946,8 @@ export default function App() {
             onNearMeClick={handleNearMe}
             isLocating={isLocating}
             selectedCity={selectedCity}
+            searchQuery={debouncedSearchQuery}
+            onClearSearch={() => setSearchQuery('')}
             onOpenClientProfile={handleOpenClientProfile}
             onExploreMapClick={() => setActiveTab('map')}
           />

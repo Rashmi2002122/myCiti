@@ -116,11 +116,11 @@ export default function NotificationCenterModal({
         // Show welcome push alert
         if ('serviceWorker' in navigator) {
           const reg = await navigator.serviceWorker.ready;
-          await reg.showNotification('myCiti Phone Alerts Enabled! 🎉', {
+          await reg.showNotification('myCite Phone Alerts Enabled! 🎉', {
             body: 'You will now receive community announcements and alerts directly on your phone.',
             icon: '/icon.svg',
             badge: '/icon.svg',
-            tag: 'myciti-alert-test',
+            tag: 'mycite-alert-test',
             renotify: true
           });
         }

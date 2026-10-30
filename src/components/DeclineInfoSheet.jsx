@@ -75,10 +75,10 @@ export default function DeclineInfoSheet({
               <span>
                 Need help? Write to{' '}
                 <a
-                  href="mailto:admin@myciti.com"
+                  href="mailto:admin@mycite.com"
                   className="font-bold text-city-blue underline hover:opacity-80"
                 >
-                  admin@myciti.com
+                  admin@mycite.com
                 </a>
               </span>
             </div>

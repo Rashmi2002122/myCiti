@@ -197,7 +197,7 @@ export default function AdminModal({ isOpen, onClose, onListingChanged, onOpenCr
             </div>
             <div>
               <h2 className="text-lg font-black text-slate-900 dark:text-slate-100">
-                myCiti Admin Panel
+                myCite Admin Panel
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 {token ? 'Review user advertisements and manage public listings' : 'Authentication required'}

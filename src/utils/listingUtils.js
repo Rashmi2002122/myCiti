@@ -1,5 +1,5 @@
 /**
- * Utility functions for listing management in myCiti.
+ * Utility functions for listing management in myCite.
  */
 
 /**

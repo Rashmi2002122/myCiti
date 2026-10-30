@@ -396,7 +396,7 @@ export default function AccountDrawer({
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <h2 className="text-base font-medium tracking-tight text-slate-900 dark:text-[#f4f5f7] truncate">
-                        {user.name || 'myCiti Member'}
+                        {user.name || 'myCite Member'}
                       </h2>
                       <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border ${roleBadge.badgeClass}`}>
                         {roleBadge.label}
@@ -657,18 +657,18 @@ export default function AccountDrawer({
                 {isHelpOpen && (
                   <div className="pt-2 pb-1 px-2 space-y-1 text-xs border-t border-slate-100 dark:border-[#303139] animate-in slide-in-from-top-2 duration-150">
                     <a
-                      href="mailto:admin@myciti.com?subject=myCiti%20Help%20and%20Support"
+                      href="mailto:admin@mycite.com?subject=myCite%20Help%20and%20Support"
                       className="flex items-center justify-between p-2 rounded-[4px] text-slate-600 dark:text-[#c9ced8] hover:bg-slate-50 dark:hover:bg-[#101522] font-medium"
                     >
                       <div className="flex items-center gap-2">
                         <Mail className="w-3.5 h-3.5 text-[#ff951f]" />
                         <span>Contact Admin</span>
                       </div>
-                      <span className="text-[10px] font-mono text-slate-400 dark:text-[#c9ced8]">admin@myciti.com</span>
+                      <span className="text-[10px] font-mono text-slate-400 dark:text-[#c9ced8]">admin@mycite.com</span>
                     </a>
 
                     <div className="p-2 rounded-[4px] text-slate-600 dark:text-[#c9ced8] font-normal">
-                      <div className="text-[11px] font-medium text-slate-800 dark:text-[#f4f5f7]">About myCiti</div>
+                      <div className="text-[11px] font-medium text-slate-800 dark:text-[#f4f5f7]">About myCite</div>
                       <p className="text-[10px] text-slate-500 dark:text-[#c9ced8] mt-0.5 leading-relaxed">
                         India's community guide for pandals, artisan melas, and neighborhood offers.
                       </p>
@@ -686,7 +686,7 @@ export default function AccountDrawer({
 
               <div className="space-y-1">
                 <h3 className="text-lg font-medium text-slate-900 dark:text-[#f4f5f7]">
-                  Welcome to my<span className="text-[#ff951f]">Citi</span>
+                  Welcome to my<span className="text-[#ff951f]">Cite</span>
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-[#c9ced8] leading-relaxed max-w-xs mx-auto">
                   Sign in to save pandals, get real-time festive announcements, and post advertisements.
@@ -726,7 +726,7 @@ export default function AccountDrawer({
           )}
 
           <div className="text-center text-[10px] font-mono font-medium text-slate-400 dark:text-[#c9ced8]/60">
-            myCiti • v2.0.0
+            myCite • v2.0.0
           </div>
         </div>
       </div>
@@ -744,7 +744,7 @@ export default function AccountDrawer({
                 Log Out?
               </h4>
               <p className="text-xs text-slate-500 dark:text-[#c9ced8]">
-                Are you sure you want to log out of your myCiti account?
+                Are you sure you want to log out of your myCite account?
               </p>
             </div>
 

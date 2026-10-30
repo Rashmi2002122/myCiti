@@ -13,7 +13,7 @@ import {
   Upload, AlertCircle
 } from 'lucide-react';
 
-const DRAFT_STORAGE_KEY = 'myciti_ad_draft';
+const DRAFT_STORAGE_KEY = 'mycite_ad_draft';
 
 const STEPS = [
   { id: 1, title: 'Basics', subtitle: 'Category & Details' },
@@ -104,7 +104,7 @@ export default function PostAdvertisementModal({
 
     // Try restoring draft from localStorage
     try {
-      const saved = localStorage.getItem(DRAFT_STORAGE_KEY);
+      const saved = (localStorage.getItem(DRAFT_STORAGE_KEY) || localStorage.getItem('myciti_ad_draft'));
       if (saved) {
         const draft = JSON.parse(saved);
         setCategory(draft.category || 'PANDAL');

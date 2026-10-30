@@ -92,7 +92,7 @@ export default function BecomeClientModal({ isOpen, onClose, onSuccess }) {
           </div>
 
           <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-            Apply to promote pandals, melas, shops, or festival offers across myCiti. Once approved by our team, you can publish listings and run geo-targeted campaigns.
+            Apply to promote pandals, melas, shops, or festival offers across myCite. Once approved by our team, you can publish listings and run geo-targeted campaigns.
           </p>
 
           {serverError && (

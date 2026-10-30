@@ -178,10 +178,10 @@ export default function ClientPublicProfileView({
   const handleShareProfile = async () => {
     setIsOverflowOpen(false);
     const shareUrl = window.location.href;
-    const shareTitle = `${profile?.businessName || 'Business Profile'} - myCiti`;
+    const shareTitle = `${profile?.businessName || 'Business Profile'} - myCite`;
     const shareText = profile?.bio
       ? `${profile.businessName}: ${profile.bio}`
-      : `Check out ${profile?.businessName} on myCiti!`;
+      : `Check out ${profile?.businessName} on myCite!`;
 
     if (navigator.share) {
       try {
@@ -624,7 +624,7 @@ export default function ClientPublicProfileView({
                 {/* WhatsApp button */}
                 {profile.whatsappNumber && (
                   <a
-                    href={`https://wa.me/91${profile.whatsappNumber}?text=${encodeURIComponent('Hi, saw your profile on myciti')}`}
+                    href={`https://wa.me/91${profile.whatsappNumber}?text=${encodeURIComponent('Hi, saw your profile on myCite')}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 hover:border-emerald-400 text-emerald-700 dark:text-emerald-400 flex items-center justify-center transition-all active:scale-95 shadow-xs cursor-pointer"
@@ -943,7 +943,7 @@ export default function ClientPublicProfileView({
             ) : (
               <form onSubmit={handleSubmitReport} className="flex flex-col gap-3.5">
                 <p className="text-xs text-slate-500 dark:text-[#c9ced8]">
-                  Help us keep myCiti safe. Select a reason why you are reporting <strong>@{slug}</strong>:
+                  Help us keep myCite safe. Select a reason why you are reporting <strong>@{slug}</strong>:
                 </p>
 
                 {reportError && (

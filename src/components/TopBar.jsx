@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Compass, X, ChevronDown, Bell } from 'lucide-react';
+import { Search, Compass, X, ChevronDown, Bell, Loader2 } from 'lucide-react';
 import { FILTER_CHIPS } from '../services/api';
 import { CITIES } from '../constants/cities';
 
@@ -10,6 +10,8 @@ export default function TopBar({
   onSelectCategory,
   searchQuery,
   onSearchChange,
+  onSearchSubmit,
+  isSearching = false,
   onNearMeClick,
   isLocating,
   _darkMode,
@@ -22,9 +24,44 @@ export default function TopBar({
   user,
   isAuthenticated
 }) {
-  const [showSearchInput, setShowSearchInput] = useState(false);
+  const [showSearchInput, setShowSearchInput] = useState(() => Boolean(searchQuery));
   const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
   const cityDropdownRef = useRef(null);
+  const searchInputRef = useRef(null);
+
+  // Auto-expand search bar if query is populated from outside
+  useEffect(() => {
+    if (searchQuery && !showSearchInput) {
+      setShowSearchInput(true);
+    }
+  }, [searchQuery, showSearchInput]);
+
+  // Focus input whenever search input opens
+  useEffect(() => {
+    if (showSearchInput) {
+      searchInputRef.current?.focus();
+    }
+  }, [showSearchInput]);
+
+  const handleToggleSearch = () => {
+    if (showSearchInput) {
+      // Closing search: clear active query so hidden filters don't linger
+      if (searchQuery) {
+        onSearchChange('');
+      }
+      setShowSearchInput(false);
+    } else {
+      setShowSearchInput(true);
+    }
+  };
+
+  const handleSearchFormSubmit = (e) => {
+    e.preventDefault();
+    searchInputRef.current?.blur();
+    if (onSearchSubmit) {
+      onSearchSubmit();
+    }
+  };
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -82,7 +119,7 @@ export default function TopBar({
             >
               <span className="text-base sm:text-lg flex-shrink-0">🪔</span>
               <span className="font-medium text-xs sm:text-sm tracking-tight text-slate-800 dark:text-[#f4f5f7] flex-shrink-0">
-                my<span className="text-[#ff951f] font-semibold">Citi</span>
+                my<span className="text-[#ff951f] font-semibold">Cite</span>
               </span>
               <span aria-label="Location_City" className="text-[10px] font-mono font-medium uppercase tracking-wider bg-slate-100 dark:bg-[#101522] text-amber-700 dark:text-[#edcd8c] border border-slate-200 dark:border-[#303139] px-2 py-0.5 rounded-full flex items-center gap-0.5 min-w-0 max-w-[75px] sm:max-w-[130px]">
                 <span className="truncate">{selectedCity}</span>
@@ -158,8 +195,10 @@ export default function TopBar({
 
           {/* Search Toggle */}
           <button
-            onClick={() => setShowSearchInput(!showSearchInput)}
-            aria-label="Toggle search"
+            type="button"
+            onClick={handleToggleSearch}
+            aria-label={showSearchInput ? 'Close search' : 'Open search'}
+            title={showSearchInput ? 'Close search' : 'Open search'}
             className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full shadow-float border transition-all duration-160 flex-shrink-0 cursor-pointer ${
               showSearchInput
                 ? 'bg-[#ff951f] text-[#07090e] border-[#ff951f]'
@@ -173,25 +212,50 @@ export default function TopBar({
 
       {/* Expandable Search Input */}
       {showSearchInput && (
-        <div className="pointer-events-auto bg-white/95 dark:bg-[#10141c] backdrop-blur-md rounded-full shadow-float px-3.5 py-1.5 border border-slate-200/80 dark:border-[#303139] flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-150">
-          <Search className="w-4 h-4 text-slate-400 dark:text-[#c9ced8] ml-1 flex-shrink-0" />
+        <form
+          onSubmit={handleSearchFormSubmit}
+          className="pointer-events-auto bg-white/95 dark:bg-[#10141c] backdrop-blur-md rounded-full shadow-float px-3.5 py-1.5 border border-slate-200/80 dark:border-[#303139] flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-150 w-full"
+        >
+          {isSearching ? (
+            <Loader2 className="w-4 h-4 text-[#ff951f] ml-1 flex-shrink-0 animate-spin" />
+          ) : (
+            <Search className="w-4 h-4 text-slate-400 dark:text-[#c9ced8] ml-1 flex-shrink-0" />
+          )}
           <input
-            type="text"
+            ref={searchInputRef}
+            type="search"
+            name="search"
+            enterKeyHint="search"
+            autoComplete="off"
+            aria-label="Search pandals, melas, stores, areas"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                if (searchQuery) {
+                  onSearchChange('');
+                } else {
+                  setShowSearchInput(false);
+                }
+              }
+            }}
             placeholder="Search pandals, melas, stores, areas..."
             className="w-full bg-transparent text-sm text-slate-800 dark:text-[#f4f5f7] placeholder:text-slate-400 dark:placeholder:text-[#c9ced8]/60 focus:outline-none py-1 font-sans"
-            autoFocus
           />
           {searchQuery && (
             <button
-              onClick={() => onSearchChange('')}
-              className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-[#101522] text-slate-400 dark:text-[#c9ced8] hover:text-slate-700 dark:hover:text-[#f4f5f7] transition-colors"
+              type="button"
+              onClick={() => {
+                onSearchChange('');
+                searchInputRef.current?.focus();
+              }}
+              aria-label="Clear search text"
+              className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-[#101522] text-slate-400 dark:text-[#c9ced8] hover:text-slate-700 dark:hover:text-[#f4f5f7] transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
           )}
-        </div>
+        </form>
       )}
 
       {/* Horizontally scrollable filter chips */}

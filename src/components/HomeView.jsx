@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Compass, MapPin } from 'lucide-react';
+import { Compass, MapPin, Search, X } from 'lucide-react';
 import ListingCard from './ListingCard';
 import SponsoredAdCard from './SponsoredAdCard';
 import { fetchActiveAds } from '../services/api';
@@ -14,6 +14,8 @@ export default function HomeView({
   onNearMeClick,
   isLocating,
   selectedCity = 'Bhubaneswar',
+  searchQuery = '',
+  onClearSearch,
   onOpenClientProfile,
   onExploreMapClick
 }) {
@@ -151,15 +153,28 @@ export default function HomeView({
         {listings.length === 0 ? (
           <div className="bg-white dark:bg-[#10141c] rounded-[5px] p-8 text-center border border-slate-200 dark:border-[#303139] space-y-3">
             <div className="w-11 h-11 rounded-full bg-slate-100 dark:bg-[#101522] border border-slate-200 dark:border-[#303139] text-amber-700 dark:text-[#edcd8c] mx-auto flex items-center justify-center text-lg">
-              ✨
+              {searchQuery ? <Search className="w-5 h-5 text-[#ff951f]" /> : '✨'}
             </div>
             <h3 className="font-medium text-base text-slate-900 dark:text-[#f4f5f7]">
-              No live events currently open
+              {searchQuery ? `No matches found for "${searchQuery}"` : 'No live events currently open'}
             </h3>
             <p className="text-xs text-slate-600 dark:text-[#c9ced8] max-w-sm mx-auto leading-relaxed">
-              Venues are currently outside daily operating hours or completed. Check back during scheduled hours or view venues across the map.
+              {searchQuery
+                ? `No active events, stores, or pandals matched your search in ${selectedCity}. Try checking your spelling or search with broader keywords.`
+                : 'Venues are currently outside daily operating hours or completed. Check back during scheduled hours or view venues across the map.'}
             </p>
-            {onExploreMapClick && (
+            {searchQuery ? (
+              onClearSearch && (
+                <button
+                  type="button"
+                  onClick={onClearSearch}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#ff951f] hover:bg-[#e68416] text-[#07090e] font-medium text-xs rounded-full shadow-md active:scale-95 transition-all duration-160 mt-1 cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                  <span>Clear Search</span>
+                </button>
+              )
+            ) : onExploreMapClick ? (
               <button
                 type="button"
                 onClick={onExploreMapClick}
@@ -168,7 +183,7 @@ export default function HomeView({
                 <Compass className="w-3.5 h-3.5" />
                 <span>Explore Map</span>
               </button>
-            )}
+            ) : null}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">

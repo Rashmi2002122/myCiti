@@ -14,6 +14,7 @@ export default function AdminUsersManager({ token, currentUserId }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL'); // ALL | USER | CLIENT | ADMIN
   const [statusFilter, setStatusFilter] = useState('ALL'); // ALL | ACTIVE | SUSPENDED
 
@@ -39,12 +40,23 @@ export default function AdminUsersManager({ token, currentUserId }) {
   }, [token]);
 
   useEffect(() => {
-    loadUsers(searchQuery);
-  }, [loadUsers, searchQuery]);
+    if (!searchQuery.trim()) {
+      setDebouncedSearchQuery('');
+      return;
+    }
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery.trim());
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    loadUsers(debouncedSearchQuery);
+  }, [loadUsers, debouncedSearchQuery]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    loadUsers(searchQuery);
+    setDebouncedSearchQuery(searchQuery.trim());
   };
 
   const handleToggleSuspend = async (targetUser) => {

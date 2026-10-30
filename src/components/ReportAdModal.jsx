@@ -64,7 +64,7 @@ export default function ReportAdModal({ isOpen, onClose, campaign, onReportSubmi
               Report Submitted
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
-              Thank you for keeping myCiti safe. Our moderators will review this advertisement shortly.
+              Thank you for keeping myCite safe. Our moderators will review this advertisement shortly.
             </p>
           </div>
         ) : (

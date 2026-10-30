@@ -73,7 +73,7 @@ export function AppVerifiedBadge({ className = 'w-4 h-4' }) {
   return (
     <span
       className={`inline-flex items-center justify-center rounded-full bg-[#ff951f] text-[#07090e] flex-shrink-0 shadow-xs ${className}`}
-      title="Verified business on myCiti"
+      title="Verified business on myCite"
     >
       <svg
         className="w-2.5 h-2.5 fill-current stroke-current"
@@ -107,7 +107,7 @@ export default function ClientPostCard({
   const isActuallyUpcoming = !isExpired && (isUpcoming || (listing.startDate && listing.startDate > todayStr));
 
   const authorName = clientProfile?.businessName || listing.businessName || 'Business';
-  const authorSlug = clientProfile?.slug || listing.clientSlug || 'myciti';
+  const authorSlug = clientProfile?.slug || listing.clientSlug || 'mycite';
   const authorLogo = clientProfile?.logoUrl || listing.businessLogoUrl;
   const isVerified = clientProfile?.verified ?? listing.verified;
 
