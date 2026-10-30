@@ -1,0 +1,12 @@
+# robots.txt for myCite (https://www.mycite.in)
+User-agent: *
+Allow: /
+Allow: /c/
+Allow: /assets/
+Disallow: /admin
+Disallow: /admin/
+Disallow: /account/
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://www.mycite.in/sitemap.xml

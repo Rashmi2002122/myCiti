@@ -57,25 +57,27 @@ export default function BottomSheet({
   };
 
   const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/?listingId=${listing.id}`;
     const shareData = {
       title: `${listing.title} on myCite`,
       text: `${listing.title} - ${listing.landmark}, ${listing.city || 'Bhubaneswar'}`,
-      url: window.location.href,
+      url: shareUrl,
     };
 
     if (navigator.share) {
       try {
         await navigator.share(shareData);
       } catch (err) {
-        if (err.name !== 'AbortError') copyToClipboard();
+        if (err.name !== 'AbortError') copyToClipboard(shareUrl);
       }
     } else {
-      copyToClipboard();
+      copyToClipboard(shareUrl);
     }
   };
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(window.location.href);
+  const copyToClipboard = (urlToCopy) => {
+    const targetUrl = urlToCopy || `${window.location.origin}/?listingId=${listing.id}`;
+    navigator.clipboard.writeText(targetUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

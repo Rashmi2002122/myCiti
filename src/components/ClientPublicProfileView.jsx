@@ -26,6 +26,7 @@ import {
   reportClientProfile,
   CATEGORIES
 } from '../services/api';
+import useSEO from '../hooks/useSEO';
 
 const REPORT_REASONS = [
   { id: 'FAKE_OFFER', label: 'Fake or misleading offer' },
@@ -78,6 +79,29 @@ export default function ClientPublicProfileView({
   const [reportSubmitting, setReportSubmitting] = useState(false);
   const [reportSuccess, setReportSuccess] = useState(false);
   const [reportError, setReportError] = useState(null);
+
+  // Dynamic SEO meta tags and schema markup for client business profile
+  useSEO({
+    title: profile?.businessName ? `${profile.businessName} - ${profile.city || 'Odisha'}` : undefined,
+    description: profile?.bio || (profile?.businessName ? `Explore ${profile.businessName} in ${profile.city || 'Odisha'}. View live offers, upcoming events, contact details, and location map on myCite.` : undefined),
+    image: profile?.coverImageUrl || profile?.profileImageUrl || 'https://www.mycite.in/icon-512.png',
+    url: slug ? `https://www.mycite.in/c/${slug}` : undefined,
+    type: 'profile',
+    schema: profile ? {
+      '@context': 'https://schema.org',
+      '@type': 'LocalBusiness',
+      'name': profile.businessName,
+      'description': profile.bio || `${profile.businessName} in ${profile.city || 'Odisha'} on myCite`,
+      'image': profile.coverImageUrl || profile.profileImageUrl || 'https://www.mycite.in/icon-512.png',
+      'address': {
+        '@type': 'PostalAddress',
+        'addressLocality': profile.city || 'Bhubaneswar',
+        'addressRegion': 'Odisha',
+        'addressCountry': 'IN'
+      },
+      'url': `https://www.mycite.in/c/${slug}`
+    } : null
+  });
 
   const overflowRef = useRef(null);
   const scrollContainerRef = useRef(null);
@@ -177,7 +201,7 @@ export default function ClientPublicProfileView({
   // Share profile
   const handleShareProfile = async () => {
     setIsOverflowOpen(false);
-    const shareUrl = window.location.href;
+    const shareUrl = `${window.location.origin}/c/${slug}`;
     const shareTitle = `${profile?.businessName || 'Business Profile'} - myCite`;
     const shareText = profile?.bio
       ? `${profile.businessName}: ${profile.bio}`

@@ -24,6 +24,7 @@ import { reverseGeocodeCity } from './utils/locationUtils';
 import { registerPushSubscription } from './utils/pushUtils';
 import { isCategoryAllowed } from './utils/notificationPrefs';
 import { filterUniqueClientListings, filterExploreListings } from './utils/listingUtils';
+import useSEO from './hooks/useSEO';
 
 const AdminModal = lazy(() => import('./components/AdminModal'));
 const LoginModal = lazy(() => import('./components/LoginModal'));
@@ -158,6 +159,56 @@ export default function App() {
     const timer = setInterval(() => setTimeTick(Date.now()), 60000);
     return () => clearInterval(timer);
   }, []);
+
+  // Dynamic SEO meta tags and schema markup for app home, city views, and open listings
+  const seoConfig = useMemo(() => {
+    if (viewingClientSlug) {
+      // Handled by ClientPublicProfileView's own useSEO
+      return null;
+    }
+    if (selectedListing) {
+      const isOffer = selectedListing.category === 'OFFER';
+      return {
+        title: `${selectedListing.title} - ${selectedListing.landmark || selectedListing.city || 'Odisha'}`,
+        description: selectedListing.offerText || selectedListing.description || `View timings, directions, and live updates for ${selectedListing.title} in ${selectedListing.city || 'Odisha'} on myCite.`,
+        image: selectedListing.primaryImageUrl || 'https://www.mycite.in/icon-512.png',
+        url: `https://www.mycite.in/?listingId=${selectedListing.id}`,
+        type: 'article',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': isOffer ? 'LocalBusiness' : 'Event',
+          'name': selectedListing.title,
+          'description': selectedListing.description || selectedListing.offerText,
+          'image': selectedListing.primaryImageUrl || 'https://www.mycite.in/icon-512.png',
+          'location': {
+            '@type': 'Place',
+            'name': selectedListing.landmark || selectedListing.title,
+            'address': {
+              '@type': 'PostalAddress',
+              'streetAddress': selectedListing.address || selectedListing.landmark,
+              'addressLocality': selectedListing.city || 'Bhubaneswar',
+              'addressRegion': 'Odisha',
+              'addressCountry': 'IN'
+            }
+          }
+        }
+      };
+    }
+    const isAllCities = !selectedCity || selectedCity === 'ALL' || selectedCity === 'All Odisha';
+    return {
+      title: isAllCities
+        ? 'myCite | Odisha City Guide, Durga Puja Pandals, Melas & Events'
+        : `myCite | ${selectedCity} City Guide, Durga Puja Pandals, Melas & Events`,
+      description: isAllCities
+        ? 'Discover top Durga Puja pandals, local melas, festive food stalls, store offers, and events across Bhubaneswar, Cuttack & Odisha on an interactive live map.'
+        : `Explore top Pandals, Melas, store offers, and local events in ${selectedCity}, Odisha on an interactive live map.`,
+      url: isAllCities ? 'https://www.mycite.in/' : `https://www.mycite.in/?city=${encodeURIComponent(selectedCity)}`,
+      image: 'https://www.mycite.in/icon-512.png',
+      type: 'website'
+    };
+  }, [viewingClientSlug, selectedListing, selectedCity]);
+
+  useSEO(seoConfig || undefined);
 
   // Deduplicate listings for Map: only the most recent active post per client is shown (over events excluded)
   const cleanListings = useMemo(() => {

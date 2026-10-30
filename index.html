@@ -3,22 +3,74 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#07090e" />
-    <meta name="description" content="Explore Pandals, Melas, Offers & Inaugurations across Odisha on an interactive map." />
-    
+
+    <!-- Primary Search Engine Tags -->
+    <title>myCite | Odisha City Guide, Durga Puja Pandals, Melas &amp; Events</title>
+    <meta name="description" content="Discover top Durga Puja pandals, local melas, festive food stalls, store offers, and events across Bhubaneswar, Cuttack &amp; Odisha on an interactive live map." />
+    <meta name="keywords" content="myCite, Odisha, Bhubaneswar, Cuttack, Puri, Durga Puja pandals, melas, local events, city guide, store offers, exhibitions, street food" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href="https://www.mycite.in/" />
+
+    <!-- Open Graph / Facebook / WhatsApp Meta Tags -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="myCite" />
+    <meta property="og:url" content="https://www.mycite.in/" />
+    <meta property="og:title" content="myCite | Odisha City Guide, Durga Puja Pandals, Melas &amp; Events" />
+    <meta property="og:description" content="Discover top Durga Puja pandals, local melas, festive food stalls, store offers, and events across Bhubaneswar, Cuttack &amp; Odisha on an interactive live map." />
+    <meta property="og:image" content="https://www.mycite.in/icon-512.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:locale" content="en_IN" />
+
+    <!-- Twitter / X Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="myCite | Odisha City Guide, Durga Puja Pandals, Melas &amp; Events" />
+    <meta name="twitter:description" content="Discover top Durga Puja pandals, local melas, festive food stalls, store offers, and events across Bhubaneswar, Cuttack &amp; Odisha on an interactive live map." />
+    <meta name="twitter:image" content="https://www.mycite.in/icon-512.png" />
+
     <!-- PWA & Mobile Web App tags -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="myCite" />
-    <!-- Google Fonts: IBM Plex Sans & IBM Plex Mono (Financial Design System) + fallbacks -->
+
+    <!-- Google Structured Data (JSON-LD Schema) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://www.mycite.in/#website",
+          "url": "https://www.mycite.in/",
+          "name": "myCite",
+          "description": "Interactive City Guide, Durga Puja Pandals, Melas & Local Events Platform for Odisha",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://www.mycite.in/?search={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://www.mycite.in/#organization",
+          "name": "myCite",
+          "url": "https://www.mycite.in/",
+          "logo": "https://www.mycite.in/icon-512.png",
+          "description": "Hyper-local city discovery, festive pandal tracker, and event promotion platform in Odisha."
+        }
+      ]
+    }
+    </script>
+
+    <!-- Google Fonts: IBM Plex Sans & IBM Plex Mono + fallbacks -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <title>myCite</title>
 
     <!-- Google Identity Services (GIS) Client Library -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
